@@ -299,7 +299,7 @@ export function plugin(
 		'import { ApolloClient, NormalizedCacheObject, ApolloQueryResult, FetchResult } from \'@apollo/client/core\';',
 		'import * as ZenObservable from \'zen-observable-ts\';',
 		OperationGroups.subscriptions.length > 0
-			? 'import type { SubscriptionHandler, SubscriptionResult } from \'@pawells/graphql-types\';'
+			? 'import type { SubscriptionHandler, SubscriptionResult } from \'@pawells/graphql-common\';'
 			: '',
 	]
 		.filter(Boolean)

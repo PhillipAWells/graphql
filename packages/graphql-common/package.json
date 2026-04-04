@@ -1,6 +1,6 @@
 {
-	"name": "@pawells/graphql-types",
-	"displayName": "@pawells/graphql-types",
+	"name": "@pawells/graphql-common",
+	"displayName": "@pawells/graphql-common",
 	"version": "2.0.0",
 	"description": "Framework-agnostic shared GraphQL primitive types and utilities",
 	"type": "module",

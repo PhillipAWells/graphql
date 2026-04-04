@@ -352,8 +352,8 @@ export function plugin(
 		'import { ApolloClient, NormalizedCacheObject } from \'@apollo/client/core\';',
 		'import * as ZenObservable from \'zen-observable-ts\';',
 		OperationGroups.subscriptions.length > 0
-			? 'import type { QueryResultPromise, MutationResultPromise, SubscriptionResult, SubscriptionHandler } from \'@pawells/graphql-types\';'
-			: 'import type { QueryResultPromise, MutationResultPromise } from \'@pawells/graphql-types\';',
+			? 'import type { QueryResultPromise, MutationResultPromise, SubscriptionResult, SubscriptionHandler } from \'@pawells/graphql-common\';'
+			: 'import type { QueryResultPromise, MutationResultPromise } from \'@pawells/graphql-common\';',
 	]
 		.filter(Boolean)
 		.join('\n');
