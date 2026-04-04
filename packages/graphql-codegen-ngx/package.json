@@ -1,0 +1,39 @@
+{
+  "name": "@pawells/graphql-codegen-ngx",
+  "displayName": "@pawells/graphql-codegen-ngx",
+  "version": "2.0.0",
+  "description": "graphql-codegen plugin generating typed Angular Apollo wrapper classes",
+  "type": "module",
+  "main": "./build/index.js",
+  "types": "./build/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./build/index.d.ts",
+      "require": "./build/index.js",
+      "import": "./build/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@graphql-codegen/plugin-helpers": ">=5.0.0"
+  },
+  "peerDependencies": {
+    "@angular/core": ">=17.0.0",
+    "@apollo/client": ">=3.0.0",
+    "@graphql-codegen/typed-document-node": ">=5.0.0",
+    "@graphql-codegen/typescript": ">=4.0.0",
+    "@graphql-codegen/typescript-apollo-client-helpers": ">=3.0.0",
+    "@graphql-codegen/typescript-operations": ">=4.0.0",
+    "@pawells/ngx-graphql": "*",
+    "graphql": ">=16.0.0",
+    "graphql-ws": ">=5.0.0",
+    "rxjs": ">=7.0.0"
+  }
+}
