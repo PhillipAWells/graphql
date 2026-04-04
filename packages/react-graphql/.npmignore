@@ -1,0 +1,16 @@
+# Source files (consumers receive build/ not src/)
+src/
+
+# TypeScript configuration
+tsconfig*.json
+
+# Test files and coverage
+*.test.ts
+*.spec.ts
+*.test.tsx
+*.spec.tsx
+__tests__/
+coverage/
+
+# Development tooling
+vitest.config.ts

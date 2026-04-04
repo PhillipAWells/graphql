@@ -1,0 +1,42 @@
+{
+  "name": "@pawells/nx-graphql",
+  "displayName": "@pawells/nx-graphql",
+  "version": "2.0.0",
+  "description": "NX executors for GraphQL schema generation and code generation",
+  "type": "module",
+  "main": "./build/index.js",
+  "types": "./build/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./build/index.d.ts",
+      "require": "./build/index.js",
+      "import": "./build/index.js"
+    }
+  },
+  "executors": "./executors.json",
+  "scripts": {
+    "build": "tsc --project tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@graphql-codegen/cli": ">=5.0.0",
+    "@nestjs/graphql": ">=12.0.0",
+    "@nx/devkit": ">=21.0.0"
+  },
+  "peerDependencies": {
+    "@pawells/graphql-codegen-ngx": "*",
+    "@pawells/graphql-codegen-ts": "*"
+  },
+  "peerDependenciesMeta": {
+    "@pawells/graphql-codegen-ngx": {
+      "optional": true
+    },
+    "@pawells/graphql-codegen-ts": {
+      "optional": true
+    }
+  }
+}

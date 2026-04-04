@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "title": "Codegen executor options",
+  "type": "object",
+  "properties": {
+    "schemaFile": {
+      "type": "string",
+      "description": "Path to input .graphql schema file"
+    },
+    "documentsGlob": {
+      "type": "string",
+      "description": "Glob pattern for .graphql operation files"
+    },
+    "outputFile": {
+      "type": "string",
+      "description": "Output .ts file path"
+    },
+    "target": {
+      "type": "string",
+      "enum": ["typescript", "angular"],
+      "default": "typescript",
+      "description": "Target platform"
+    },
+    "plugins": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Override default plugin list"
+    },
+    "config": {
+      "type": "object",
+      "description": "Override codegen config fields"
+    },
+    "watch": {
+      "type": "boolean",
+      "default": false,
+      "description": "Run in watch mode"
+    }
+  },
+  "required": ["schemaFile", "documentsGlob", "outputFile"]
+}
