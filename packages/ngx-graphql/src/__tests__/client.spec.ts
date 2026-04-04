@@ -172,26 +172,30 @@ describe('GraphQLClient', () => {
 	});
 
 	describe('OnConnectionState Subject', () => {
-		it('should emit connection state changes', (done) => {
-			const subscription = client.OnConnectionState.subscribe((event) => {
-				expect(event.State).toBe('Connected');
-				subscription.unsubscribe();
-				done();
-			});
+		it('should emit connection state changes', () => {
+			return new Promise<void>((resolve) => {
+				const subscription = client.OnConnectionState.subscribe((event) => {
+					expect(event.State).toBe('Connected');
+					subscription.unsubscribe();
+					resolve();
+				});
 
-			client.OnConnectionState.next({ State: 'Connected' });
+				client.OnConnectionState.next({ State: 'Connected' });
+			});
 		});
 
-		it('should emit connection errors', (done) => {
-			const error = new Error('Connection error');
-			const subscription = client.OnConnectionState.subscribe((event) => {
-				expect(event.State).toBe('Error');
-				expect(event.Error).toBe(error);
-				subscription.unsubscribe();
-				done();
-			});
+		it('should emit connection errors', () => {
+			return new Promise<void>((resolve) => {
+				const error = new Error('Connection error');
+				const subscription = client.OnConnectionState.subscribe((event) => {
+					expect(event.State).toBe('Error');
+					expect(event.Error).toBe(error);
+					subscription.unsubscribe();
+					resolve();
+				});
 
-			client.OnConnectionState.next({ State: 'Error', Error: error });
+				client.OnConnectionState.next({ State: 'Error', Error: error });
+			});
 		});
 	});
 
