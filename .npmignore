@@ -1,0 +1,43 @@
+# Source files (consumers receive build/ not src/)
+src/
+
+# TypeScript configuration
+tsconfig*.json
+
+# Test files and coverage
+*.test.ts
+*.spec.ts
+__tests__/
+coverage/
+
+# Development tooling
+eslint.config.mjs
+vitest.config.ts
+vitest.workspace.ts
+.husky/
+.devcontainer/
+.github/
+.serena/
+tmp/
+scripts/
+
+# Local configuration and environment
+.env
+.env.*
+
+# Editor
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# NX workspace files
+nx.json
+.nx/
+AGENTS.md
+CLAUDE.md
+CONTRIBUTING.md
+CHANGELOG.md
+STYLE_GUIDE.md
