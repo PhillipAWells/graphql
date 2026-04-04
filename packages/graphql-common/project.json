@@ -1,7 +1,7 @@
 {
-	"name": "graphql-types",
+	"name": "graphql-common",
 	"$schema": "../../node_modules/nx/schemas/project-schema.json",
-	"sourceRoot": "packages/graphql-types/src",
+	"sourceRoot": "packages/graphql-common/src",
 	"projectType": "library",
 	"targets": {
 		"build": {
