@@ -7,8 +7,6 @@ import {
 	split,
 	NormalizedCacheObject,
 	Operation,
-	FetchResult,
-	gql,
 } from '@apollo/client/core';
 import { onError } from '@apollo/client/link/error';
 import { RetryLink } from '@apollo/client/link/retry';
@@ -44,6 +42,7 @@ export class GraphQLClient {
 	public readonly OnConnectionState = new Subject<GraphQLConnectionEvent>();
 
 	private wsClient: WsClient | undefined;
+	private wsSocket: unknown | undefined;
 	private pingTimeoutHandle: NodeJS.Timeout | undefined;
 
 	constructor() {
@@ -124,7 +123,9 @@ export class GraphQLClient {
 		});
 
 		// Create WebSocket link
-		const wsUri = this.WS_URI();
+		const wsUri = this.WS_URI()!;
+		let pingTimeout: ReturnType<typeof setTimeout> | undefined;
+
 		this.wsClient = createClient({
 			url: wsUri,
 			lazy: false,
@@ -138,19 +139,25 @@ export class GraphQLClient {
 				return {};
 			},
 			on: {
-				connected: () => {
-					this.ConnectionState.set('Connected');
-					this.OnConnectionState.next({ State: 'Connected' });
-				},
 				connecting: () => {
 					this.ConnectionState.set('Connecting');
 					this.OnConnectionState.next({ State: 'Connecting' });
 				},
-				opened: () => {
+				opened: (socket) => {
+					this.wsSocket = socket;
 					this.ConnectionState.set('Opened');
 					this.OnConnectionState.next({ State: 'Opened' });
 				},
+				connected: () => {
+					this.ConnectionState.set('Connected');
+					this.OnConnectionState.next({ State: 'Connected' });
+				},
 				closed: () => {
+					this.wsSocket = undefined;
+					if (pingTimeout !== undefined) {
+						clearTimeout(pingTimeout);
+						pingTimeout = undefined;
+					}
 					this.ConnectionState.set('Closed');
 					this.OnConnectionState.next({ State: 'Closed' });
 				},
@@ -158,30 +165,24 @@ export class GraphQLClient {
 					this.ConnectionState.set('Error');
 					this.OnConnectionState.next({ State: 'Error', Error: error });
 				},
+				ping: (received) => {
+					if (!received) {
+						// client sent ping, wait for pong
+						pingTimeout = setTimeout(() => {
+							const sock = this.wsSocket as (WebSocket | undefined);
+							sock?.close(4408, 'Request Timeout');
+						}, 5000);
+					}
+				},
+				pong: (received) => {
+					if (received && pingTimeout !== undefined) {
+						clearTimeout(pingTimeout);
+						pingTimeout = undefined;
+					}
+				},
 			},
 			shouldRetry: () => true,
 		});
-
-		// Set up ping/pong timeout handler
-		if (this.wsClient) {
-			this.wsClient.on.ping?.(({ received }) => {
-				// Clear existing timeout if pong was received
-				if (received) {
-					if (this.pingTimeoutHandle) {
-						clearTimeout(this.pingTimeoutHandle);
-						this.pingTimeoutHandle = undefined;
-					}
-					return;
-				}
-
-				// Set timeout for pong response
-				this.pingTimeoutHandle = setTimeout(() => {
-					if (this.wsClient) {
-						this.wsClient.close(4408, 'Request Timeout');
-					}
-				}, 5000);
-			});
-		}
 
 		// Create WebSocket link
 		const graphQLWsLink = new GraphQLWsLink(this.wsClient!);
