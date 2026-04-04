@@ -1,0 +1,59 @@
+{
+	"name": "@pawells/ngx-graphql",
+	"displayName": "@pawells/ngx-graphql",
+	"version": "2.0.0",
+	"description": "Angular reactive Apollo + graphql-ws client base class",
+	"type": "module",
+	"main": "./build/index.js",
+	"types": "./build/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./build/index.d.ts",
+			"require": "./build/index.js",
+			"import": "./build/index.js"
+		}
+	},
+	"scripts": {
+		"build": "tsc --project tsconfig.build.json",
+		"typecheck": "tsc --noEmit",
+		"lint": "eslint src/",
+		"lint:fix": "eslint src/ --fix",
+		"test": "vitest run",
+		"test:coverage": "vitest run --coverage",
+		"pipeline": "yarn typecheck && yarn lint && yarn test && yarn build"
+	},
+	"dependencies": {
+		"@apollo/client": ">=3.0.0",
+		"graphql-ws": ">=5.0.0"
+	},
+	"peerDependencies": {
+		"@angular/core": ">=17.0.0",
+		"graphql": ">=16.0.0",
+		"rxjs": ">=7.0.0"
+	},
+	"devDependencies": {
+		"@angular/core": "^17.3.0",
+		"@apollo/client": "^3.11.9",
+		"graphql": "^16.13.2",
+		"graphql-ws": "^5.16.0",
+		"rxjs": "^7.8.2"
+	},
+	"engines": {
+		"node": ">=22.0.0"
+	},
+	"packageManager": "yarn@4.12.0",
+	"author": "Aaron Wells <69355326+PhillipAWells@users.noreply.github.com>",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/PhillipAWells/graphql"
+	},
+	"files": [
+		"build/",
+		"README.md",
+		"LICENSE"
+	],
+	"publishConfig": {
+		"access": "public"
+	}
+}
