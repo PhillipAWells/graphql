@@ -5,7 +5,7 @@ export interface ICodegenExecutorSchema {
 	schemaFile: string;
 	documentsGlob: string;
 	outputFile: string;
-	target?: 'typescript' | 'angular';
+	target?: 'typescript';
 	plugins?: string[];
 	config?: Record<string, unknown>;
 	watch?: boolean;
@@ -17,14 +17,6 @@ const DEFAULT_PLUGINS_TYPESCRIPT = [
 	'typed-document-node',
 	'typescript-apollo-client-helpers',
 	'@pawells/graphql-codegen-ts',
-];
-
-const DEFAULT_PLUGINS_ANGULAR = [
-	'typescript',
-	'typescript-operations',
-	'typed-document-node',
-	'typescript-apollo-client-helpers',
-	'@pawells/graphql-codegen-ngx',
 ];
 
 const DEFAULT_CONFIG = {
@@ -42,10 +34,8 @@ export default async function CodegenExecutor(
 		let DefaultPlugins: string[];
 		if (Target === 'typescript') {
 			DefaultPlugins = DEFAULT_PLUGINS_TYPESCRIPT;
-		} else if (Target === 'angular') {
-			DefaultPlugins = DEFAULT_PLUGINS_ANGULAR;
 		} else {
-			throw new Error(`Unknown target: ${Target}. Must be 'typescript' or 'angular'.`);
+			throw new Error(`Unknown target: ${Target}. Must be 'typescript'.`);
 		}
 
 		const Plugins = options.plugins ?? DefaultPlugins;
@@ -57,7 +47,7 @@ export default async function CodegenExecutor(
 		// Build plugin config objects
 		const PluginObjects = Plugins.map(p => ({ [p]: {} }));
 
-		const Generates: Record<string, Types.ConfiguredOutput> = {
+		const Generates = {
 			[options.outputFile]: {
 				schema: options.schemaFile,
 				documents: options.documentsGlob,
@@ -66,7 +56,7 @@ export default async function CodegenExecutor(
 			},
 		};
 
-		const CodegenConfig: Types.Config = {
+		const CodegenConfig = {
 			schema: options.schemaFile,
 			documents: options.documentsGlob,
 			generates: Generates,

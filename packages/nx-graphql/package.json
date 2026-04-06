@@ -31,13 +31,9 @@
 		"@nx/devkit": ">=21.0.0"
 	},
 	"peerDependencies": {
-		"@pawells/graphql-codegen-ngx": "*",
 		"@pawells/graphql-codegen-ts": "*"
 	},
 	"peerDependenciesMeta": {
-		"@pawells/graphql-codegen-ngx": {
-			"optional": true
-		},
 		"@pawells/graphql-codegen-ts": {
 			"optional": true
 		}
