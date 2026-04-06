@@ -31,7 +31,7 @@ describe('Cache', () => {
 
 	it('should delete cache entry', async () => {
 		const entry: ICachedRequest<number> = {
-			ID: 'test-id-2',
+			Id: 'test-id-2',
 			Entries: [1, 2, 3],
 			Expiration: new Date(),
 		};
@@ -48,7 +48,7 @@ describe('Cache', () => {
 	it('should handle complex object types in entries', async () => {
 		interface User { id: number; name: string }
 		const entry: ICachedRequest<User> = {
-			ID: 'test-id-3',
+			Id: 'test-id-3',
 			Entries: [
 				{ id: 1, name: 'Alice' },
 				{ id: 2, name: 'Bob' },
@@ -67,7 +67,7 @@ describe('Cache', () => {
 
 	it('should overwrite existing cache entry', async () => {
 		const entry1: ICachedRequest<string> = {
-			ID: 'test-id-4',
+			Id: 'test-id-4',
 			Entries: ['old'],
 			Expiration: new Date(),
 		};
@@ -77,7 +77,7 @@ describe('Cache', () => {
 		expect(result?.Entries).toEqual(['old']);
 
 		const entry2: ICachedRequest<string> = {
-			ID: 'test-id-4',
+			Id: 'test-id-4',
 			Entries: ['new'],
 			Expiration: new Date(),
 		};
@@ -89,7 +89,7 @@ describe('Cache', () => {
 
 	it('should handle empty entries array', async () => {
 		const entry: ICachedRequest<string> = {
-			ID: 'test-id-5',
+			Id: 'test-id-5',
 			Entries: [],
 			Expiration: new Date(),
 		};
