@@ -67,7 +67,7 @@ export function GraphQLProvider({ options, children, fallback }: IGraphQLProvide
 	}
 
 	return (
-		<GraphQLContext.Provider value={{ connectionState: connectionState, reconnect: reconnect }}>
+		<GraphQLContext.Provider value={{ connectionState, reconnect }}>
 			<ApolloProvider client={clientRef.current.client as ApolloClient}>
 				{children}
 			</ApolloProvider>
