@@ -3,7 +3,8 @@
   "compilerOptions": {
     "outDir": "./build",
     "rootDir": "./src",
-    "types": ["vitest/globals", "node"]
+    "noEmit": true,
+    "types": ["node"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "build"]

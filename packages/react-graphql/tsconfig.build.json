@@ -2,6 +2,7 @@
 	"extends": "./tsconfig.json",
 	"compilerOptions": {
 		"rootDir": "./src",
+		"noEmit": false,
 		"types": [
 			"node"
 		]
@@ -13,8 +14,8 @@
 	"exclude": [
 		"node_modules",
 		"build",
-		"src/**/*.spec.ts",
-		"src/**/*.spec.tsx",
+		"src/**/*.test.ts",
+		"src/**/*.test.tsx",
 		"src/**/__tests__/**"
 	]
 }
