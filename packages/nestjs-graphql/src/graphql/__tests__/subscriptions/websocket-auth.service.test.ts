@@ -1,4 +1,4 @@
-import { vi } from 'vitest';
+import { describe,it,expect,beforeEach,vi } from 'vitest';
 import { JwtService } from '@nestjs/jwt';
 import { WebSocketAuthService } from '../../subscriptions/websocket-auth.service.js';
 

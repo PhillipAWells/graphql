@@ -1,5 +1,5 @@
+import { describe,it,expect,beforeEach,vi } from 'vitest';
 
-import { vi } from 'vitest';
 import { SubscriptionService } from '../../subscriptions/subscription.service.js';
 import { AppLogger } from '@pawells/nestjs-shared/common';
 

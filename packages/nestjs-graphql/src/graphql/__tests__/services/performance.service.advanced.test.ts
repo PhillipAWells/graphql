@@ -1,5 +1,5 @@
+import { describe,it,expect,beforeEach,vi } from 'vitest';
 
-import { vi } from 'vitest';
 import { GraphQLPerformanceService } from '../../services/performance.service.js';
 
 describe('GraphQL Performance Service - Advanced Metrics', () => {

@@ -1,8 +1,8 @@
+import { describe,it,expect,beforeEach,vi } from 'vitest';
 
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { AppLogger } from '@pawells/nestjs-shared/common';
 import { CacheService } from '../cache.service.js';
-import { vi } from 'vitest';
 
 describe('CacheService', () => {
 	let service: CacheService;

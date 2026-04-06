@@ -1,5 +1,5 @@
+import { describe,it,expect,beforeEach,afterEach,vi } from 'vitest';
 
-import { vi } from 'vitest';
 import { ConnectionManagerService } from '../../subscriptions/connection-manager.service.js';
 import type { ISubscriptionConfig } from '../../subscriptions/subscription-config.interface.js';
 
