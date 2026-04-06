@@ -122,7 +122,7 @@ export default [
 					format: ['PascalCase'],
 					leadingUnderscore: 'allow',
 					filter: {
-						regex: '^(onModuleInit|onModuleDestroy|onApplicationBootstrap|onApplicationShutdown|beforeApplicationShutdown|canActivate|intercept|catch|transform|configure|use|parseValue|parseLiteral|serialize)$',
+						regex: '^(onModuleInit|onModuleDestroy|onApplicationBootstrap|onApplicationShutdown|beforeApplicationShutdown|canActivate|intercept|catch|transform|configure|use|parseValue|parseLiteral|serialize|forRoot|forRootAsync)$',
 						match: false,
 					},
 				},
