@@ -194,6 +194,7 @@ describe('GraphQLPublicGuard', () => {
 			} as any;
 
 			const ErrorGuard = new GraphQLPublicGuard(ErrorModuleRef);
+			// eslint-disable-next-line prefer-destructuring
 			const Logger = ErrorGuard['Logger'];
 			expect(Logger).toBeUndefined();
 		});
@@ -218,6 +219,7 @@ describe('GraphQLPublicGuard', () => {
 			} as any;
 
 			const ErrorGuard = new GraphQLPublicGuard(ErrorModuleRef);
+			// eslint-disable-next-line prefer-destructuring
 			const Logger = ErrorGuard['Logger'];
 			expect(Logger).toBeUndefined();
 		});
