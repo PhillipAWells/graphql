@@ -67,7 +67,8 @@
       ],
       "options": {
         "packageRoot": "{projectRoot}",
-        "access": "public"
+        "access": "public",
+        "provenance": false
       }
     },
     "test": {
