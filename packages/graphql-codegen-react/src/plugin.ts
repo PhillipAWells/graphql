@@ -32,7 +32,12 @@ interface IGQLOperationGroup {
 function DetermineTypeNames(
 	name: string,
 	operationType: 'query' | 'mutation' | 'subscription',
-): { TypeName: string; VariablesTypeName: string; DocumentName: string; HookName: string } {
+): {
+	TypeName: string;
+	VariablesTypeName: string;
+	DocumentName: string;
+	HookName: string;
+} {
 	const TypeOperationSuffix =
 		operationType === 'query'
 			? 'Query'
