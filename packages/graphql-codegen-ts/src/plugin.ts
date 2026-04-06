@@ -29,18 +29,18 @@ function DetermineTypeNames(
 	name: string,
 	operationType: 'query' | 'mutation' | 'subscription',
 ): { TypeName: string; VariablesTypeName: string; DocumentName: string } {
-	const TypeOperationSuffix =
+	const typeOperationSuffix =
 		operationType === 'query'
 			? 'Query'
 			: operationType === 'mutation'
 				? 'Mutation'
 				: 'Subscription';
 
-	const TypeName = `${name}${TypeOperationSuffix}`;
-	const VariablesTypeName = `${name}${TypeOperationSuffix}Variables`;
-	const DocumentName = `${name}Document`;
+	const typeName = `${name}${typeOperationSuffix}`;
+	const variablesTypeName = `${name}${typeOperationSuffix}Variables`;
+	const documentName = `${name}Document`;
 
-	return { TypeName, VariablesTypeName, DocumentName };
+	return { TypeName: typeName, VariablesTypeName: variablesTypeName, DocumentName: documentName };
 }
 
 function IsOptionalVariables(definition: OperationDefinitionNode): boolean {
@@ -48,84 +48,84 @@ function IsOptionalVariables(definition: OperationDefinitionNode): boolean {
 		return true;
 	}
 
-	return !definition.variableDefinitions.some((v) => v.type.kind === 'NonNullType');
+	return !definition.variableDefinitions.some((variableDef) => variableDef.type.kind === 'NonNullType');
 }
 
 function ExtractOperations(files: Types.DocumentFile[]): IGQLOperationGroup {
-	const Operations: IGQLOperationGroup = {
+	const operations: IGQLOperationGroup = {
 		queries: [],
 		mutations: [],
 		subscriptions: [],
 	};
 
-	for (const File of files) {
-		if (!File.document) continue;
+	for (const file of files) {
+		if (!file.document) continue;
 
-		for (const Def of File.document.definitions) {
+		for (const definition of file.document.definitions) {
 			if (
-				Def.kind === 'OperationDefinition' &&
-				Def.name &&
-				Def.operation
+				definition.kind === 'OperationDefinition' &&
+				definition.name &&
+				definition.operation
 			) {
-				const OperationType = Def.operation as 'query' | 'mutation' | 'subscription';
+				const operationType = definition.operation as 'query' | 'mutation' | 'subscription';
 				const { TypeName, VariablesTypeName, DocumentName } =
-					DetermineTypeNames(Def.name.value, OperationType);
+					DetermineTypeNames(definition.name.value, operationType);
 
-				const Operation: IGQLOperation = {
-					Name: Def.name.value,
-					OperationType,
-					IsOptionalVariables: IsOptionalVariables(Def),
+				const operation: IGQLOperation = {
+					Name: definition.name.value,
+					OperationType: operationType,
+					IsOptionalVariables: IsOptionalVariables(definition),
 					TypeName,
 					VariablesTypeName,
 					DocumentName,
 				};
 
-				if (OperationType === 'query') {
-					Operations.queries.push(Operation);
-				} else if (OperationType === 'mutation') {
-					Operations.mutations.push(Operation);
-				} else if (OperationType === 'subscription') {
-					Operations.subscriptions.push(Operation);
+				if (operationType === 'query') {
+					operations.queries.push(operation);
+				} else if (operationType === 'mutation') {
+					operations.mutations.push(operation);
+				} else if (operationType === 'subscription') {
+					operations.subscriptions.push(operation);
 				}
 			}
 		}
 	}
 
-	return Operations;
+	return operations;
 }
 
 function ValidateRequiredPlugins(info: {
 	allPlugins?: Types.ConfiguredPlugin[];
 	[key: string]: unknown;
 }): void {
-	const RequiredPlugins = [
+	const requiredPlugins = [
 		'typescript',
 		'typescript-operations',
 		'typed-document-node',
 		'typescript-apollo-client-helpers',
 	];
 
-	const AllPlugins = info.allPlugins ?? [];
-	const InstalledPlugins = AllPlugins.map((plugin): string => {
+	const allPlugins = info.allPlugins ?? [];
+	const installedPlugins = allPlugins.map((plugin): string => {
 		if (typeof plugin === 'string') {
 			return plugin;
 		}
 		if (typeof plugin === 'object' && plugin !== null) {
-			const Entries = Object.entries(plugin) as Array<[string, unknown]>;
-			if (Entries.length === 0) {
+			const entries = Object.entries(plugin) as Array<[string, unknown]>;
+			if (entries.length === 0) {
 				return '';
 			}
 			// eslint-disable-next-line prefer-destructuring -- Destructuring here would be less clear
-			const PluginName = Entries[0][0];
-			return PluginName ?? '';
+			const pluginName = entries[0][0];
+			return pluginName ?? '';
 		}
 		return '';
 	});
 
-	for (const Required of RequiredPlugins) {
-		if (!InstalledPlugins.includes(Required)) {
+	for (const required of requiredPlugins) {
+		if (!installedPlugins.includes(required)) {
 			throw new Error(
-				`Missing required plugin: ${Required}. Required plugins: ${RequiredPlugins.join(', ')}`,
+				`Missing required plugin: ${required}. Required plugins: ${requiredPlugins.join(', ')}`,
 			);
 		}
 	}
@@ -142,13 +142,13 @@ function GenerateApolloQueriesClass(operations: IGQLOperation[]): string {
 }`;
 	}
 
-	const Methods = operations
+	const methods = operations
 		.map((operation) => {
-			const VariablesParam = operation.IsOptionalVariables
+			const variablesParam = operation.IsOptionalVariables
 				? `variables?: ${operation.VariablesTypeName}`
 				: `variables: ${operation.VariablesTypeName}`;
 
-			return `	public async ${operation.Name}(${VariablesParam}): Promise<ApolloQueryResult<${operation.TypeName}>> {
+			return `	public async ${operation.Name}(${variablesParam}): Promise<ApolloQueryResult<${operation.TypeName}>> {
 		const result = await this.Apollo.query({
 			query: ${operation.DocumentName},
 			variables,
@@ -170,7 +170,7 @@ function GenerateApolloQueriesClass(operations: IGQLOperation[]): string {
 		this.Apollo = apollo;
 	}
 
-${Methods}
+${methods}
 }`;
 }
 
@@ -185,13 +185,13 @@ function GenerateApolloMutationsClass(operations: IGQLOperation[]): string {
 }`;
 	}
 
-	const Methods = operations
+	const methods = operations
 		.map((operation) => {
-			const VariablesParam = operation.IsOptionalVariables
+			const variablesParam = operation.IsOptionalVariables
 				? `variables?: ${operation.VariablesTypeName}`
 				: `variables: ${operation.VariablesTypeName}`;
 
-			return `	public async ${operation.Name}(${VariablesParam}): Promise<FetchResult<${operation.TypeName}>> {
+			return `	public async ${operation.Name}(${variablesParam}): Promise<FetchResult<${operation.TypeName}>> {
 		const result = await this.Apollo.mutate({
 			mutation: ${operation.DocumentName},
 			variables,
@@ -213,7 +213,7 @@ function GenerateApolloMutationsClass(operations: IGQLOperation[]): string {
 		this.Apollo = apollo;
 	}
 
-${Methods}
+${methods}
 }`;
 }
 
@@ -228,13 +228,13 @@ function GenerateApolloSubscriptionsClass(operations: IGQLOperation[]): string {
 }`;
 	}
 
-	const Methods = operations
+	const methods = operations
 		.map((operation) => {
-			const VariablesParam = operation.IsOptionalVariables
+			const variablesParam = operation.IsOptionalVariables
 				? `variables?: ${operation.VariablesTypeName}`
 				: `variables: ${operation.VariablesTypeName}`;
 
-			return `	public async ${operation.Name}(${VariablesParam}, handler: ${operation.Name}EventHandler): Promise<ZenObservable.Subscription> {
+			return `	public async ${operation.Name}(${variablesParam}, handler: ${operation.Name}EventHandler): Promise<ZenObservable.Subscription> {
 		const observable = this.Apollo.subscribe({
 			query: ${operation.DocumentName},
 			variables,
@@ -252,7 +252,7 @@ function GenerateApolloSubscriptionsClass(operations: IGQLOperation[]): string {
 		this.Apollo = apollo;
 	}
 
-${Methods}
+${methods}
 }`;
 }
 
@@ -297,51 +297,50 @@ export function Plugin(
 ): Types.Promisable<Types.PluginOutput> {
 	ValidateRequiredPlugins(info);
 
-	const OperationGroups = ExtractOperations(files);
+	const operationGroups = ExtractOperations(files);
 
-	const ImportStatements = [
+	const importStatements = [
 		'/* eslint-disable */',
 		'import { GraphQLClient, GraphQLClientOptions } from \'@pawells/graphql-codegen-ts\';',
 		'import { ApolloClient, NormalizedCacheObject, ApolloQueryResult, FetchResult } from \'@apollo/client/core\';',
 		'import * as ZenObservable from \'zen-observable-ts\';',
-		OperationGroups.subscriptions.length > 0
+		operationGroups.subscriptions.length > 0
 			? 'import type { SubscriptionHandler, SubscriptionResult } from \'@pawells/graphql-common\';'
 			: '',
 	]
 		.filter(Boolean)
 		.join('\n');
 
-	const SubscriptionTypes =
-		OperationGroups.subscriptions.length > 0
-			? `\n\n${GenerateSubscriptionTypes(OperationGroups.subscriptions)}`
+	const subscriptionTypes =
+		operationGroups.subscriptions.length > 0
+			? `\n\n${GenerateSubscriptionTypes(operationGroups.subscriptions)}`
 			: '';
 
-	const QueriesClass = GenerateApolloQueriesClass(OperationGroups.queries);
-	const MutationsClass = GenerateApolloMutationsClass(OperationGroups.mutations);
-	const SubscriptionsClass = GenerateApolloSubscriptionsClass(
-		OperationGroups.subscriptions,
+	const queriesClass = GenerateApolloQueriesClass(operationGroups.queries);
+	const mutationsClass = GenerateApolloMutationsClass(operationGroups.mutations);
+	const subscriptionsClass = GenerateApolloSubscriptionsClass(
+		operationGroups.subscriptions,
 	);
-	const WrapperClass = GenerateApolloWrapperClass();
+	const wrapperClass = GenerateApolloWrapperClass();
 
-	const Content = [
-		ImportStatements,
-		SubscriptionTypes,
+	const content = [
+		importStatements,
+		subscriptionTypes,
 		'',
-		QueriesClass,
+		queriesClass,
 		'',
-		MutationsClass,
+		mutationsClass,
 		'',
-		SubscriptionsClass,
+		subscriptionsClass,
 		'',
-		WrapperClass,
+		wrapperClass,
 	]
 		.join('\n');
 
 	return {
-		content: Content,
+		content,
 	};
 }
 
 /** @deprecated Use Plugin instead */
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export const plugin = Plugin;
