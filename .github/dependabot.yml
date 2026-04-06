@@ -1,0 +1,37 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    ignore:
+      - dependency-name: typescript
+        update-types:
+          - version-update:semver-minor
+    groups:
+      nx:
+        patterns:
+          - "@nx/*"
+          - "nx"
+      eslint:
+        patterns:
+          - "@eslint/*"
+          - "@stylistic/*"
+          - "@typescript-eslint/*"
+          - "eslint*"
+          - "globals"
+      vitest:
+        patterns:
+          - "@vitest/*"
+          - "vitest"
+      dev-dependencies:
+        dependency-type: development
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
