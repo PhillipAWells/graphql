@@ -1,5 +1,5 @@
+import { describe,it,expect,beforeEach,afterEach,vi } from 'vitest';
 
-import { vi } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { RedisPubSubFactory } from '../../subscriptions/redis-pubsub.factory.js';
 import { IRedisConfig } from '../../subscriptions/subscription-config.interface.js';
