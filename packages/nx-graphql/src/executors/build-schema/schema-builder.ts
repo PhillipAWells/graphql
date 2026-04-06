@@ -18,7 +18,7 @@ export function ValidateResolversModuleExists(modulePath: string): void {
 	}
 }
 
-export function ValidateResolversExport(resolvers: unknown): asserts resolvers is readonly unknown[] {
+export function ValidateResolversExport(resolvers: unknown): asserts resolvers is unknown[] {
 	if (!Array.isArray(resolvers)) {
 		throw new Error(
 			'Module must export a \'GraphQLSchema\' array of resolver classes',
@@ -38,7 +38,7 @@ export function WriteSchemaToFile(
 	console.log(`Schema written to ${schemaOutputPath}`);
 }
 
-async function BuildNestJSGraphQLSchema(resolvers: readonly unknown[]): Promise<string> {
+async function BuildNestJSGraphQLSchema(resolvers: unknown[]): Promise<string> {
 	// Dynamic import NestJS GraphQL schema builder to avoid hard dependency at module load time
 	const { NestFactory } = await import('@nestjs/core');
 	const { GraphQLSchemaBuilderModule, GraphQLSchemaFactory } = await import('@nestjs/graphql');
