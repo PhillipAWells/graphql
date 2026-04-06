@@ -2,7 +2,7 @@ export interface ICodegenExecutorSchema {
 	schemaFile: string;
 	documentsGlob: string;
 	outputFile: string;
-	target?: 'typescript' | 'angular';
+	target?: 'typescript';
 	plugins?: string[];
 	config?: Record<string, unknown>;
 	watch?: boolean;

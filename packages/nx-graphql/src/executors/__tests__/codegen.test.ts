@@ -1,13 +1,18 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import type { ExecutorContext } from '@nx/devkit';
+import type { ICodegenExecutorSchema } from '../codegen/executor';
 
 describe('CodegenExecutor', () => {
-	let Executor: any;
-	let MockContext: ExecutorContext;
+	let executor: (
+		options: ICodegenExecutorSchema,
+		context: ExecutorContext,
+	) => Promise<{ success: boolean }>;
+	let mockContext: ExecutorContext;
 
 	beforeEach(async () => {
-		Executor = (await import('../codegen/executor')).default;
-		MockContext = {
+		const module = await import('../codegen/executor');
+		executor = module.default;
+		mockContext = {
 			root: '/workspace',
 			projectName: 'test-project',
 			targetName: 'codegen',
@@ -18,92 +23,87 @@ describe('CodegenExecutor', () => {
 	});
 
 	it('should export CodegenExecutor as default', async () => {
-		expect(Executor).toBeDefined();
-		expect(typeof Executor).toBe('function');
+		expect(executor).toBeDefined();
+		expect(typeof executor).toBe('function');
 	});
 
 	it('should be an async function', async () => {
-		expect(Executor.constructor.name).toBe('AsyncFunction');
+		expect(executor.constructor.name).toBe('AsyncFunction');
 	});
 
 	it('should return object with success property', async () => {
-		const CodegenExecutor = await import('../codegen/executor');
-		expect(CodegenExecutor.default).toBeDefined();
-	});
-
-	it('should have correct schema interface exported', async () => {
-		const Schema = await import('../codegen/schema.d');
-		expect(Schema).toBeDefined();
+		const codegenExecutor = await import('../codegen/executor');
+		expect(codegenExecutor.default).toBeDefined();
 	});
 
 	it('should return failure for unknown target', async () => {
-		const Options = {
+		const options = {
 			schemaFile: 'schema.graphql',
 			documentsGlob: 'src/**/*.graphql',
 			outputFile: 'src/generated.ts',
-			target: 'unknown' as any,
+			target: 'unknown' as never,
 		};
 
-		const Result = await Executor(Options, MockContext);
-		expect(Result.success).toBe(false);
+		const result = await executor(options as ICodegenExecutorSchema, mockContext);
+		expect(result.success).toBe(false);
 	});
 
 	it('should return object with proper success indicator', async () => {
-		const Options = {
+		const options: ICodegenExecutorSchema = {
 			schemaFile: 'schema.graphql',
 			documentsGlob: 'src/**/*.graphql',
 			outputFile: 'src/generated.ts',
 			target: 'typescript',
 		};
 
-		const Result = await Executor(Options, MockContext);
-		expect(typeof Result.success).toBe('boolean');
+		const result = await executor(options, mockContext);
+		expect(typeof result.success).toBe('boolean');
 	});
 
 	it('should handle optional parameters correctly', async () => {
-		const Options = {
+		const options: ICodegenExecutorSchema = {
 			schemaFile: 'schema.graphql',
 			documentsGlob: 'src/**/*.graphql',
 			outputFile: 'src/generated.ts',
 		};
 
-		const Result = await Executor(Options, MockContext);
-		expect(Result).toBeDefined();
+		const result = await executor(options, mockContext);
+		expect(result).toBeDefined();
 	});
 
 	it('should support custom config override', async () => {
-		const Options = {
+		const options: ICodegenExecutorSchema = {
 			schemaFile: 'schema.graphql',
 			documentsGlob: 'src/**/*.graphql',
 			outputFile: 'src/generated.ts',
 			config: { customField: 'value' },
 		};
 
-		const Result = await Executor(Options, MockContext);
-		expect(Result).toBeDefined();
+		const result = await executor(options, mockContext);
+		expect(result).toBeDefined();
 	});
 
 	it('should support plugin override', async () => {
-		const Options = {
+		const options: ICodegenExecutorSchema = {
 			schemaFile: 'schema.graphql',
 			documentsGlob: 'src/**/*.graphql',
 			outputFile: 'src/generated.ts',
 			plugins: ['custom-plugin'],
 		};
 
-		const Result = await Executor(Options, MockContext);
-		expect(Result).toBeDefined();
+		const result = await executor(options, mockContext);
+		expect(result).toBeDefined();
 	});
 
 	it('should support watch mode flag', async () => {
-		const Options = {
+		const options: ICodegenExecutorSchema = {
 			schemaFile: 'schema.graphql',
 			documentsGlob: 'src/**/*.graphql',
 			outputFile: 'src/generated.ts',
 			watch: true,
 		};
 
-		const Result = await Executor(Options, MockContext);
-		expect(Result).toBeDefined();
+		const result = await executor(options, mockContext);
+		expect(result).toBeDefined();
 	});
 });
