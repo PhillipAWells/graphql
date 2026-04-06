@@ -5,8 +5,8 @@
 		"rootDir": "./src",
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true,
+		"noEmit": true,
 		"types": [
-			"vitest/globals",
 			"node"
 		]
 	},
