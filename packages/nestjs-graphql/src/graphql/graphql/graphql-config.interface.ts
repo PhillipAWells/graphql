@@ -51,8 +51,6 @@ export interface IGraphQLConfigOptions extends Omit<ApolloDriverConfig, 'driver'
 
 	/**
    * Custom context function or object
-   * TODO: Type as (req: Request, res: Response) => Promise<IGraphQLContext> | IGraphQLContext
-   * once context interface is stabilized
    */
 	context?: any;
 
