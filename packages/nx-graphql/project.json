@@ -1,0 +1,39 @@
+{
+  "name": "nx-graphql",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/nx-graphql/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "options": {
+        "main": "{projectRoot}/src/index.ts",
+        "outputPath": "{projectRoot}/build",
+        "tsConfig": "{projectRoot}/tsconfig.build.json",
+        "rootDir": "{projectRoot}/src",
+        "assets": [
+          { "input": "{projectRoot}", "glob": "README.md", "output": "." },
+          { "input": "{projectRoot}", "glob": "LICENSE", "output": "." },
+          { "input": "{projectRoot}", "glob": "executors.json", "output": "." },
+          { "input": "{projectRoot}/src/executors/build-schema", "glob": "schema.json", "output": "src/executors/build-schema" },
+          { "input": "{projectRoot}/src/executors/codegen", "glob": "schema.json", "output": "src/executors/codegen" }
+        ],
+        "updateBuildableProjectDepsInPackageJson": true
+      },
+      "outputs": ["{projectRoot}/build"]
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": { "command": "tsc --noEmit", "cwd": "{projectRoot}" }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": { "lintFilePatterns": ["{projectRoot}/src/**/*.ts"] }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": { "command": "vitest run", "cwd": "{projectRoot}" }
+    }
+  }
+}
