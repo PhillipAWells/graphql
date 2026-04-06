@@ -73,4 +73,13 @@ describe('CursorUtils', () => {
 		expect(decoded1.Id).toBe('id-1');
 		expect(decoded2.Id).toBe('id-2');
 	});
+
+	it('should throw on invalid cursor string', () => {
+		expect(() => CursorUtils.decodeCursor('not-valid-base64-json!!!!')).toThrow('Invalid cursor');
+	});
+
+	it('should throw on base64 string that is not valid JSON', () => {
+		const InvalidBase64 = Buffer.from('not json content').toString('base64');
+		expect(() => CursorUtils.decodeCursor(InvalidBase64)).toThrow('Invalid cursor');
+	});
 });
