@@ -3793,10 +3793,10 @@ __metadata:
   linkType: hard
 
 "@pawells/nestjs-auth@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "@pawells/nestjs-auth@npm:2.0.1"
+  version: 2.0.2
+  resolution: "@pawells/nestjs-auth@npm:2.0.2"
   dependencies:
-    "@pawells/nestjs-shared": "npm:2.0.1"
+    "@pawells/nestjs-shared": "npm:2.0.2"
   peerDependencies:
     "@nestjs/common": ">=10.0.0"
     "@nestjs/config": ">=3.0.0"
@@ -3820,7 +3820,7 @@ __metadata:
   peerDependenciesMeta:
     jwks-rsa:
       optional: true
-  checksum: 10c0/29f43d1e4dcff716083efadb113b506e1e3e459bd4687eff1c619b1bfbe926f526f1eadceddc8245f16864214e931e4fa6e7a77e908e1f0960dabee201af0e75
+  checksum: 10c0/f843bfe6405f8f28824e8bbe80270dd515e03d0cef334f590fb9bfe27c52cfcb80411ee3ed08f51ab466394f90d0dc1f8e92196466e181819148b5383736dce9
   languageName: node
   linkType: hard
 
@@ -3901,11 +3901,11 @@ __metadata:
   linkType: soft
 
 "@pawells/nestjs-open-telemetry@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "@pawells/nestjs-open-telemetry@npm:2.0.1"
+  version: 2.0.2
+  resolution: "@pawells/nestjs-open-telemetry@npm:2.0.2"
   dependencies:
     "@pawells/logger": "npm:^1.2.2"
-    "@pawells/nestjs-shared": "npm:2.0.1"
+    "@pawells/nestjs-shared": "npm:2.0.2"
   peerDependencies:
     "@nestjs/common": ">=10.0.0"
     "@nestjs/config": ">=3.0.0"
@@ -3922,15 +3922,15 @@ __metadata:
     prom-client: ">=15.0.0"
     rxjs: ">=7.0.0"
     xss: ">=1.0.0"
-  checksum: 10c0/655255b4323a514e7a514b622dbcac04c27e74884ee4655da917352919061be1badb42037a9978dc6b0ebf80c8645f07e4b27173fc5c2f949fa1b5b89c972bbc
+  checksum: 10c0/92cddac8ee9f1b3cba7f62406cb4ec88bee0b418b0d30ac6d0a70a2514367c44af706705ba0465a43fe6b869aac72d26a833212b0a2b7155b834961a5b6d9993
   languageName: node
   linkType: hard
 
 "@pawells/nestjs-pyroscope@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "@pawells/nestjs-pyroscope@npm:2.0.1"
+  version: 2.0.2
+  resolution: "@pawells/nestjs-pyroscope@npm:2.0.2"
   dependencies:
-    "@pawells/nestjs-shared": "npm:2.0.1"
+    "@pawells/nestjs-shared": "npm:2.0.2"
     "@pyroscope/nodejs": "npm:^0.4.11"
   peerDependencies:
     "@nestjs/common": ">=10.0.0"
@@ -3949,13 +3949,13 @@ __metadata:
     prom-client: ">=15.0.0"
     rxjs: ">=7.0.0"
     xss: ">=1.0.0"
-  checksum: 10c0/9ee850fd4f36f4f2b3dfe1551f9c5347e3854db5cd646188b7424544112b478641fe72bf618f55b622889435819a9cf943a214fd91517bd7dcbe1b5c3f96a52f
+  checksum: 10c0/87574a49d73ac712e7b0f7ee8700fbea14af4bb24f480d1f7937e7a439a83e109b981c5a9efd5653a2a76204718d420e89b18521385a6177f01b4ebdf6141317
   languageName: node
   linkType: hard
 
-"@pawells/nestjs-shared@npm:2.0.1, @pawells/nestjs-shared@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "@pawells/nestjs-shared@npm:2.0.1"
+"@pawells/nestjs-shared@npm:2.0.2, @pawells/nestjs-shared@npm:^2.0.1":
+  version: 2.0.2
+  resolution: "@pawells/nestjs-shared@npm:2.0.2"
   dependencies:
     "@pawells/logger": "npm:^1.2.2"
     "@pawells/typescript-common": "npm:^1.4.1"
@@ -3975,7 +3975,7 @@ __metadata:
     prom-client: ">=15.0.0"
     rxjs: ">=7.0.0"
     xss: ">=1.0.0"
-  checksum: 10c0/840b2d196971161d4890d5ac61bcead2650dfdb53eb62f254e63c5b015e9dd613393296266ce809ac01a131f93f300b2c4275900dcc696b81749b1a1dd2edd25
+  checksum: 10c0/74e9962c9172fc7d3862914d8337d2c454aed3286a85d46617658e14903268e40f10ebd996825911bce876e2c56a9da80161b79836ab3cd17b54ed7c376f3610
   languageName: node
   linkType: hard
 
@@ -3990,7 +3990,9 @@ __metadata:
     "@nx/devkit": "npm:^21.2.0"
     "@types/node": "npm:^20.18.14"
     graphql: "npm:>=16.0.0"
+    nx: "npm:^22.6.3"
     reflect-metadata: "npm:>=0.1.0"
+    rxjs: "npm:^7.8.2"
   peerDependencies:
     "@pawells/graphql-codegen-ts": "*"
     nx: ">=21.0.0"
@@ -4011,6 +4013,7 @@ __metadata:
     graphql-ws: "npm:^5.16.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
+    rxjs: "npm:^7.8.2"
   peerDependencies:
     "@apollo/client": ">=4.0.0"
     graphql: ">=16.0.0"
@@ -6018,11 +6021,11 @@ __metadata:
   linkType: hard
 
 "baseline-browser-mapping@npm:^2.10.12":
-  version: 2.10.14
-  resolution: "baseline-browser-mapping@npm:2.10.14"
+  version: 2.10.16
+  resolution: "baseline-browser-mapping@npm:2.10.16"
   bin:
     baseline-browser-mapping: dist/cli.cjs
-  checksum: 10c0/1e595ab3bfb7fa2b453abe93f430b0a3ecbcbdbb3f331689670b93670bf1e329028740a881a423f7c27f8296d506880b25aac60fee7a86c851bcc5eaf80aa0f8
+  checksum: 10c0/9947243bb8f16db3f8e05397c5c3e7a91243dcf2d1ec6a681ad5ffabeadee36c1061cd18e5f0432088df6798fa0689890ba26db173b9ad23c5650709b7b2e7cf
   languageName: node
   linkType: hard
 
@@ -6289,9 +6292,9 @@ __metadata:
   linkType: hard
 
 "caniuse-lite@npm:^1.0.30001782":
-  version: 1.0.30001785
-  resolution: "caniuse-lite@npm:1.0.30001785"
-  checksum: 10c0/c537e35063f857d3266375d60ed89d46258a912d4b562e7768fb1b02bbc4c36982d4ec7d25451c41e3565640d926a968869e12d9eac3caf444564d857f1f674c
+  version: 1.0.30001786
+  resolution: "caniuse-lite@npm:1.0.30001786"
+  checksum: 10c0/9895f0add1991eefb91cfae98e7baa9daffc6b862b0996c983d30e6be90ef679b6aef32dcb6eca312977fb67c2636ee575820f101213e69c1e0dbffd6ee8e09e
   languageName: node
   linkType: hard
 
@@ -9688,9 +9691,9 @@ __metadata:
   linkType: hard
 
 "lru-cache@npm:^11.0.0, lru-cache@npm:^11.1.0, lru-cache@npm:^11.2.1":
-  version: 11.2.7
-  resolution: "lru-cache@npm:11.2.7"
-  checksum: 10c0/549cdb59488baa617135fc12159cafb1a97f91079f35093bb3bcad72e849fc64ace636d244212c181dfdf1a99bbfa90757ff303f98561958ee4d0f885d9bd5f7
+  version: 11.3.1
+  resolution: "lru-cache@npm:11.3.1"
+  checksum: 10c0/4fb5cf792cf6fb40bee3f4a0a0903f74b7869bfeaf500a6194dffcd556d16819342f02a7d0bac13b55557ddf231970c58740ff2098ecffbf23c8a99569084acb
   languageName: node
   linkType: hard
 
@@ -10255,7 +10258,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nx@npm:22.6.4, nx@npm:~22.6.3":
+"nx@npm:22.6.4, nx@npm:^22.6.3, nx@npm:~22.6.3":
   version: 22.6.4
   resolution: "nx@npm:22.6.4"
   dependencies:
@@ -11117,13 +11120,13 @@ __metadata:
   linkType: hard
 
 "regjsparser@npm:^0.13.0":
-  version: 0.13.0
-  resolution: "regjsparser@npm:0.13.0"
+  version: 0.13.1
+  resolution: "regjsparser@npm:0.13.1"
   dependencies:
     jsesc: "npm:~3.1.0"
   bin:
     regjsparser: bin/parser
-  checksum: 10c0/4702f85cda09f67747c1b2fb673a0f0e5d1ba39d55f177632265a0be471ba59e3f320623f411649141f752b126b8126eac3ff4c62d317921e430b0472bfc6071
+  checksum: 10c0/1276c983f00de49e37ef76b181df4390699b46e3666fbe6b8b5512bd75919112574cf023f28ac720d427be158af60dba6a77cce9a8aaff14967263636e667356
   languageName: node
   linkType: hard
 
@@ -12894,8 +12897,8 @@ __metadata:
   linkType: hard
 
 "vite@npm:^5.0.0 || ^6.0.0 || ^7.0.0-0":
-  version: 7.3.1
-  resolution: "vite@npm:7.3.1"
+  version: 7.3.2
+  resolution: "vite@npm:7.3.2"
   dependencies:
     esbuild: "npm:^0.27.0"
     fdir: "npm:^6.5.0"
@@ -12944,13 +12947,13 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: 10c0/5c7548f5f43a23533e53324304db4ad85f1896b1bfd3ee32ae9b866bac2933782c77b350eb2b52a02c625c8ad1ddd4c000df077419410650c982cd97fde8d014
+  checksum: 10c0/74be36907e208916f18bfec81c8eba18b869f0a170f1ece0a4dcb14874d0f0e7c022fb6c2ad896e3ee6c973fe88f53ac23b4078879ada340d8b263260868b8d4
   languageName: node
   linkType: hard
 
 "vite@npm:^6.0.0 || ^7.0.0 || ^8.0.0, vite@npm:^8.0.3":
-  version: 8.0.3
-  resolution: "vite@npm:8.0.3"
+  version: 8.0.5
+  resolution: "vite@npm:8.0.5"
   dependencies:
     fsevents: "npm:~2.3.3"
     lightningcss: "npm:^1.32.0"
@@ -12961,7 +12964,7 @@ __metadata:
   peerDependencies:
     "@types/node": ^20.19.0 || >=22.12.0
     "@vitejs/devtools": ^0.1.0
-    esbuild: ^0.27.0
+    esbuild: ^0.27.0 || ^0.28.0
     jiti: ">=1.21.0"
     less: ^4.0.0
     sass: ^1.70.0
@@ -13001,7 +13004,7 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: 10c0/bed9520358080393a02fe22565b3309b4b3b8f916afe4c97577528f3efb05c1bf4b29f7b552179bc5b3938629e50fbd316231727457411dbc96648fa5c9d14bf
+  checksum: 10c0/bfc22896b2661753c01c398a058f1859bdbd3ebe55f3d8505ab629b39e5f68790c0a6f55f8644b6692b0b9b8e210f698082ef9f4fd0d76509f4a46762fbfbba2
   languageName: node
   linkType: hard
 
