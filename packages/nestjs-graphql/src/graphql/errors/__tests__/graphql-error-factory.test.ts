@@ -1,3 +1,4 @@
+import { describe,it,expect } from 'vitest';
 import { CreateGraphQLError, GRAPHQL_ERROR_CONFIGS, type TGraphQLErrorType } from '../graphql-error-factory.js';
 
 describe('createGraphQLError', () => {

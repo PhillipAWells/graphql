@@ -1,3 +1,4 @@
+import { describe,it,expect,beforeEach } from 'vitest';
 
 import { GraphQLService } from '../../graphql/graphql.service.js';
 import { GraphQLSchema, GraphQLObjectType, GraphQLString } from 'graphql';

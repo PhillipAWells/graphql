@@ -1,3 +1,4 @@
+import { describe,it,expect } from 'vitest';
 import { GraphQLService } from '../graphql/graphql.service.js';
 import { GraphQLModule } from '../graphql/graphql.module.js';
 
