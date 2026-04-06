@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useRef, useState } from 'r
 import { ApolloProvider } from '@apollo/client/react';
 import type { ApolloClient } from '@apollo/client/core';
 import { CreateGraphQLClient } from './client';
-import type { GraphQLClientOptions } from './types';
+import type { TGraphQLClientOptions } from './types';
 import { GraphQLConnectionState } from './types';
 
 interface IGraphQLContextValue {
@@ -19,7 +19,7 @@ export function UseGraphQLContext(): IGraphQLContextValue {
 }
 
 export interface IGraphQLProviderProps {
-	options: GraphQLClientOptions;
+	options: TGraphQLClientOptions;
 	children: React.ReactNode;
 	fallback?: React.ReactNode;
 }
@@ -40,20 +40,28 @@ export function GraphQLProvider({ options, children, fallback }: IGraphQLProvide
 		setIsReady(true);
 
 		return () => {
-			UnsubscribeRef.current?.();
-			Result.dispose();
-			ClientRef.current = null;
+			try {
+				UnsubscribeRef.current?.();
+				Result.dispose();
+				ClientRef.current = null;
+			} catch (error) {
+				console.error('Error disposing GraphQL client:', error);
+			}
 		};
 	}, [options]);
 
 	function Reconnect(): void {
-		UnsubscribeRef.current?.();
-		if (ClientRef.current) {
-			ClientRef.current.dispose();
+		try {
+			UnsubscribeRef.current?.();
+			if (ClientRef.current) {
+				ClientRef.current.dispose();
+			}
+			const Result = CreateGraphQLClient(options);
+			ClientRef.current = Result;
+			UnsubscribeRef.current = Result.onStateChange(setConnectionState);
+		} catch (error) {
+			console.error('Error reconnecting GraphQL client:', error);
 		}
-		const Result = CreateGraphQLClient(options);
-		ClientRef.current = Result;
-		UnsubscribeRef.current = Result.onStateChange(setConnectionState);
 	}
 
 	if (!IsReady || !ClientRef.current) {

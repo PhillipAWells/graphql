@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { CreateGraphQLClient } from '../client';
 import { GraphQLConnectionState } from '../types';
-import type { GraphQLClientOptions } from '../types';
+import type { TGraphQLClientOptions } from '../types';
 
 let OnErrorHandler: ((errorResponse: any) => void) | undefined;
 let SetContextHandler: ((operation: unknown, prevContext: Record<string, unknown>) => Promise<Record<string, unknown>>) | undefined;
@@ -73,7 +73,7 @@ vi.mock('@apollo/client/utilities', () => ({
 }));
 
 describe('CreateGraphQLClient', () => {
-	let Options: GraphQLClientOptions;
+	let Options: TGraphQLClientOptions;
 
 	beforeEach(() => {
 		Options = {
@@ -136,7 +136,7 @@ describe('CreateGraphQLClient', () => {
 	});
 
 	it('should handle static token string', () => {
-		const OptionsWithToken: GraphQLClientOptions = {
+		const OptionsWithToken: TGraphQLClientOptions = {
 			...Options,
 			token: 'static-token',
 		};
@@ -147,7 +147,7 @@ describe('CreateGraphQLClient', () => {
 	});
 
 	it('should handle token function', () => {
-		const OptionsWithToken: GraphQLClientOptions = {
+		const OptionsWithToken: TGraphQLClientOptions = {
 			...Options,
 			token: () => 'dynamic-token',
 		};
@@ -158,7 +158,7 @@ describe('CreateGraphQLClient', () => {
 	});
 
 	it('should handle async token function', async () => {
-		const OptionsWithToken: GraphQLClientOptions = {
+		const OptionsWithToken: TGraphQLClientOptions = {
 			...Options,
 			token: async () => 'async-token',
 		};
@@ -169,7 +169,7 @@ describe('CreateGraphQLClient', () => {
 	});
 
 	it('should handle undefined token', () => {
-		const OptionsWithToken: GraphQLClientOptions = {
+		const OptionsWithToken: TGraphQLClientOptions = {
 			...Options,
 			token: undefined,
 		};
@@ -182,7 +182,7 @@ describe('CreateGraphQLClient', () => {
 	it('should support logging GraphQL errors', () => {
 		const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
-		const OptionsWithLogging: GraphQLClientOptions = {
+		const OptionsWithLogging: TGraphQLClientOptions = {
 			...Options,
 			logGraphQLErrors: true,
 		};
@@ -197,7 +197,7 @@ describe('CreateGraphQLClient', () => {
 	it('should support logging network errors', () => {
 		const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
-		const OptionsWithLogging: GraphQLClientOptions = {
+		const OptionsWithLogging: TGraphQLClientOptions = {
 			...Options,
 			logNetworkErrors: true,
 		};
@@ -212,7 +212,7 @@ describe('CreateGraphQLClient', () => {
 	it('should use provided cache instance', () => {
 		const customCache = {};
 
-		const OptionsWithCache: GraphQLClientOptions = {
+		const OptionsWithCache: TGraphQLClientOptions = {
 			...Options,
 			cache: customCache,
 		};
@@ -225,7 +225,7 @@ describe('CreateGraphQLClient', () => {
 	it('should invoke error handler for GraphQL errors', () => {
 		const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
-		const OptionsWithLogging: GraphQLClientOptions = {
+		const OptionsWithLogging: TGraphQLClientOptions = {
 			...Options,
 			logGraphQLErrors: true,
 		};
@@ -244,7 +244,7 @@ describe('CreateGraphQLClient', () => {
 	it('should invoke error handler for network errors', () => {
 		const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
-		const OptionsWithLogging: GraphQLClientOptions = {
+		const OptionsWithLogging: TGraphQLClientOptions = {
 			...Options,
 			logNetworkErrors: true,
 		};
@@ -263,7 +263,7 @@ describe('CreateGraphQLClient', () => {
 	it('should handle empty error response', () => {
 		const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
-		const OptionsWithLogging: GraphQLClientOptions = {
+		const OptionsWithLogging: TGraphQLClientOptions = {
 			...Options,
 			logGraphQLErrors: true,
 			logNetworkErrors: true,
@@ -297,7 +297,7 @@ describe('CreateGraphQLClient', () => {
 	});
 
 	it('should add authorization header with token in auth link', async () => {
-		const OptionsWithToken: GraphQLClientOptions = {
+		const OptionsWithToken: TGraphQLClientOptions = {
 			...Options,
 			token: 'test-token',
 		};
@@ -312,7 +312,7 @@ describe('CreateGraphQLClient', () => {
 	});
 
 	it('should add authorization header with async token in auth link', async () => {
-		const OptionsWithToken: GraphQLClientOptions = {
+		const OptionsWithToken: TGraphQLClientOptions = {
 			...Options,
 			token: async () => 'async-test-token',
 		};
@@ -445,7 +445,7 @@ describe('CreateGraphQLClient', () => {
 	});
 
 	it('should get connection params with token', async () => {
-		const OptionsWithToken: GraphQLClientOptions = {
+		const OptionsWithToken: TGraphQLClientOptions = {
 			...Options,
 			token: 'test-token',
 		};
@@ -601,7 +601,7 @@ describe('CreateGraphQLClient', () => {
 	});
 
 	it('should handle async token resolution in connection params', async () => {
-		const OptionsWithToken: GraphQLClientOptions = {
+		const OptionsWithToken: TGraphQLClientOptions = {
 			...Options,
 			token: async () => {
 				return 'resolved-token';
@@ -618,7 +618,7 @@ describe('CreateGraphQLClient', () => {
 	});
 
 	it('should handle undefined token in connection params', async () => {
-		const OptionsWithUndefinedToken: GraphQLClientOptions = {
+		const OptionsWithUndefinedToken: TGraphQLClientOptions = {
 			...Options,
 			token: undefined,
 		};
