@@ -83,13 +83,13 @@ export class GraphQLClient {
 	private _BuildClient(
 		options: IGraphQLClientOptions,
 	): ApolloClient<NormalizedCacheObject> {
-		const PING_TIMEOUT_CODE = 4408;
-		const PING_TIMEOUT_WAIT_MS = 5000;
+		const pingTimeoutCode = 4408;
+		const pingTimeoutWaitMs = 5000;
 
-		const ErrorLink = onError(({ graphQLErrors, networkError }): void => {
+		const errorLink = onError(({ graphQLErrors, networkError }): void => {
 			if (options.LogGraphQLErrors && graphQLErrors) {
-				for (const Error of graphQLErrors) {
-					console.error('[GraphQL Error]', Error);
+				for (const error of graphQLErrors) {
+					console.error('[GraphQL Error]', error);
 				}
 			}
 			if (options.LogNetworkErrors && networkError) {
@@ -97,7 +97,7 @@ export class GraphQLClient {
 			}
 		});
 
-		const RetryLink = new RetryLinkClass({
+		const retryLink = new RetryLinkClass({
 			delay: {
 				initial: 1000,
 				max: 10000,
@@ -106,33 +106,33 @@ export class GraphQLClient {
 			attempts: {
 				max: 10,
 				retryIf: (error): boolean => {
-					const IsNetworkError = !error.message.startsWith('[GraphQL error');
-					return IsNetworkError;
+					const isNetworkError = !error.message.startsWith('[GraphQL error');
+					return isNetworkError;
 				},
 			},
 		});
 
-		const AuthLink = setContext(async (_, { headers }) => {
-			const Token =
+		const authLink = setContext(async (_, { headers }) => {
+			const token =
 				options.UseTokenFunction && options.TokenFunction
 					? await options.TokenFunction()
 					: options.Token;
 			return {
 				headers: {
 					...headers,
-					...(Token ? { Authorization: `Bearer ${Token}` } : {}),
+					...(token ? { Authorization: `Bearer ${token}` } : {}),
 				},
 			};
 		});
 
-		const WsClient = createClient({
+		const wsClient = createClient({
 			url: options.WS_URI,
 			connectionParams: async () => {
-				const Token =
+				const token =
 					options.UseTokenFunction && options.TokenFunction
 						? await options.TokenFunction()
 						: options.Token;
-				return Token ? { authorization: `Bearer ${Token}` } : {};
+				return token ? { authorization: `Bearer ${token}` } : {};
 			},
 			on: {
 				connecting: () => {
@@ -156,9 +156,9 @@ export class GraphQLClient {
 						// Client sent ping, set 5s timeout for pong
 						this.PingTimeout = setTimeout(() => {
 							if (this.Socket) {
-								this.Socket.close(PING_TIMEOUT_CODE, 'Ping timeout');
+								this.Socket.close(pingTimeoutCode, 'Ping timeout');
 							}
-						}, PING_TIMEOUT_WAIT_MS);
+						}, pingTimeoutWaitMs);
 					}
 				},
 				pong: (received) => {
@@ -171,29 +171,29 @@ export class GraphQLClient {
 			},
 		});
 
-		const WsLink = new GraphQLWsLink(WsClient);
+		const wsLink = new GraphQLWsLink(wsClient);
 
-		const HttpLink = new HttpLinkClass({
+		const httpLink = new HttpLinkClass({
 			uri: options.HTTP_URI,
 			credentials: 'include',
 		});
 
-		const SplitLink = split(
+		const splitLink = split(
 			({ query }) => {
-				const Definition = getMainDefinition(query);
+				const definition = getMainDefinition(query);
 				return (
-					Definition.kind === 'OperationDefinition' &&
-					Definition.operation === 'subscription'
+					definition.kind === 'OperationDefinition' &&
+					definition.operation === 'subscription'
 				);
 			},
-			WsLink,
-			HttpLink,
+			wsLink,
+			httpLink,
 		);
 
-		const Link = ErrorLink.concat(RetryLink).concat(AuthLink).concat(SplitLink);
+		const link = errorLink.concat(retryLink).concat(authLink).concat(splitLink);
 
 		return new ApolloClient({
-			link: Link,
+			link,
 			cache: new InMemoryCache(),
 			defaultOptions: {
 				watchQuery: { fetchPolicy: 'no-cache' },
