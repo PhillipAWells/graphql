@@ -4,7 +4,7 @@
 [![CI](https://github.com/PhillipAWells/graphql/actions/workflows/ci.yml/badge.svg)](https://github.com/PhillipAWells/graphql/actions/workflows/ci.yml)
 [![npm version](https://img.shields.io/npm/v/@pawells/nx-graphql.svg?style=flat)](https://www.npmjs.com/package/@pawells/nx-graphql)
 [![Node](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](https://nodejs.org)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/PhillipAWells/graphql/blob/main/LICENSE)
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/PhillipAWells?style=social)](https://github.com/sponsors/PhillipAWells)
 
 ## Installation
@@ -242,11 +242,11 @@ With this configuration, running `nx run my-api:codegen` automatically builds th
 
 ## Related Packages
 
-- **[@pawells/nestjs-graphql](../nestjs-graphql)** — Server-side NestJS module providing Apollo Server integration, guards, interceptors, and DataLoaders. The resolver classes consumed by `build-schema` typically live in a project that depends on this package.
-- **[@pawells/graphql-codegen-ts](../graphql-codegen-ts)** — The default codegen plugin for the `typescript` target. Generates typed Apollo Client classes (`ApolloQueries`, `ApolloMutations`, `ApolloSubscriptions`, and `ApolloWrapper`) for Node.js/TypeScript applications.
-- **[@pawells/graphql-codegen-react](../graphql-codegen-react)** — Alternative codegen plugin for React applications. Use this in the `plugins` override when targeting a React front end.
-- **[@pawells/react-graphql](../react-graphql)** — React runtime companion providing Apollo Client setup, connection state management, and `GraphQLProvider`. Consumed by the output generated with `@pawells/graphql-codegen-react`.
-- **[@pawells/graphql-common](../graphql-common)** — Shared GraphQL primitive types and utilities consumed by the generated output.
+- **[@pawells/nestjs-graphql](https://www.npmjs.com/package/@pawells/nestjs-graphql)** — Server-side NestJS module providing Apollo Server integration, guards, interceptors, and DataLoaders. The resolver classes consumed by `build-schema` typically live in a project that depends on this package.
+- **[@pawells/graphql-codegen-ts](https://www.npmjs.com/package/@pawells/graphql-codegen-ts)** — The default codegen plugin for the `typescript` target. Generates typed Apollo Client classes (`ApolloQueries`, `ApolloMutations`, `ApolloSubscriptions`, and `ApolloWrapper`) for Node.js/TypeScript applications.
+- **[@pawells/graphql-codegen-react](https://www.npmjs.com/package/@pawells/graphql-codegen-react)** — Alternative codegen plugin for React applications. Use this in the `plugins` override when targeting a React front end.
+- **[@pawells/react-graphql](https://www.npmjs.com/package/@pawells/react-graphql)** — React runtime companion providing Apollo Client setup, connection state management, and `GraphQLProvider`. Consumed by the output generated with `@pawells/graphql-codegen-react`.
+- **[@pawells/graphql-common](https://www.npmjs.com/package/@pawells/graphql-common)** — Shared GraphQL primitive types and utilities consumed by the generated output.
 
 ## License
 
