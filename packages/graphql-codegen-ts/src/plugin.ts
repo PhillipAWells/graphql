@@ -273,9 +273,9 @@ function GenerateApolloWrapperClass(): string {
 		return this.Handle.Apollo;
 	}
 
-	public Queries: ApolloQueries;
-	public Mutations: ApolloMutations;
-	public Subscriptions: ApolloSubscriptions;
+	public readonly Queries: ApolloQueries;
+	public readonly Mutations: ApolloMutations;
+	public readonly Subscriptions: ApolloSubscriptions;
 
 	public constructor(options: GraphQLClientOptions) {
 		this.Handle = new GraphQLClient(options);
