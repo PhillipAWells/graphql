@@ -12,10 +12,10 @@ interface IGraphQLContextValue {
 
 export const GraphQLContext = createContext<IGraphQLContextValue | null>(null);
 
-export function UseGraphQLContext(): IGraphQLContextValue {
-	const Ctx = useContext(GraphQLContext);
-	if (!Ctx) throw new Error('useGraphQLContext must be used inside GraphQLProvider');
-	return Ctx;
+export function useGraphQLContext(): IGraphQLContextValue {
+	const ctx = useContext(GraphQLContext);
+	if (!ctx) throw new Error('useGraphQLContext must be used inside GraphQLProvider');
+	return ctx;
 }
 
 export interface IGraphQLProviderProps {
@@ -25,52 +25,50 @@ export interface IGraphQLProviderProps {
 }
 
 export function GraphQLProvider({ options, children, fallback }: IGraphQLProviderProps): React.ReactElement {
-	const ClientRef = useRef<ReturnType<typeof CreateGraphQLClient> | null>(null);
-	const UnsubscribeRef = useRef<(() => void) | null>(null);
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	const [ConnectionState, setConnectionState] = useState<GraphQLConnectionState>(GraphQLConnectionState.Connecting);
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	const [IsReady, setIsReady] = useState(false);
+	const clientRef = useRef<ReturnType<typeof CreateGraphQLClient> | null>(null);
+	const unsubscribeRef = useRef<(() => void) | null>(null);
+	const [connectionState, setConnectionState] = useState<GraphQLConnectionState>(GraphQLConnectionState.Connecting);
+	const [isReady, setIsReady] = useState(false);
 
 	useEffect(() => {
-		const Result = CreateGraphQLClient(options);
-		ClientRef.current = Result;
+		const result = CreateGraphQLClient(options);
+		clientRef.current = result;
 
-		UnsubscribeRef.current = Result.onStateChange(setConnectionState);
+		unsubscribeRef.current = result.onStateChange(setConnectionState);
 		setIsReady(true);
 
-		return () => {
+		return (): void => {
 			try {
-				UnsubscribeRef.current?.();
-				Result.dispose();
-				ClientRef.current = null;
+				unsubscribeRef.current?.();
+				result.dispose();
+				clientRef.current = null;
 			} catch (error) {
 				console.error('Error disposing GraphQL client:', error);
 			}
 		};
 	}, [options]);
 
-	function Reconnect(): void {
+	function reconnect(): void {
 		try {
-			UnsubscribeRef.current?.();
-			if (ClientRef.current) {
-				ClientRef.current.dispose();
+			unsubscribeRef.current?.();
+			if (clientRef.current) {
+				clientRef.current.dispose();
 			}
-			const Result = CreateGraphQLClient(options);
-			ClientRef.current = Result;
-			UnsubscribeRef.current = Result.onStateChange(setConnectionState);
+			const result = CreateGraphQLClient(options);
+			clientRef.current = result;
+			unsubscribeRef.current = result.onStateChange(setConnectionState);
 		} catch (error) {
 			console.error('Error reconnecting GraphQL client:', error);
 		}
 	}
 
-	if (!IsReady || !ClientRef.current) {
+	if (!isReady || !clientRef.current) {
 		return <>{fallback ?? null}</>;
 	}
 
 	return (
-		<GraphQLContext.Provider value={{ connectionState: ConnectionState, reconnect: Reconnect }}>
-			<ApolloProvider client={ClientRef.current.client as ApolloClient}>
+		<GraphQLContext.Provider value={{ connectionState: connectionState, reconnect: reconnect }}>
+			<ApolloProvider client={clientRef.current.client as ApolloClient}>
 				{children}
 			</ApolloProvider>
 		</GraphQLContext.Provider>

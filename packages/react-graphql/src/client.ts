@@ -25,70 +25,70 @@ export interface IGraphQLClientResult {
 }
 
 export function CreateGraphQLClient(options: TGraphQLClientOptions): IGraphQLClientResult {
-	let _ConnectionState: GraphQLConnectionState = State.Connecting;
-	const _StateHandlers: Array<(state: GraphQLConnectionState) => void> = [];
+	let _connectionState: GraphQLConnectionState = State.Connecting;
+	const _stateHandlers: Array<(state: GraphQLConnectionState) => void> = [];
 
-	function SetState(state: GraphQLConnectionState): void {
-		_ConnectionState = state;
-		for (const Handler of _StateHandlers) {
-			Handler(state);
+	function setState(state: GraphQLConnectionState): void {
+		_connectionState = state;
+		for (const handler of _stateHandlers) {
+			handler(state);
 		}
 	}
 
 	// eslint-disable-next-line require-await
-	async function ResolveToken(): Promise<string | undefined> {
+	async function resolveToken(): Promise<string | undefined> {
 		if (!options.token) return undefined;
 		if (typeof options.token === 'function') return options.token();
 		return options.token;
 	}
 
-	let _PingTimeout: ReturnType<typeof setTimeout> | undefined;
-	let _WsSocket: WebSocket | undefined;
+	let _pingTimeout: ReturnType<typeof setTimeout> | undefined;
+	let _wsSocket: WebSocket | undefined;
 
-	const WsClient = createWsClient({
+	const wsClient = createWsClient({
 		url: options.wsUri,
 		lazy: false,
 		keepAlive: 0,
 		retryAttempts: 5,
 		connectionParams: async () => {
-			const Token = await ResolveToken();
-			return Token ? { authorization: `Bearer ${Token}` } : {};
+			const token = await resolveToken();
+			return token ? { authorization: `Bearer ${token}` } : {};
 		},
 		on: {
-			connecting: () => SetState(State.Connecting),
+			connecting: () => setState(State.Connecting),
 			opened: (socket) => {
-				_WsSocket = socket as WebSocket;
-				SetState(State.Connected);
+				_wsSocket = socket as WebSocket;
+				setState(State.Connected);
 			},
-			connected: () => SetState(State.Connected),
+			connected: () => setState(State.Connected),
 			closed: () => {
-				_WsSocket = undefined;
-				if (_PingTimeout) {
-					clearTimeout(_PingTimeout);
-					_PingTimeout = undefined;
+				_wsSocket = undefined;
+				if (_pingTimeout) {
+					clearTimeout(_pingTimeout);
+					_pingTimeout = undefined;
 				}
-				SetState(State.Disconnected);
+				setState(State.Disconnected);
 			},
-			error: () => SetState(State.Error),
+			error: () => setState(State.Error),
 			ping: (received) => {
 				if (!received) {
-					_PingTimeout = setTimeout(() => {
+					_pingTimeout = setTimeout(() => {
 						// eslint-disable-next-line no-magic-numbers
-						_WsSocket?.close(4408, 'Request Timeout');
+						_wsSocket?.close(4408, 'Request Timeout');
 					// eslint-disable-next-line no-magic-numbers
 					}, 5000);
 				}
 			},
 			pong: (received) => {
-				if (received && _PingTimeout) {
-					clearTimeout(_PingTimeout);
-					_PingTimeout = undefined;
+				if (received && _pingTimeout) {
+					clearTimeout(_pingTimeout);
+					_pingTimeout = undefined;
 				}
 			},
 		},
 	});
 
-	const ErrorLink = onError((errorResponse: any): void => {
+	const errorLink = onError((errorResponse: any): void => {
 		if (options.logGraphQLErrors && errorResponse?.graphQLErrors) {
 			errorResponse.graphQLErrors.forEach((err: unknown) => console.error('[GraphQL error]', err));
 		}
@@ -97,43 +97,43 @@ export function CreateGraphQLClient(options: TGraphQLClientOptions): IGraphQLCli
 		}
 	});
 
-	const RetryLinkInstance = new RetryLink({
+	const retryLinkInstance = new RetryLink({
 		delay: { initial: 1000, max: 10000, jitter: true },
 		attempts: { max: 10 },
 	});
 
-	const AuthLink = setContext(async (_: unknown, prevContext: IContextPrevious): Promise<IContextPrevious> => {
-		const Token = await ResolveToken();
-		const PrevHeaders = (prevContext.headers as Record<string, string | undefined>) || {};
+	const authLink = setContext(async (_: unknown, prevContext: IContextPrevious): Promise<IContextPrevious> => {
+		const token = await resolveToken();
+		const prevHeaders = (prevContext.headers as Record<string, string | undefined>) || {};
 		return {
 			...prevContext,
 			headers: {
-				...PrevHeaders,
-				...(Token ? { Authorization: `Bearer ${Token}` } : {}),
+				...prevHeaders,
+				...(token ? { Authorization: `Bearer ${token}` } : {}),
 			},
 		};
 	});
 
-	const HttpLinkInstance = new HttpLink({ uri: options.httpUri });
-	const WsLinkInstance = new GraphQLWsLink(WsClient);
+	const httpLinkInstance = new HttpLink({ uri: options.httpUri });
+	const wsLinkInstance = new GraphQLWsLink(wsClient);
 
-	function IsSubscription(op: { readonly query: DocumentNode }): boolean {
-		const Def = getMainDefinition(op.query);
-		return Def.kind === 'OperationDefinition' && Def.operation === 'subscription';
+	function isSubscription(op: { readonly query: DocumentNode }): boolean {
+		const def = getMainDefinition(op.query);
+		return def.kind === 'OperationDefinition' && def.operation === 'subscription';
 	}
 
-	const Link = ApolloLink.from([
-		ErrorLink,
-		RetryLinkInstance,
-		AuthLink,
-		split(IsSubscription, WsLinkInstance, HttpLinkInstance),
+	const link = ApolloLink.from([
+		errorLink,
+		retryLinkInstance,
+		authLink,
+		split(isSubscription, wsLinkInstance, httpLinkInstance),
 	]);
 
-	const Cache = (options.cache as InMemoryCache | undefined) ?? new InMemoryCache();
+	const cache = (options.cache as InMemoryCache | undefined) ?? new InMemoryCache();
 
-	const Client = new ApolloClient({
-		link: Link,
-		cache: Cache,
+	const client = new ApolloClient({
+		link: link,
+		cache: cache,
 		defaultOptions: {
 			watchQuery: { fetchPolicy: 'no-cache' },
 			query: { fetchPolicy: 'no-cache' },
@@ -141,21 +141,21 @@ export function CreateGraphQLClient(options: TGraphQLClientOptions): IGraphQLCli
 		},
 	});
 
-	const Dispose: TDisposeFunction = () => {
-		if (_PingTimeout) clearTimeout(_PingTimeout);
-		WsClient.dispose();
-		Client.stop();
+	const dispose: TDisposeFunction = (): void => {
+		if (_pingTimeout) clearTimeout(_pingTimeout);
+		wsClient.dispose();
+		client.stop();
 	};
 
 	return {
-		client: Client,
-		dispose: Dispose,
-		getConnectionState: () => _ConnectionState,
-		onStateChange: (handler) => {
-			_StateHandlers.push(handler);
-			return () => {
-				const Idx = _StateHandlers.indexOf(handler);
-				if (Idx !== -1) _StateHandlers.splice(Idx, 1);
+		client: client,
+		dispose: dispose,
+		getConnectionState: (): GraphQLConnectionState => _connectionState,
+		onStateChange: (handler): (() => void) => {
+			_stateHandlers.push(handler);
+			return (): void => {
+				const idx = _stateHandlers.indexOf(handler);
+				if (idx !== -1) _stateHandlers.splice(idx, 1);
 			};
 		},
 	};

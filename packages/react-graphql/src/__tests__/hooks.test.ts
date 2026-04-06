@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { useConnectionState, useGraphQLReconnect } from '../hooks';
 
 vi.mock('../provider', () => ({
-	UseGraphQLContext: vi.fn(() => {
+	useGraphQLContext: vi.fn(() => {
 		throw new Error('useGraphQLContext must be used inside GraphQLProvider');
 	}),
 }));
