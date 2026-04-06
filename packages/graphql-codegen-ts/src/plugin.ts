@@ -2,6 +2,9 @@ import type { Types } from '@graphql-codegen/plugin-helpers';
 import type { GraphQLSchema } from 'graphql';
 import { OperationDefinitionNode } from 'graphql';
 
+/**
+ * Plugin configuration interface (currently has no configuration options).
+ */
 export interface IRawPluginConfig {
 	// No additional fields for TS variant
 }
@@ -25,6 +28,9 @@ interface IGQLOperationGroup {
 	subscriptions: IGQLOperation[];
 }
 
+/**
+ * Determines operation type names from the GraphQL document.
+ */
 function DetermineTypeNames(
 	name: string,
 	operationType: 'query' | 'mutation' | 'subscription',
@@ -43,6 +49,9 @@ function DetermineTypeNames(
 	return { TypeName: typeName, VariablesTypeName: variablesTypeName, DocumentName: documentName };
 }
 
+/**
+ * Checks if all operation variables are optional.
+ */
 function IsOptionalVariables(definition: OperationDefinitionNode): boolean {
 	if (!definition.variableDefinitions || definition.variableDefinitions.length === 0) {
 		return true;
@@ -51,6 +60,9 @@ function IsOptionalVariables(definition: OperationDefinitionNode): boolean {
 	return !definition.variableDefinitions.some((variableDef) => variableDef.type.kind === 'NonNullType');
 }
 
+/**
+ * Extracts query, mutation, and subscription operations from the document.
+ */
 function ExtractOperations(files: Types.DocumentFile[]): IGQLOperationGroup {
 	const operations: IGQLOperationGroup = {
 		queries: [],
@@ -94,6 +106,9 @@ function ExtractOperations(files: Types.DocumentFile[]): IGQLOperationGroup {
 	return operations;
 }
 
+/**
+ * Validates that all required co-plugins are present in the plugin list.
+ */
 function ValidateRequiredPlugins(info: {
 	allPlugins?: Types.ConfiguredPlugin[];
 	[key: string]: unknown;
@@ -131,6 +146,9 @@ function ValidateRequiredPlugins(info: {
 	}
 }
 
+/**
+ * Generates the ApolloQueries class with one method per query operation.
+ */
 function GenerateApolloQueriesClass(operations: IGQLOperation[]): string {
 	if (operations.length === 0) {
 		return `export class ApolloQueries {
@@ -174,6 +192,9 @@ ${methods}
 }`;
 }
 
+/**
+ * Generates the ApolloMutations class with one method per mutation operation.
+ */
 function GenerateApolloMutationsClass(operations: IGQLOperation[]): string {
 	if (operations.length === 0) {
 		return `export class ApolloMutations {
@@ -217,6 +238,9 @@ ${methods}
 }`;
 }
 
+/**
+ * Generates the ApolloSubscriptions class with one method per subscription operation.
+ */
 function GenerateApolloSubscriptionsClass(operations: IGQLOperation[]): string {
 	if (operations.length === 0) {
 		return `export class ApolloSubscriptions {
@@ -256,6 +280,9 @@ ${methods}
 }`;
 }
 
+/**
+ * Generates TypeScript type aliases for subscription event handlers.
+ */
 function GenerateSubscriptionTypes(operations: IGQLOperation[]): string {
 	return operations
 		.map((op) => {
@@ -265,6 +292,9 @@ export type ${op.Name}Event = SubscriptionResult<${op.TypeName}>;`;
 		.join('\n\n');
 }
 
+/**
+ * Generates the ApolloWrapper class that ties Queries, Mutations, and Subscriptions together.
+ */
 function GenerateApolloWrapperClass(): string {
 	return `export class ApolloWrapper {
 	public readonly Handle: GraphQLClient;
@@ -285,6 +315,27 @@ function GenerateApolloWrapperClass(): string {
 }`;
 }
 
+/**
+ * GraphQL Code Generator plugin entry point for TypeScript Apollo client code generation.
+ *
+ * This plugin generates type-safe Apollo client wrapper classes (ApolloQueries, ApolloMutations,
+ * ApolloSubscriptions, and ApolloWrapper) from GraphQL document files.
+ *
+ * Requires the following co-plugins to be installed:
+ * - `typescript`
+ * - `typescript-operations`
+ * - `typed-document-node`
+ * - `typescript-apollo-client-helpers`
+ *
+ * All required co-plugins are validated at code generation time.
+ * Missing plugins will cause code generation to fail with a descriptive error.
+ *
+ * @param _schema The GraphQL schema (unused).
+ * @param files The GraphQL document files to process.
+ * @param _config Plugin configuration (currently unused).
+ * @param info Plugin metadata including the list of all configured plugins.
+ * @returns Generated TypeScript code containing Apollo client wrapper classes.
+ */
 export function Plugin(
 	_schema: GraphQLSchema,
 	files: Types.DocumentFile[],

@@ -17,6 +17,10 @@ interface IContextPrevious {
 	[key: string]: unknown;
 }
 
+/**
+ * Result object returned when creating a GraphQL client.
+ * Contains the configured Apollo Client and connection state provider.
+ */
 export interface IGraphQLClientResult {
 	client: ApolloClient;
 	dispose: TDisposeFunction;
@@ -24,6 +28,12 @@ export interface IGraphQLClientResult {
 	onStateChange: (handler: (state: GraphQLConnectionState) => void) => () => void;
 }
 
+/**
+ * Creates a configured Apollo Client with HTTP and WebSocket transport.
+ * Supports automatic reconnection with exponential backoff, connection state tracking, and error logging.
+ * @param options - Configuration options for the client.
+ * @returns Configured Apollo Client with connection state provider.
+ */
 export function CreateGraphQLClient(options: TGraphQLClientOptions): IGraphQLClientResult {
 	let _connectionState: GraphQLConnectionState = State.Connecting;
 	const _stateHandlers: Array<(state: GraphQLConnectionState) => void> = [];
