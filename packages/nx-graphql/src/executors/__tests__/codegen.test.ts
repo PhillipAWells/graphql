@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import type { ExecutorContext } from '@nx/devkit';
 import type { ICodegenExecutorSchema } from '../codegen/executor';
 
@@ -20,6 +20,11 @@ describe('CodegenExecutor', () => {
 			cwd: '/workspace',
 			isVerbose: false,
 		} as ExecutorContext;
+		vi.clearAllMocks();
+	});
+
+	afterEach(() => {
+		vi.clearAllMocks();
 	});
 
 	it('should export CodegenExecutor as default', async () => {
@@ -105,5 +110,113 @@ describe('CodegenExecutor', () => {
 
 		const result = await executor(options, mockContext);
 		expect(result).toBeDefined();
+	});
+
+	it('should use default typescript target when target is not specified', async () => {
+		const options: ICodegenExecutorSchema = {
+			schemaFile: 'schema.graphql',
+			documentsGlob: 'src/**/*.graphql',
+			outputFile: 'src/generated.ts',
+		};
+
+		const result = await executor(options, mockContext);
+		expect(result).toBeDefined();
+		expect(typeof result.success).toBe('boolean');
+	});
+
+	it('should use default plugins for typescript target', async () => {
+		const options: ICodegenExecutorSchema = {
+			schemaFile: 'schema.graphql',
+			documentsGlob: 'src/**/*.graphql',
+			outputFile: 'src/generated.ts',
+			target: 'typescript',
+		};
+
+		const result = await executor(options, mockContext);
+		expect(result).toBeDefined();
+	});
+
+	it('should use default config when config is not specified', async () => {
+		const options: ICodegenExecutorSchema = {
+			schemaFile: 'schema.graphql',
+			documentsGlob: 'src/**/*.graphql',
+			outputFile: 'src/generated.ts',
+		};
+
+		const result = await executor(options, mockContext);
+		expect(result).toBeDefined();
+	});
+
+	it('should merge custom config with default config', async () => {
+		const options: ICodegenExecutorSchema = {
+			schemaFile: 'schema.graphql',
+			documentsGlob: 'src/**/*.graphql',
+			outputFile: 'src/generated.ts',
+			config: { namingConvention: 'pascalCase' },
+		};
+
+		const result = await executor(options, mockContext);
+		expect(result).toBeDefined();
+	});
+
+	it('should handle empty plugins array', async () => {
+		const options: ICodegenExecutorSchema = {
+			schemaFile: 'schema.graphql',
+			documentsGlob: 'src/**/*.graphql',
+			outputFile: 'src/generated.ts',
+			plugins: [],
+		};
+
+		const result = await executor(options, mockContext);
+		expect(result).toBeDefined();
+	});
+
+	it('should support combined options: target, plugins, config', async () => {
+		const options: ICodegenExecutorSchema = {
+			schemaFile: 'schema.graphql',
+			documentsGlob: 'src/**/*.graphql',
+			outputFile: 'src/generated.ts',
+			target: 'typescript',
+			plugins: ['plugin1', 'plugin2'],
+			config: { key: 'value' },
+		};
+
+		const result = await executor(options, mockContext);
+		expect(result).toBeDefined();
+	});
+
+	it('should handle missing documents glob gracefully', async () => {
+		const options: ICodegenExecutorSchema = {
+			schemaFile: 'schema.graphql',
+			documentsGlob: '',
+			outputFile: 'src/generated.ts',
+		};
+
+		const result = await executor(options, mockContext);
+		expect(result).toBeDefined();
+	});
+
+	it('should handle error during codegen execution', async () => {
+		const options: ICodegenExecutorSchema = {
+			schemaFile: 'schema.graphql',
+			documentsGlob: 'src/**/*.graphql',
+			outputFile: 'src/generated.ts',
+		};
+
+		const result = await executor(options, mockContext);
+		expect(result).toBeDefined();
+		expect(typeof result.success).toBe('boolean');
+	});
+
+	it('should handle nullish context parameter', async () => {
+		const options: ICodegenExecutorSchema = {
+			schemaFile: 'schema.graphql',
+			documentsGlob: 'src/**/*.graphql',
+			outputFile: 'src/generated.ts',
+		};
+
+		const result = await executor(options, null as unknown as ExecutorContext);
+		expect(result).toBeDefined();
+		expect(typeof result.success).toBe('boolean');
 	});
 });

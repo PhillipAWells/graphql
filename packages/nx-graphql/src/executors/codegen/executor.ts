@@ -1,5 +1,5 @@
 import { ExecutorContext } from '@nx/devkit';
-import type { Types } from '@graphql-codegen/plugin-helpers';
+import { ExecuteCodegen, GetDefaultPluginsForTarget, GetDefaultConfig } from './codegen-builder';
 
 export interface ICodegenExecutorSchema {
 	schemaFile: string;
@@ -11,60 +11,27 @@ export interface ICodegenExecutorSchema {
 	watch?: boolean;
 }
 
-const DEFAULT_PLUGINS_TYPESCRIPT = [
-	'typescript',
-	'typescript-operations',
-	'typed-document-node',
-	'typescript-apollo-client-helpers',
-	'@pawells/graphql-codegen-ts',
-];
-
-const DEFAULT_CONFIG = {
-	namingConvention: 'keep',
-	immutableTypes: false,
-};
-
 export default async function CodegenExecutor(
 	options: ICodegenExecutorSchema,
 	_context: ExecutorContext,
 ): Promise<{ success: boolean }> {
 	try {
-		const Target = options.target ?? 'typescript';
+		const Target = (options.target ?? 'typescript') as 'typescript';
 
-		let DefaultPlugins: string[];
-		if (Target === 'typescript') {
-			DefaultPlugins = DEFAULT_PLUGINS_TYPESCRIPT;
-		} else {
-			throw new Error(`Unknown target: ${Target}. Must be 'typescript'.`);
-		}
-
+		const DefaultPlugins = GetDefaultPluginsForTarget(Target);
 		const Plugins = options.plugins ?? DefaultPlugins;
-		const Config = { ...DEFAULT_CONFIG, ...(options.config ?? {}) };
+		const DefaultConfig = GetDefaultConfig();
+		const Config = { ...DefaultConfig, ...(options.config ?? {}) };
 
-		// Build the add plugin for eslint-disable comment
-		const AddPlugin = { add: { content: '/* eslint-disable */' } };
-
-		// Build plugin config objects
-		const PluginObjects = Plugins.map((p) => ({ [p]: {} }));
-
-		const Generates = {
-			[options.outputFile]: {
-				schema: options.schemaFile,
-				documents: options.documentsGlob,
-				plugins: [AddPlugin, ...PluginObjects] as Types.ConfiguredPlugin[],
-				config: Config,
-			},
-		};
-
-		const CodegenConfig = {
-			schema: options.schemaFile,
-			documents: options.documentsGlob,
-			generates: Generates,
-			watch: options.watch,
-		};
-
-		const { generate } = await import('@graphql-codegen/cli');
-		await generate(CodegenConfig, true);
+		await ExecuteCodegen({
+			SchemaFile: options.schemaFile,
+			DocumentsGlob: options.documentsGlob,
+			OutputFile: options.outputFile,
+			Target,
+			Plugins,
+			Config,
+			Watch: options.watch,
+		});
 
 		return { success: true };
 	} catch (error) {

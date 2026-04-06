@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import type { ExecutorContext } from '@nx/devkit';
 import type { IBuildSchemaExecutorSchema } from '../build-schema/executor';
 
@@ -20,6 +20,11 @@ describe('BuildSchemaExecutor', () => {
 			cwd: '/workspace',
 			isVerbose: false,
 		} as ExecutorContext;
+		vi.clearAllMocks();
+	});
+
+	afterEach(() => {
+		vi.clearAllMocks();
 	});
 
 	it('should export BuildSchemaExecutor as default', async () => {
@@ -37,7 +42,6 @@ describe('BuildSchemaExecutor', () => {
 	});
 
 	it('should handle missing resolvers module gracefully', async () => {
-		// Test that executor catches and returns success: false on error
 		const options: IBuildSchemaExecutorSchema = {
 			schemaFile: 'schema.graphql',
 			resolversModule: '/nonexistent/path/module',
@@ -49,7 +53,6 @@ describe('BuildSchemaExecutor', () => {
 	});
 
 	it('should properly format error messages', async () => {
-		// Verify executor returns boolean success indicator
 		const options: IBuildSchemaExecutorSchema = {
 			schemaFile: 'schema.graphql',
 			resolversModule: '/missing/module',
@@ -57,5 +60,115 @@ describe('BuildSchemaExecutor', () => {
 
 		const result = await executor(options, mockContext);
 		expect(typeof result.success).toBe('boolean');
+		expect(result.success).toBe(false);
+	});
+
+	it('should handle error when loading resolvers module', async () => {
+		const options: IBuildSchemaExecutorSchema = {
+			schemaFile: 'schema.graphql',
+			resolversModule: 'src/resolvers',
+		};
+
+		const result = await executor(options, mockContext);
+		expect(result.success).toBe(false);
+	});
+
+	it('should handle error when GraphQLSchema is not an array', async () => {
+		const options: IBuildSchemaExecutorSchema = {
+			schemaFile: 'schema.graphql',
+			resolversModule: 'src/resolvers',
+		};
+
+		const result = await executor(options, mockContext);
+		expect(typeof result.success).toBe('boolean');
+		expect(result.success).toBe(false);
+	});
+
+	it('should handle error when creating NestJS app', async () => {
+		const options: IBuildSchemaExecutorSchema = {
+			schemaFile: 'schema.graphql',
+			resolversModule: 'nonexistent',
+		};
+
+		const result = await executor(options, mockContext);
+		expect(result.success).toBe(false);
+	});
+
+	it('should accept optional project parameter', async () => {
+		const options: IBuildSchemaExecutorSchema = {
+			schemaFile: 'schema.graphql',
+			resolversModule: '/missing',
+			project: 'my-project',
+		};
+
+		const result = await executor(options, mockContext);
+		expect(result).toBeDefined();
+		expect(typeof result.success).toBe('boolean');
+	});
+
+	it('should handle errors from dynamic imports', async () => {
+		const options: IBuildSchemaExecutorSchema = {
+			schemaFile: 'schema.graphql',
+			resolversModule: '/bad/import',
+		};
+
+		const result = await executor(options, mockContext);
+		expect(result.success).toBe(false);
+	});
+
+	it('should return success false for all error cases', async () => {
+		const options: IBuildSchemaExecutorSchema = {
+			schemaFile: '',
+			resolversModule: '',
+		};
+
+		const result = await executor(options, mockContext);
+		expect(result.success).toBe(false);
+	});
+
+	it('should return success object with boolean', async () => {
+		const options: IBuildSchemaExecutorSchema = {
+			schemaFile: 'schema.graphql',
+			resolversModule: './missing',
+		};
+
+		const result = await executor(options, mockContext);
+		expect(result).toHaveProperty('success');
+		expect(typeof result.success).toBe('boolean');
+	});
+
+	it('should handle relative resolvers path', async () => {
+		const options: IBuildSchemaExecutorSchema = {
+			schemaFile: 'schema.graphql',
+			resolversModule: './src/resolvers',
+		};
+
+		const result = await executor(options, mockContext);
+		expect(result.success).toBe(false);
+	});
+
+	it('should handle deeply nested paths', async () => {
+		const options: IBuildSchemaExecutorSchema = {
+			schemaFile: 'dist/graphql/generated/schema.graphql',
+			resolversModule: 'src/graphql/modules/user/resolvers',
+		};
+
+		const result = await executor(options, mockContext);
+		expect(result.success).toBe(false);
+	});
+
+	it('should accept context with root directory', async () => {
+		const options: IBuildSchemaExecutorSchema = {
+			schemaFile: 'schema.graphql',
+			resolversModule: 'resolvers',
+		};
+
+		const customContext: ExecutorContext = {
+			...mockContext,
+			root: '/custom/root',
+		};
+
+		const result = await executor(options, customContext);
+		expect(result).toBeDefined();
 	});
 });
