@@ -10,6 +10,21 @@
 
 ---
 
+## Packages
+
+This monorepo contains the following packages:
+
+| Package | Description |
+|---|---|
+| [`@pawells/nestjs-graphql`](./packages/nestjs-graphql/README.md) | Enterprise NestJS GraphQL module with Apollo Server 5.x, Redis caching, DataLoaders, WebSocket subscriptions, and security primitives |
+| [`@pawells/graphql-common`](./packages/graphql-common/README.md) | Framework-agnostic shared GraphQL primitive types and utilities |
+| [`@pawells/graphql-codegen-react`](./packages/graphql-codegen-react/README.md) | graphql-codegen plugin generating typed Apollo Client 4 hooks for React |
+| [`@pawells/graphql-codegen-ts`](./packages/graphql-codegen-ts/README.md) | graphql-codegen plugin generating typed Apollo Client classes for Node.js/TypeScript |
+| [`@pawells/nx-graphql`](./packages/nx-graphql/README.md) | NX executors for GraphQL schema generation and code generation |
+| [`@pawells/react-graphql`](./packages/react-graphql/README.md) | React runtime companion providing Apollo Client setup, connection state management, and GraphQLProvider |
+
+---
+
 ## Requirements
 
 - **Node.js**: `>=22.0.0`

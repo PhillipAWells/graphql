@@ -2,7 +2,7 @@
 	"name": "@pawells/graphql-codegen-ts",
 	"displayName": "@pawells/graphql-codegen-ts",
 	"version": "2.0.0",
-	"description": "graphql-codegen plugin generating typed Apollo client classes for Node.js/TypeScript",
+	"description": "graphql-codegen plugin generating typed Apollo Client classes for Node.js/TypeScript",
 	"type": "module",
 	"main": "./build/index.js",
 	"types": "./build/index.d.ts",
