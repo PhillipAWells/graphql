@@ -1,78 +1,78 @@
 {
-	"name": "@pawells/graphql-codegen-ts",
-	"displayName": "@pawells/graphql-codegen-ts",
-	"version": "2.0.0",
-	"description": "graphql-codegen plugin generating typed Apollo Client classes for Node.js/TypeScript",
-	"keywords": [
-		"graphql",
-		"graphql-codegen",
-		"codegen",
-		"apollo",
-		"apollo-client",
-		"typescript",
-		"nodejs",
-		"code-generation",
-		"typed",
-		"plugin"
-	],
-	"type": "module",
-	"main": "./build/index.js",
-	"types": "./build/index.d.ts",
-	"exports": {
-		".": {
-			"types": "./build/index.d.ts",
-			"require": "./build/index.js",
-			"import": "./build/index.js"
-		}
-	},
-	"scripts": {
-		"build": "tsc --project tsconfig.build.json",
-		"typecheck": "tsc --noEmit",
-		"lint": "eslint src/",
-		"lint:fix": "eslint src/ --fix",
-		"test": "vitest run",
-		"test:watch": "vitest",
-		"test:coverage": "vitest run --coverage",
-		"clean": "rimraf build",
-		"pipeline": "yarn typecheck && yarn lint && yarn test && yarn build"
-	},
-	"dependencies": {
-		"@graphql-codegen/plugin-helpers": ">=6.2.1",
-		"graphql-ws": ">=6.0.8",
-		"strongly-typed-events": ">=3.0.11"
-	},
-	"peerDependencies": {
-		"@apollo/client": ">=3.0.0",
-		"@graphql-codegen/typed-document-node": ">=5.0.0",
-		"@graphql-codegen/typescript": ">=4.0.0",
-		"@graphql-codegen/typescript-apollo-client-helpers": ">=3.0.0",
-		"@graphql-codegen/typescript-operations": ">=4.0.0",
-		"graphql": ">=16.0.0",
-		"rxjs": ">=7.0.0"
-	},
-	"devDependencies": {
-		"@apollo/client": "^4.1.6",
-		"@pawells/graphql-common": "^2.0.0",
-		"@types/node": "^25.5.2",
-		"graphql": "^16.13.2",
-		"rxjs": "^7.8.2"
-	},
-	"engines": {
-		"node": ">=22.0.0"
-	},
-	"packageManager": "yarn@4.12.0",
-	"author": "Aaron Wells <69355326+PhillipAWells@users.noreply.github.com>",
-	"license": "MIT",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/PhillipAWells/graphql"
-	},
-	"files": [
-		"build/",
-		"README.md",
-		"LICENSE"
-	],
-	"publishConfig": {
-		"access": "public"
-	}
+  "name": "@pawells/graphql-codegen-ts",
+  "displayName": "@pawells/graphql-codegen-ts",
+  "version": "2.0.1",
+  "description": "graphql-codegen plugin generating typed Apollo Client classes for Node.js/TypeScript",
+  "keywords": [
+    "graphql",
+    "graphql-codegen",
+    "codegen",
+    "apollo",
+    "apollo-client",
+    "typescript",
+    "nodejs",
+    "code-generation",
+    "typed",
+    "plugin"
+  ],
+  "type": "module",
+  "main": "./build/index.js",
+  "types": "./build/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./build/index.d.ts",
+      "require": "./build/index.js",
+      "import": "./build/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "clean": "rimraf build",
+    "pipeline": "yarn typecheck && yarn lint && yarn test && yarn build"
+  },
+  "dependencies": {
+    "@graphql-codegen/plugin-helpers": ">=6.2.1",
+    "graphql-ws": ">=6.0.8",
+    "strongly-typed-events": ">=3.0.11"
+  },
+  "peerDependencies": {
+    "@apollo/client": ">=3.0.0",
+    "@graphql-codegen/typed-document-node": ">=5.0.0",
+    "@graphql-codegen/typescript": ">=4.0.0",
+    "@graphql-codegen/typescript-apollo-client-helpers": ">=3.0.0",
+    "@graphql-codegen/typescript-operations": ">=4.0.0",
+    "graphql": ">=16.0.0",
+    "rxjs": ">=7.0.0"
+  },
+  "devDependencies": {
+    "@apollo/client": "^4.1.6",
+    "@pawells/graphql-common": "^2.0.0",
+    "@types/node": "^25.5.2",
+    "graphql": "^16.13.2",
+    "rxjs": "^7.8.2"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "packageManager": "yarn@4.12.0",
+  "author": "Aaron Wells <69355326+PhillipAWells@users.noreply.github.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PhillipAWells/graphql"
+  },
+  "files": [
+    "build/",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }
