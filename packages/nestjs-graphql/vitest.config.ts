@@ -2,9 +2,9 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
 	test: {
-		globals: true,
+		globals: false,
 		environment: 'node',
-		include: ['src/**/*.{test,spec}.ts'],
+		include: ['src/**/*.test.ts'],
 		exclude: ['node_modules', 'build', 'tmp'],
 		silent: true,
 		env: {
@@ -15,13 +15,12 @@ export default defineConfig({
 		},
 		coverage: {
 			provider: 'v8',
-			reporter: ['text', 'json', 'html'],
+			reporter: ['text', 'lcov'],
 			exclude: [
 				'node_modules/',
 				'build/',
 				'tmp/',
 				'**/*.test.ts',
-				'**/*.spec.ts',
 				'**/types/**',
 			],
 			thresholds: {
