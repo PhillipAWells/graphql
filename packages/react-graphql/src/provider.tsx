@@ -26,6 +26,7 @@ export interface IGraphQLProviderProps {
 
 export function GraphQLProvider({ options, children, fallback }: IGraphQLProviderProps): React.ReactElement {
 	const ClientRef = useRef<ReturnType<typeof CreateGraphQLClient> | null>(null);
+	const UnsubscribeRef = useRef<(() => void) | null>(null);
 	// eslint-disable-next-line @typescript-eslint/naming-convention
 	const [ConnectionState, setConnectionState] = useState<GraphQLConnectionState>(GraphQLConnectionState.Connecting);
 	// eslint-disable-next-line @typescript-eslint/naming-convention
@@ -35,23 +36,24 @@ export function GraphQLProvider({ options, children, fallback }: IGraphQLProvide
 		const Result = CreateGraphQLClient(options);
 		ClientRef.current = Result;
 
-		const Unsubscribe = Result.onStateChange(setConnectionState);
+		UnsubscribeRef.current = Result.onStateChange(setConnectionState);
 		setIsReady(true);
 
 		return () => {
-			Unsubscribe();
+			UnsubscribeRef.current?.();
 			Result.dispose();
 			ClientRef.current = null;
 		};
 	}, [options]);
 
 	function Reconnect(): void {
+		UnsubscribeRef.current?.();
 		if (ClientRef.current) {
 			ClientRef.current.dispose();
 		}
 		const Result = CreateGraphQLClient(options);
 		ClientRef.current = Result;
-		Result.onStateChange(setConnectionState);
+		UnsubscribeRef.current = Result.onStateChange(setConnectionState);
 	}
 
 	if (!IsReady || !ClientRef.current) {
