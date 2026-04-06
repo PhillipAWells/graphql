@@ -1,3 +1,4 @@
+import { describe,it,expect } from 'vitest';
 import { GraphQLErrorCode, IGraphQLErrorInput } from '../../graphql/types/graphql-safety.types.js';
 import { CreateGraphQLError, GRAPHQL_ERROR_CONFIGS } from '../../errors/graphql-error-factory.js';
 

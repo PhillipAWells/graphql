@@ -1,3 +1,4 @@
+import { describe,it,expect,beforeEach,afterEach } from 'vitest';
 import { GetRedisConfig, GetRedisConnectionOptions } from '../redis.config.js';
 
 describe('Redis Configuration Validation', () => {

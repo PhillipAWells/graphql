@@ -1,3 +1,4 @@
+import { describe,it,expect } from 'vitest';
 
 import { ObjectType, Field, ID } from '@nestjs/graphql';
 // import { buildSchema } from 'type-graphql'; // TODO: Add type-graphql dependency to enable this test
