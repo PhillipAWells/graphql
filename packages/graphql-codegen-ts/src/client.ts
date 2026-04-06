@@ -28,7 +28,7 @@ export interface IGraphQLClientOptions {
 // Export under old name for backward compatibility
 export type TGraphQLClientOptions = IGraphQLClientOptions;
 /** @deprecated Use TGraphQLClientOptions instead */
-// eslint-disable-next-line @typescript-eslint/naming-convention
+// eslint-disable-next-line @typescript-eslint/naming-convention -- Legacy export name required for compatibility
 export type GraphQLClientOptions = TGraphQLClientOptions;
 
 export class GraphQLClient {
