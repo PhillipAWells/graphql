@@ -56,11 +56,8 @@ export async function ExecuteCodegen(params: ICodegenBuilderParams): Promise<voi
 	await generate(CodegenConfig, true);
 }
 
-export function GetDefaultPluginsForTarget(target: 'typescript'): string[] {
-	if (target === 'typescript') {
-		return DEFAULT_PLUGINS_TYPESCRIPT;
-	}
-	return [];
+export function GetDefaultPluginsForTarget(_target: 'typescript'): string[] {
+	return DEFAULT_PLUGINS_TYPESCRIPT;
 }
 
 export function GetDefaultConfig(): Record<string, unknown> {
