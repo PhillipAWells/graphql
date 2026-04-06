@@ -16,7 +16,7 @@ describe('Cache', () => {
 
 	it('should set and get cache entry', async () => {
 		const entry: ICachedRequest<string> = {
-			ID: 'test-id-1',
+			Id: 'test-id-1',
 			Entries: ['a', 'b', 'c'],
 			Expiration: new Date(),
 		};
@@ -25,7 +25,7 @@ describe('Cache', () => {
 		const result = await CacheGet<string>('test-id-1');
 
 		expect(result).toBeDefined();
-		expect(result?.ID).toBe('test-id-1');
+		expect(result?.Id).toBe('test-id-1');
 		expect(result?.Entries).toEqual(['a', 'b', 'c']);
 	});
 
