@@ -154,7 +154,7 @@ export class GraphQLContextFactory {
 	 */
 	public static CreateFactory(options: IContextFactoryOptions = {}): {
 		createHttpContext: (req: Request, res: Response) => Promise<IGraphQLContext>;
-		createWebSocketContext: (connection: IWebSocketConnection) => Promise<IGraphQLContext>;
+		createWebSocketContext: (connection: IWebSocketConnection) => Promise<IWebSocketContext>;
 	} {
 		const Factory = new GraphQLContextFactory(undefined);
 
@@ -162,7 +162,7 @@ export class GraphQLContextFactory {
 			createHttpContext: (req: Request, res: Response): Promise<IGraphQLContext> =>
 				Factory.CreateHttpContext(req, res, options),
 
-			createWebSocketContext: (connection: IWebSocketConnection): Promise<IGraphQLContext> =>
+			createWebSocketContext: (connection: IWebSocketConnection): Promise<IWebSocketContext> =>
 				Factory.CreateWebSocketContext(connection, options),
 		};
 	}
