@@ -1,16 +1,16 @@
-export interface RelayPageInfo {
+export interface IRelayPageInfo {
 	HasNextPage: boolean;
 	HasPreviousPage: boolean;
 	StartCursor: string | null;
 	EndCursor: string | null;
 }
 
-export interface Edge<T> {
+export interface IEdge<T> {
 	Node: T;
 	Cursor: string;
 }
 
-export interface Connection<T> {
-	Edges: Edge<T>[];
-	PageInfo: RelayPageInfo;
+export interface IConnection<T> {
+	Edges: IEdge<T>[];
+	PageInfo: IRelayPageInfo;
 }

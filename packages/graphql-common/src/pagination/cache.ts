@@ -1,21 +1,22 @@
 import { Mutex } from 'async-mutex';
 import type { ICachedRequest } from './page-info';
 
-const _cache = new Map<string, ICachedRequest<unknown>>();
-const _mutex = new Mutex();
+const _Cache = new Map<string, ICachedRequest<unknown>>();
+const _Mutex = new Mutex();
 
 export async function CacheGet<T>(id: string): Promise<ICachedRequest<T> | undefined> {
-	return _mutex.runExclusive(() => _cache.get(id) as ICachedRequest<T> | undefined);
+	const Result = await _Mutex.runExclusive(() => _Cache.get(id) as ICachedRequest<T> | undefined);
+	return Result;
 }
 
 export async function CacheSet<T>(entry: ICachedRequest<T>): Promise<void> {
-	return _mutex.runExclusive(() => {
-		_cache.set(entry.ID, entry as ICachedRequest<unknown>);
+	await _Mutex.runExclusive(() => {
+		_Cache.set(entry.ID, entry as ICachedRequest<unknown>);
 	});
 }
 
 export async function CacheDelete(id: string): Promise<void> {
-	return _mutex.runExclusive(() => {
-		_cache.delete(id);
+	await _Mutex.runExclusive(() => {
+		_Cache.delete(id);
 	});
 }

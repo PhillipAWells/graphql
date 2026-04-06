@@ -7,6 +7,7 @@ export interface IPageInfo {
 
 export interface ICachedPageInfo extends IPageInfo {
 	RequestID: string;
+	ExpiresAt: Date;
 }
 
 export interface ICachedRequest<T> {

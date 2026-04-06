@@ -1,12 +1,12 @@
 import type { ApolloQueryResult, FetchResult } from '@apollo/client/core';
 
-export type QueryResult<T>                    = ApolloQueryResult<T>;
-export type QueryResultPromise<T>             = Promise<QueryResult<T>>;
-export type QueryNullableResult<T>            = ApolloQueryResult<T> | null;
-export type QueryNullableResultPromise<T>     = Promise<QueryNullableResult<T>>;
-export type MutationResult<T>                 = FetchResult<T>;
-export type MutationResultPromise<T>          = Promise<MutationResult<T>>;
-export type MutationNullableResult<T>         = FetchResult<T> | null;
-export type MutationNullableResultPromise<T>  = Promise<MutationNullableResult<T>>;
-export type SubscriptionResult<T>             = FetchResult<T>;
-export type SubscriptionHandler<T>            = (result: SubscriptionResult<T>) => Promise<void>;
+export type TQueryResult<T>                    = ApolloQueryResult<T>;
+export type TQueryResultPromise<T>             = Promise<TQueryResult<T>>;
+export type TQueryNullableResult<T>            = ApolloQueryResult<T> | null;
+export type TQueryNullableResultPromise<T>     = Promise<TQueryNullableResult<T>>;
+export type TMutationResult<T>                 = FetchResult<T>;
+export type TMutationResultPromise<T>          = Promise<TMutationResult<T>>;
+export type TMutationNullableResult<T>         = FetchResult<T> | null;
+export type TMutationNullableResultPromise<T>  = Promise<TMutationNullableResult<T>>;
+export type TSubscriptionResult<T>             = FetchResult<T>;
+export type TSubscriptionHandler<T>            = (result: TSubscriptionResult<T>) => Promise<void>;
