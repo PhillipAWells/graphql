@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+- `@pawells/ngx-graphql` — Angular reactive Apollo + graphql-ws client package removed
+- `@pawells/graphql-codegen-ngx` — Angular graphql-codegen plugin package removed
+- `nx-graphql`: removed `@pawells/graphql-codegen-ngx` optional peer dependency and `target: "angular"` codegen executor option
+
 ## [2.0.0] - 2026-04-04
 
 ### Added
