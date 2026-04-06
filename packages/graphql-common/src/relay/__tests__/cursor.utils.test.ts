@@ -79,7 +79,7 @@ describe('CursorUtils', () => {
 	});
 
 	it('should throw on base64 string that is not valid JSON', () => {
-		const InvalidBase64 = Buffer.from('not json content').toString('base64');
-		expect(() => CursorUtils.decodeCursor(InvalidBase64)).toThrow('Invalid cursor');
+		const invalidBase64 = Buffer.from('not json content').toString('base64');
+		expect(() => CursorUtils.decodeCursor(invalidBase64)).toThrow('Invalid cursor');
 	});
 });
