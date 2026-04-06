@@ -324,7 +324,7 @@ describe('plugin', () => {
 		expect(result.content).toContain('@apollo/client/react');
 	});
 
-	it('should return prepend and content in PluginOutput', () => {
+	it('should return content in PluginOutput', () => {
 		const files: Types.DocumentFile[] = [
 			{
 				document: parse('query GetUser { users { id } }'),
@@ -333,14 +333,12 @@ describe('plugin', () => {
 		];
 
 		const result = plugin(baseSchema, files, {}, baseInfo) as {
-			prepend?: string[];
 			content: string;
 		};
 
-		expect(result.prepend).toBeDefined();
-		expect(Array.isArray(result.prepend)).toBe(true);
-		expect(result.prepend?.length).toBeGreaterThan(0);
 		expect(result.content).toBeDefined();
+		expect(typeof result.content).toBe('string');
+		expect(result.content.length).toBeGreaterThan(0);
 	});
 
 	it('should include QueryHookOptions, MutationHookOptions, and SubscriptionHookOptions types', () => {
