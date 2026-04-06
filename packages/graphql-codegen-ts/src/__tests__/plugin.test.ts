@@ -130,9 +130,9 @@ describe('plugin', () => {
 		};
 
 		expect(result.content).toContain('class ApolloWrapper');
-		expect(result.content).toContain('public Queries: ApolloQueries');
-		expect(result.content).toContain('public Mutations: ApolloMutations');
-		expect(result.content).toContain('public Subscriptions: ApolloSubscriptions');
+		expect(result.content).toContain('public readonly Queries: ApolloQueries');
+		expect(result.content).toContain('public readonly Mutations: ApolloMutations');
+		expect(result.content).toContain('public readonly Subscriptions: ApolloSubscriptions');
 	});
 
 	it('should mark variables as optional when no required variables', () => {
@@ -392,9 +392,9 @@ describe('plugin', () => {
 
 		expect(result.content).toContain('export class ApolloWrapper');
 		expect(result.content).toContain('public readonly Handle: GraphQLClient');
-		expect(result.content).toContain('public Queries: ApolloQueries');
-		expect(result.content).toContain('public Mutations: ApolloMutations');
-		expect(result.content).toContain('public Subscriptions: ApolloSubscriptions');
+		expect(result.content).toContain('public readonly Queries: ApolloQueries');
+		expect(result.content).toContain('public readonly Mutations: ApolloMutations');
+		expect(result.content).toContain('public readonly Subscriptions: ApolloSubscriptions');
 	});
 
 	it('should handle operations without names correctly', () => {
