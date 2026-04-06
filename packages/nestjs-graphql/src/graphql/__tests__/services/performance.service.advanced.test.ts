@@ -44,7 +44,7 @@ describe('GraphQL Performance Service - Advanced Metrics', () => {
 
 			const metrics = service.GetRecentMetrics(1);
 			expect(metrics.length).toBe(1);
-			expect(metrics[0]?.Operation).toBe('testOperation');
+			expect(metrics[0]?.operation).toBe('testOperation');
 			expect(metrics[0]?.success).toBe(true);
 		});
 
@@ -158,7 +158,7 @@ describe('GraphQL Performance Service - Advanced Metrics', () => {
 		it('should calculate operations per second', () => {
 			const stats = service.GetStats();
 
-			expect(stats.OperationsPerSecond).toBeGreaterThan(0);
+			expect(stats.operationsPerSecond).toBeGreaterThan(0);
 		});
 
 		it('should filter stats by operation name', async () => {
@@ -204,8 +204,8 @@ describe('GraphQL Performance Service - Advanced Metrics', () => {
 
 			expect(metrics.length).toBe(3);
 			// Most recent first (reverse order)
-			expect(metrics[0]?.Operation).toBe('op1');
-			expect(metrics[2]?.Operation).toBe('op1');
+			expect(metrics[0]?.operation).toBe('op1');
+			expect(metrics[2]?.operation).toBe('op1');
 		});
 
 		it('should respect limit parameter', () => {
@@ -218,7 +218,7 @@ describe('GraphQL Performance Service - Advanced Metrics', () => {
 			const metrics = service.GetRecentMetrics(10, 'op1');
 
 			expect(metrics.length).toBe(2);
-			expect(metrics.every(m => m.Operation === 'op1')).toBe(true);
+			expect(metrics.every(m => m.operation === 'op1')).toBe(true);
 		});
 	});
 
@@ -235,7 +235,7 @@ describe('GraphQL Performance Service - Advanced Metrics', () => {
 			const slowOps = service.GetSlowOperations(1000);
 
 			expect(slowOps.length).toBe(1);
-			expect(slowOps[0]?.Operation).toBe('slowOp');
+			expect(slowOps[0]?.operation).toBe('slowOp');
 		});
 
 		it('should sort by duration descending', async () => {
@@ -293,8 +293,8 @@ describe('GraphQL Performance Service - Advanced Metrics', () => {
 		it('should return most recent errors first', () => {
 			const errors = service.GetErrors();
 
-			expect(errors[0]?.Operation).toBe('errorOp2');
-			expect(errors[1]?.Operation).toBe('errorOp1');
+			expect(errors[0]?.operation).toBe('errorOp2');
+			expect(errors[1]?.operation).toBe('errorOp1');
 		});
 
 		it('should respect limit parameter', () => {

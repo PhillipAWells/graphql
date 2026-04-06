@@ -17,7 +17,7 @@ import {
  * Performance metrics interface
  */
 export interface IPerformanceMetrics {
-	Operation: string;
+	operation: string;
 	duration: number;
 	startTime: Date;
 	endTime: Date;
@@ -35,7 +35,7 @@ export interface IPerformanceStats {
 	minDuration: number;
 	maxDuration: number;
 	errorRate: number;
-	OperationsPerSecond: number;
+	operationsPerSecond: number;
 }
 
 /**
@@ -95,7 +95,7 @@ export class GraphQLPerformanceService implements ILazyModuleRefService {
 			const Duration = EndTime.getTime() - StartTime.getTime();
 
 			this.RecordMetrics({
-				Operation: operation,
+				operation,
 				duration: Duration,
 				startTime: StartTime,
 				endTime: EndTime,
@@ -115,7 +115,7 @@ export class GraphQLPerformanceService implements ILazyModuleRefService {
 			const Duration = EndTime.getTime() - StartTime.getTime();
 
 			this.RecordMetrics({
-				Operation: operation,
+				operation,
 				duration: Duration,
 				startTime: StartTime,
 				endTime: EndTime,
@@ -154,7 +154,7 @@ export class GraphQLPerformanceService implements ILazyModuleRefService {
 
 		const RelevantMetrics = this.Metrics.filter(m =>
 			m.startTime.getTime() >= Cutoff &&
-			(!operation || m.Operation === operation),
+			(!operation || m.operation === operation),
 		);
 
 		if (RelevantMetrics.length === 0) {
@@ -164,7 +164,7 @@ export class GraphQLPerformanceService implements ILazyModuleRefService {
 				minDuration: 0,
 				maxDuration: 0,
 				errorRate: 0,
-				OperationsPerSecond: 0,
+				operationsPerSecond: 0,
 			};
 		}
 
@@ -180,7 +180,7 @@ export class GraphQLPerformanceService implements ILazyModuleRefService {
 			minDuration: Math.min(...Durations),
 			maxDuration: Math.max(...Durations),
 			errorRate: Errors / RelevantMetrics.length,
-			OperationsPerSecond: RelevantMetrics.length / TimeSpanSeconds,
+			operationsPerSecond: RelevantMetrics.length / TimeSpanSeconds,
 		};
 	}
 
@@ -193,7 +193,7 @@ export class GraphQLPerformanceService implements ILazyModuleRefService {
 	 */
 	public GetRecentMetrics(limit: number = DEFAULT_RECENT_METRICS_LIMIT, operation?: string): IPerformanceMetrics[] {
 		return this.Metrics
-			.filter(m => !operation || m.Operation === operation)
+			.filter(m => !operation || m.operation === operation)
 			.slice(-limit)
 			.reverse(); // Most recent first
 	}
@@ -242,7 +242,7 @@ export class GraphQLPerformanceService implements ILazyModuleRefService {
 		const Summary: Record<string, { durations: number[]; errors: number; count: number }> = {};
 
 		for (const Metric of this.Metrics) {
-			const OpSummary = Summary[Metric.Operation] ?? (Summary[Metric.Operation] = { durations: [], errors: 0, count: 0 });
+			const OpSummary = Summary[Metric.operation] ?? (Summary[Metric.operation] = { durations: [], errors: 0, count: 0 });
 
 			OpSummary.durations.push(Metric.duration);
 			OpSummary.count++;
