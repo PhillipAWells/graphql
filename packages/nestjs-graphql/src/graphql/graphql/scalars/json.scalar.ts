@@ -39,7 +39,7 @@ export class JSONScalar implements CustomScalar<unknown, unknown> {
 				return Result;
 			}
 			default:
-				return null;
+				throw new Error(`Unsupported JSON literal kind: ${ast.kind}`);
 		}
 	}
 }

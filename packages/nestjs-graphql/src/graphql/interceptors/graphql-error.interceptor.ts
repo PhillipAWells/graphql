@@ -129,7 +129,7 @@ export class GraphQLErrorInterceptor implements NestInterceptor, ILazyModuleRefS
 		const HTTP_STATUS_CONFLICT = 409;
 
 		// Handle specific error types
-		if (error.name === 'IValidationError' || error.message?.includes('validation')) {
+		if (error.name === 'ValidationError' || error.message?.includes('validation')) {
 			return {
 				code: 'VALIDATION_ERROR',
 				message: 'Input validation failed',

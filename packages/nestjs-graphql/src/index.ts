@@ -206,7 +206,7 @@ export {
 	GRAPHQL_ERROR_CONFIGS,
 	GraphqlError,
 	RateLimitError,
-	IValidationError as ValidationErrorClass,
+	ValidationError,
 	LegacyNotFoundError,
 	LegacyValidationError,
 	LegacyUnauthorizedError,

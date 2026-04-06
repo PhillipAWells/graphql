@@ -249,10 +249,8 @@ describe('GraphQLCacheService', () => {
 
 	describe('clear', () => {
 		it('should call clear operation', async () => {
-			await service.Clear();
-
-			// Should not throw - implementation depends on cache store
-			expect(true).toBe(true);
+			// Service should support Clear operation without throwing
+			await expect(service.Clear()).resolves.not.toThrow();
 		});
 	});
 
@@ -260,10 +258,8 @@ describe('GraphQLCacheService', () => {
 		it('should log pattern invalidation request', async () => {
 			const pattern = 'graphql:user|id:*';
 
-			await service.InvalidatePattern(pattern);
-
-			// Should not throw - logs the intent
-			expect(true).toBe(true);
+			// Should not throw when invalidating a pattern
+			await expect(service.InvalidatePattern(pattern)).resolves.not.toThrow();
 		});
 	});
 

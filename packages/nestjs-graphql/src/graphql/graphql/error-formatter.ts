@@ -61,8 +61,7 @@ export class GraphQLErrorFormatter {
 	 * Checks if error is a validation error
 	 */
 	private static IsValidationError(error: any): boolean {
-		return error.name === 'IValidationError' ||
-			   Boolean(error.message?.includes('validation')) ||
+		return Boolean(error.message?.includes('validation')) ||
 			   Boolean(error.errors);
 	}
 
@@ -196,11 +195,11 @@ export class GraphQLErrorFormatter {
 	 * Extracts validation errors from various formats
 	 */
 	private static ExtractValidationErrors(error: any): any[] {
-		if (error.errors) {
-			// Class-validator errors
-			return Object.values(error.errors).map((fieldErrors: any) => ({
-				field: fieldErrors.property,
-				constraints: fieldErrors.constraints,
+		if (Array.isArray(error.errors)) {
+			// Class-validator errors - errors is an array of ValidationError objects
+			return error.errors.map((fieldError: any) => ({
+				field: fieldError.property,
+				constraints: fieldError.constraints,
 			}));
 		}
 

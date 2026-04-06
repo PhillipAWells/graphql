@@ -660,15 +660,16 @@ describe('CacheService', () => {
 
 		describe('invalidatePattern - cache key validation', () => {
 			it('should throw error for empty pattern', async () => {
-				await expect(service.InvalidatePattern('')).rejects.toThrow('Cache key cannot be empty');
+				await expect(service.InvalidatePattern('')).rejects.toThrow('Cache invalidation pattern must be a non-empty string');
 			});
 
 			it('should throw error for null pattern', async () => {
-				await expect(service.InvalidatePattern(null as any)).rejects.toThrow('Cache key must be a string');
+				await expect(service.InvalidatePattern(null as any)).rejects.toThrow('Cache invalidation pattern must be a non-empty string');
 			});
 
-			it('should throw error for pattern with invalid characters', async () => {
-				await expect(service.InvalidatePattern('key\0invalid')).rejects.toThrow('Cache key contains invalid characters');
+			it('should allow pattern with glob characters', async () => {
+				mockCacheManager.store.keys.mockResolvedValue([]);
+				await expect(service.InvalidatePattern('key*invalid')).resolves.not.toThrow();
 			});
 
 			it('should allow valid pattern', async () => {

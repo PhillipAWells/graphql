@@ -122,9 +122,11 @@ export class GraphQLWebSocketServer implements OnApplicationBootstrap, OnModuleD
 			{
 				schema,
 				onConnect: async (ctx: any) => {
+					// Auth is fail-closed: require AuthService to be available
+					// If AuthService is not available, reject the connection
 					if (!AuthServiceVar) {
-						this.Logger.debug('No WebSocketAuthService — accepting connection without auth');
-						return true;
+						this.Logger.error('WebSocketAuthService unavailable — WebSocket authentication rejected (auth service required)');
+						return false;
 					}
 
 					const Params = ctx.connectionParams ?? {};

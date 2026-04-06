@@ -18,8 +18,8 @@ const CACHE_DEFAULT_TTL_MS = 3_600_000;
  * storage management, TTL support, and metrics tracking. Requires Redis
  * connection configuration via environment variables (REDIS_HOST, REDIS_PORT, etc.).
  *
- * Use {@link CacheModule.ForRoot} for standard configuration or
- * {@link CacheModule.ForRootAsync} for dynamic configuration via factories.
+ * Use {@link CacheModule.forRoot} for standard configuration or
+ * {@link CacheModule.forRootAsync} for dynamic configuration via factories.
  *
  * @example
  * ```typescript
@@ -38,7 +38,7 @@ const CACHE_DEFAULT_TTL_MS = 3_600_000;
 @Global()
 @Module({})
 export class CacheModule {
-	public static ForRoot(): DynamicModule {
+	public static forRoot(): DynamicModule {
 		return {
 			module: CacheModule,
 			imports: [
@@ -95,7 +95,7 @@ export class CacheModule {
 	 * @param options Async configuration options
 	 * @returns Dynamic module configuration
 	 */
-	public static ForRootAsync(options: ICacheModuleAsyncOptions): DynamicModule {
+	public static forRootAsync(options: ICacheModuleAsyncOptions): DynamicModule {
 		const Providers: Provider[] = [
 			CacheService,
 			{

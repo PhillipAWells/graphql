@@ -9,24 +9,24 @@ export class PageInfo {
 	/**
    * Whether there is a next page of results
    */
-	@Field(() => Boolean)
+	@Field(() => Boolean, { name: 'hasNextPage' })
 	public HasNextPage!: boolean;
 
 	/**
    * Whether there is a previous page of results
    */
-	@Field(() => Boolean)
+	@Field(() => Boolean, { name: 'hasPreviousPage' })
 	public HasPreviousPage!: boolean;
 
 	/**
    * Cursor for the first item in the current page
    */
-	@Field(() => String, { nullable: true })
+	@Field(() => String, { nullable: true, name: 'startCursor' })
 	public StartCursor?: string;
 
 	/**
    * Cursor for the last item in the current page
    */
-	@Field(() => String, { nullable: true })
+	@Field(() => String, { nullable: true, name: 'endCursor' })
 	public EndCursor?: string;
 }

@@ -3,7 +3,7 @@
 [![GitHub Release](https://img.shields.io/github/v/release/PhillipAWells/nestjs-common)](https://github.com/PhillipAWells/nestjs-common/releases)
 [![CI](https://github.com/PhillipAWells/nestjs-common/actions/workflows/ci.yml/badge.svg)](https://github.com/PhillipAWells/nestjs-common/actions/workflows/ci.yml)
 [![npm version](https://img.shields.io/npm/v/@pawells/nestjs-graphql.svg?style=flat)](https://www.npmjs.com/package/@pawells/nestjs-graphql)
-[![Node](https://img.shields.io/badge/node-%3E%3D24-brightgreen)](https://nodejs.org)
+[![Node](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](https://nodejs.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/PhillipAWells?style=social)](https://github.com/sponsors/PhillipAWells)
 
@@ -17,19 +17,21 @@ yarn add @pawells/nestjs-graphql
 
 ### Optional Dependencies
 
-For WebSocket subscriptions with authentication:
+For authentication (guards, decorators, WebSocket auth):
 ```bash
 yarn add @pawells/nestjs-auth
 ```
 
-For BSON serialization support:
+For WebSocket subscriptions:
 ```bash
-yarn add bson
+yarn add ws
 ```
+
+Note: Without `@pawells/nestjs-auth`, all WebSocket connections requiring authentication will be rejected (fail-closed for security).
 
 ## Requirements
 
-- **Node.js**: >= 24.0.0
+- **Node.js**: >= 22.0.0
 - **NestJS**: >= 10.0.0
 - **GraphQL**: >= 16.0.0
 - **@pawells/nestjs-shared**: same version
@@ -39,28 +41,50 @@ yarn add bson
 
 ```json
 {
-  "@nestjs/apollo": ">=12.0.0",
-  "@nestjs/cache-manager": ">=2.0.0",
+  "@nestjs/apollo": ">=13.0.0",
+  "@nestjs/cache-manager": ">=3.0.0",
   "@nestjs/common": ">=10.0.0",
+  "@nestjs/config": ">=3.0.0",
   "@nestjs/core": ">=10.0.0",
-  "@nestjs/graphql": ">=12.0.0",
-  "@pawells/nestjs-auth": "*" (optional),
-  "cache-manager": ">=5.0.0",
-  "cache-manager-redis-store": ">=3.0.0",
+  "@nestjs/graphql": ">=13.0.0",
+  "@nestjs/terminus": ">=10.0.0",
+  "@nestjs/throttler": ">=5.0.0",
+  "@opentelemetry/api": ">=1.0.0",
+  "@pawells/nestjs-auth": "^2.0.1" (optional - see below),
+  "cache-manager": ">=7.0.0",
   "class-transformer": ">=0.5.0",
   "class-validator": ">=0.14.0",
+  "compression": ">=1.0.0",
+  "csrf-csrf": ">=4.0.0",
   "dataloader": ">=2.0.0",
+  "express": ">=5.0.0",
   "graphql": ">=16.0.0",
   "graphql-query-complexity": ">=0.12.0",
   "graphql-redis-subscriptions": ">=2.0.0",
-  "graphql-ws": ">=5.0.0",
+  "helmet": ">=7.0.0",
   "ioredis": ">=5.0.0",
-  "mongodb": ">=4.0.0" (optional, for ObjectId scalar),
+  "joi": ">=18.0.0",
+  "keyv": ">=5",
+  "prom-client": ">=15.0.0",
   "rxjs": ">=7.0.0",
   "uuid": ">=9.0.0",
-  "ws": ">=8.0.0"
+  "ws": ">=8.0.0" (optional - required for subscriptions),
+  "xss": ">=1.0.0"
 }
 ```
+
+### Optional Dependencies Details
+
+The following peer dependencies are optional:
+
+- **`@pawells/nestjs-auth`**: Required only if using authentication features:
+  - `GraphQLAuthGuard` — JWT validation and protected resolvers
+  - `GraphQLRolesGuard` — Role-based access control with `@Roles()`
+  - `WebSocketAuthService` — JWT validation for WebSocket connections (fails closed without it)
+  - Decorators: `@Public()`, `@Roles()`, `@CurrentUser()`, `@AuthToken()`
+  - Without this package, all WebSocket authentication will fail.
+
+- **`ws`**: Required only for WebSocket subscriptions. If omitted, the subscription and WebSocket infrastructure will not be available.
 
 ## Quick Start
 
@@ -644,9 +668,11 @@ export class CreateUserInput {
 
 ### Guards
 
+> **Note:** `GraphQLAuthGuard` and `GraphQLRolesGuard` require `@pawells/nestjs-auth` to be installed and imported as a module. Without it, these guards will not function.
+
 #### GraphQLAuthGuard
 
-Requires authentication for resolvers:
+Requires authentication for resolvers (requires `@pawells/nestjs-auth`):
 
 ```typescript
 import { UseGuards } from '@nestjs/common';
@@ -676,7 +702,7 @@ async health(): Promise<string> {
 
 #### GraphQLRolesGuard
 
-Role-based access control:
+Role-based access control (requires `@pawells/nestjs-auth`):
 
 ```typescript
 import { UseGuards } from '@nestjs/common';

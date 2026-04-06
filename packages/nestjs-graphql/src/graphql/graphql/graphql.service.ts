@@ -196,10 +196,8 @@ export class GraphQLService {
 			pageInfo: {
 				hasNextPage: EndIndex < items.length,
 				hasPreviousPage: StartIndex > 0,
-				...(Edges.length > 0 ? {
-					startCursor: Edges[0]?.cursor,
-					endCursor: Edges[Edges.length - 1]?.cursor,
-				} : {}),
+				startCursor: Edges.length > 0 ? Edges[0]?.cursor : undefined,
+				endCursor: Edges.length > 0 ? Edges[Edges.length - 1]?.cursor : undefined,
 			},
 		};
 	}

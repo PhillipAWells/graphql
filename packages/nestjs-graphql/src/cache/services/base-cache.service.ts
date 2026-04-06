@@ -364,11 +364,11 @@ export abstract class BaseCacheService implements ILazyModuleRefService, OnModul
 			}));
 		} catch (error) {
 			this.Stats.errors++;
-			const Duration2 = Date.now() - StartTime;
-			this.TrackOperationTiming('del', Duration2);
+			const Duration = Date.now() - StartTime;
+			this.TrackOperationTiming('del', Duration);
 			this.Logger?.error(`Cache delete error for keys ${key}:`, JSON.stringify({
 				error: (error as Error).message,
-				durationMs: Duration2,
+				durationMs: Duration,
 			}));
 			throw error;
 		}
@@ -460,7 +460,11 @@ export abstract class BaseCacheService implements ILazyModuleRefService, OnModul
 		tags: { operation: 'cache_invalidatePattern', cacheType: 'redis' },
 	})
 	public async InvalidatePattern(pattern: string): Promise<number> {
-		this.ValidateCacheKey(pattern);
+		// Patterns are inherently different from cache keys—skip validation to allow glob chars (* and ?)
+		if (typeof pattern !== 'string' || !pattern || pattern.length === 0) {
+			throw new BadRequestException('Cache invalidation pattern must be a non-empty string');
+		}
+
 		this.Logger?.info(`Invalidating cache pattern: ${pattern}`);
 		try {
 			// For Redis store, we need to access the underlying client

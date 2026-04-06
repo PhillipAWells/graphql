@@ -46,7 +46,7 @@ export class BsonResponseInterceptor implements NestInterceptor, ILazyModuleRefS
 				}
 
 				return from(
-					this.BsonSerializationService.serialize(data).then(
+					this.BsonSerializationService.Serialize(data).then(
 						(bsonBuffer) => {
 							// Set response headers
 							Response.setHeader('Content-Type', 'application/bson');

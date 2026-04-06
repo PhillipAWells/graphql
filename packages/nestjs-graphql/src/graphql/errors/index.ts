@@ -47,11 +47,11 @@ export const InternalServerError = CreateGraphQLError(GRAPHQL_ERROR_CONFIGS.INTE
 export const RateLimitError = CreateGraphQLError(GRAPHQL_ERROR_CONFIGS.RATE_LIMIT_EXCEEDED);
 
 // Additional GraphQL-specific errors
-export const IValidationError = CreateGraphQLError(GRAPHQL_ERROR_CONFIGS.VALIDATION_ERROR);
+export const ValidationError = CreateGraphQLError(GRAPHQL_ERROR_CONFIGS.VALIDATION_ERROR);
 
 // Backward compatibility aliases (deprecated - use the factory-generated classes above)
 export { NotFoundError as LegacyNotFoundError } from './not-found.error.js';
-export { IValidationError as LegacyValidationError } from './validation.error.js';
+export { ValidationError as LegacyValidationError } from './validation.error.js';
 export { UnauthorizedError as LegacyUnauthorizedError } from './unauthorized.error.js';
 export { ForbiddenError as LegacyForbiddenError } from './forbidden.error.js';
 export { ConflictError as LegacyConflictError } from './conflict.error.js';

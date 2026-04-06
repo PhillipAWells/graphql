@@ -1,4 +1,25 @@
 import { ApolloDriverConfig } from '@nestjs/apollo';
+import { GraphQLFormattedError } from 'graphql';
+
+/**
+ * CORS configuration options
+ */
+export interface ICorsOptions {
+	/**
+	 * Configures the Access-Control-Allow-Origin CORS header
+	 */
+	origin?: boolean | string | string[] | RegExp | ((origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => void);
+
+	/**
+	 * Configures the Access-Control-Allow-Credentials CORS header
+	 */
+	credentials?: boolean;
+
+	/**
+	 * Additional CORS options
+	 */
+	[key: string]: unknown;
+}
 
 /**
  * Configuration options for the GraphQL module
@@ -30,18 +51,20 @@ export interface IGraphQLConfigOptions extends Omit<ApolloDriverConfig, 'driver'
 
 	/**
    * Custom context function or object
+   * TODO: Type as (req: Request, res: Response) => Promise<IGraphQLContext> | IGraphQLContext
+   * once context interface is stabilized
    */
 	context?: any;
 
 	/**
    * CORS configuration
    */
-	cors?: any;
+	cors?: boolean | ICorsOptions;
 
 	/**
    * Custom error formatting function
    */
-	formatError?: (error: any) => any;
+	formatError?: (formattedError: GraphQLFormattedError, error: unknown) => GraphQLFormattedError;
 
 	/**
    * Custom error handling options

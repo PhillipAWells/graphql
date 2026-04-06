@@ -184,7 +184,7 @@ describe('BsonResponseInterceptor', () => {
 			(mockCallHandler.handle as any).mockReturnValue(of(data));
 
 			// Mock a serialization error
-			vi.spyOn(bsonService, 'serialize').mockRejectedValueOnce(new Error('Serialization failed'));
+			vi.spyOn(bsonService, 'Serialize').mockRejectedValueOnce(new Error('Serialization failed'));
 
 			await new Promise((resolve) => {
 				interceptor.intercept(mockContext as ExecutionContext, mockCallHandler as CallHandler).subscribe({

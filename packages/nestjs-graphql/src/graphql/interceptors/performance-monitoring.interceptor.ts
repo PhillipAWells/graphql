@@ -11,15 +11,24 @@ import { SLOW_OPERATION_THRESHOLD_MS, PERFORMANCE_WARNING_THRESHOLD_MS } from '.
 /**
  * GraphQL Performance Monitoring Interceptor
  *
- * Monitors and tracks performance metrics for GraphQL operations.
- * Measures execution time, tracks errors, and provides insights
- * into resolver performance.
+ * Monitors and tracks performance metrics for GraphQL operations via external services.
+ * Records execution time, errors, and operation details to the GraphQLPerformanceService
+ * for export to metrics backends (e.g., Prometheus, APM platforms).
+ *
+ * Use this for:
+ * - Recording metrics to external services (Prometheus, Datadog, etc.)
+ * - Operation telemetry and performance analytics
+ * - Error tracking in external monitoring systems
+ *
+ * This is complementary to GraphQLPerformanceInterceptor which provides local logging
+ * and Pyroscope profiling integration.
  *
  * @example
  * ```typescript
  * @UseInterceptors(GraphQLPerformanceMonitoringInterceptor)
  * @Query(() => IUser, { name: 'GetUser' })
  * async getUser(@Args('id') id: string): Promise<IUser> {
+ *   // Execution metrics will be recorded to external monitoring systems
  *   return this.userService.findById(id);
  * }
  * ```

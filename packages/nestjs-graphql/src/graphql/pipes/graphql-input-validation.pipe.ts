@@ -102,7 +102,7 @@ export class GraphQLInputValidationPipe implements PipeTransform<any> {
 	 */
 	private PerformSecurityChecks(value: any): void {
 		// Check input size
-		const InputSize = JSON.stringify(value).length;
+		const InputSize = Buffer.byteLength(JSON.stringify(value), 'utf8');
 		if (InputSize > this.MAX_INPUT_SIZE) {
 			this.Logger?.warn(`Input size ${InputSize} exceeds maximum of ${this.MAX_INPUT_SIZE}`);
 			throw new BadRequestException({

@@ -21,7 +21,7 @@ describe('BsonSerializationService', () => {
 	describe('serialize', () => {
 		it('should serialize a simple object to BSON buffer', async () => {
 			const data = { hello: 'world', number: 42 };
-			const buffer = await service.serialize(data);
+			const buffer = await service.Serialize(data);
 
 			expect(buffer).toBeInstanceOf(Buffer);
 			expect(buffer.length).toBeGreaterThan(0);
@@ -36,7 +36,7 @@ describe('BsonSerializationService', () => {
 				},
 				active: true,
 			};
-			const buffer = await service.serialize(data);
+			const buffer = await service.Serialize(data);
 
 			expect(buffer).toBeInstanceOf(Buffer);
 			expect(buffer.length).toBeGreaterThan(0);
@@ -47,7 +47,7 @@ describe('BsonSerializationService', () => {
 				items: [1, 2, 3, 4, 5],
 				names: ['Alice', 'Bob', 'Charlie'],
 			};
-			const buffer = await service.serialize(data);
+			const buffer = await service.Serialize(data);
 
 			expect(buffer).toBeInstanceOf(Buffer);
 			expect(buffer.length).toBeGreaterThan(0);
@@ -55,7 +55,7 @@ describe('BsonSerializationService', () => {
 
 		it('should serialize null and undefined', async () => {
 			const data = { nullable: null, undef: undefined };
-			const buffer = await service.serialize(data);
+			const buffer = await service.Serialize(data);
 
 			expect(buffer).toBeInstanceOf(Buffer);
 		});
@@ -64,7 +64,7 @@ describe('BsonSerializationService', () => {
 	describe('deserialize', () => {
 		it('should deserialize BSON buffer back to object', async () => {
 			const original = { hello: 'world', number: 42 };
-			const buffer = await service.serialize(original);
+			const buffer = await service.Serialize(original);
 			const deserialized = await service.Deserialize(buffer);
 
 			expect(deserialized).toEqual(original);
@@ -78,7 +78,7 @@ describe('BsonSerializationService', () => {
 				},
 				active: true,
 			};
-			const buffer = await service.serialize(original);
+			const buffer = await service.Serialize(original);
 			const deserialized = await service.Deserialize(buffer);
 
 			expect(deserialized).toEqual(original);
@@ -89,7 +89,7 @@ describe('BsonSerializationService', () => {
 				items: [1, 2, 3],
 				names: ['Alice', 'Bob'],
 			};
-			const buffer = await service.serialize(original);
+			const buffer = await service.Serialize(original);
 			const deserialized = await service.Deserialize(buffer);
 
 			expect(deserialized).toEqual(original);
@@ -102,7 +102,7 @@ describe('BsonSerializationService', () => {
 				operationName: 'GetUser',
 			};
 
-			const buffer = await service.serialize(original);
+			const buffer = await service.Serialize(original);
 			const deserialized = await service.Deserialize(buffer);
 
 			expect(deserialized).toEqual(original);
