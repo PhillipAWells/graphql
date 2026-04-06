@@ -45,7 +45,7 @@ export default async function CodegenExecutor(
 		const AddPlugin = { add: { content: '/* eslint-disable */' } };
 
 		// Build plugin config objects
-		const PluginObjects = Plugins.map(p => ({ [p]: {} }));
+		const PluginObjects = Plugins.map((p) => ({ [p]: {} }));
 
 		const Generates = {
 			[options.outputFile]: {

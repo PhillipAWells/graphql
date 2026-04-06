@@ -19,14 +19,14 @@ export default async function BuildSchemaExecutor(
 
 		if (
 			!existsSync(ResolversModulePath) &&
-			!existsSync(ResolversModulePath + '.ts') &&
-			!existsSync(ResolversModulePath + '.js')
+			!existsSync(`${ResolversModulePath}.ts`) &&
+			!existsSync(`${ResolversModulePath}.js`)
 		) {
 			throw new Error(`Resolvers module not found: ${ResolversModulePath}`);
 		}
 
 		const Module = await import(ResolversModulePath);
-		const Resolvers = Module['GraphQLSchema'];
+		const Resolvers = Module['GraphQLSchema'] as unknown;
 
 		if (!Array.isArray(Resolvers)) {
 			throw new Error(
