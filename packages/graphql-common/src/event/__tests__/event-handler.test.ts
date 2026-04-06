@@ -14,7 +14,7 @@ describe('GraphQLEventHandler', () => {
 		expect(handler).toBeDefined();
 	});
 
-	it('should trigger event', async () => {
+	it('should trigger event', () => {
 		const handler = new GraphQLEventHandler<{ id: string }, { test: string }>('TestEvent', pubSub);
 		const data = { id: 'test-123' };
 

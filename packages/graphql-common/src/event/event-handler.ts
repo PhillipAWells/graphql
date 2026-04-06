@@ -6,10 +6,9 @@ const _DefaultPubSub = new PubSub();
 export class GraphQLEventHandler<TObject extends object, TEvent> {
 	private readonly _TopicKey: string;
 	private readonly _PubSub: PubSubEngine;
-	private readonly _Name: string;
 
 	constructor(name: string, pubSub?: PubSubEngine) {
-		this._Name = name;
+		// name parameter is reserved for future use in custom topic naming
 		this._TopicKey = randomUUID();
 		this._PubSub = pubSub ?? _DefaultPubSub;
 	}
@@ -19,7 +18,7 @@ export class GraphQLEventHandler<TObject extends object, TEvent> {
 	}
 
 	public Trigger(data: TObject): void {
-		void this._PubSub.publish(this._TopicKey, { [this._Name]: data });
+		void this._PubSub.publish(this._TopicKey, data);
 	}
 
 	public Subscribe(handler: (...args: unknown[]) => void): Promise<number> | number {
