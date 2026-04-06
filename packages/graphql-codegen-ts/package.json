@@ -39,6 +39,7 @@
 	},
 	"devDependencies": {
 		"@apollo/client": "^3.11.7",
+		"@pawells/graphql-common": "^2.0.0",
 		"@types/node": "^20.18.10",
 		"graphql": "^16.13.2"
 	},

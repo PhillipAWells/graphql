@@ -8,7 +8,7 @@ vi.mock('@apollo/client/core', () => {
 		public stop = vi.fn();
 	}
 
-	class MockLink {
+	class _MockLink {
 		public concat = vi.fn((nextLink: unknown) => nextLink);
 	}
 
@@ -19,22 +19,22 @@ vi.mock('@apollo/client/core', () => {
 	return {
 		ApolloClient: MockApolloClient,
 		InMemoryCache: MockInMemoryCache,
-		split: (_test: unknown, _ifTrue: unknown, _ifFalse: unknown) => new MockLink(),
+		split: (_test: unknown, _ifTrue: unknown, _ifFalse: unknown) => new _MockLink(),
 	};
 });
 
 vi.mock('@apollo/client/link/error', () => {
-	class MockLink {
+	class _MockLink {
 		public concat = vi.fn((nextLink: unknown) => nextLink);
 	}
 
 	return {
-		onError: () => new MockLink(),
+		onError: () => new _MockLink(),
 	};
 });
 
 vi.mock('@apollo/client/link/retry', () => {
-	class MockLink {
+	class _MockLink {
 		public concat = vi.fn((nextLink: unknown) => nextLink);
 	}
 
@@ -48,12 +48,12 @@ vi.mock('@apollo/client/link/retry', () => {
 });
 
 vi.mock('@apollo/client/link/context', () => {
-	class MockLink {
+	class _MockLink {
 		public concat = vi.fn((nextLink: unknown) => nextLink);
 	}
 
 	return {
-		setContext: () => new MockLink(),
+		setContext: () => new _MockLink(),
 	};
 });
 

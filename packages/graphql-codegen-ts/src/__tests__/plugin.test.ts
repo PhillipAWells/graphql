@@ -274,9 +274,9 @@ describe('plugin', () => {
 			content: string;
 		};
 
-		expect(result.content).toContain('type OnUserAddedEventHandler');
+		expect(result.content).toContain('export type OnUserAddedEventHandler');
 		expect(result.content).toContain('export type OnUserAddedEvent');
-		expect(result.content).toContain('type OnUserUpdatedEventHandler');
+		expect(result.content).toContain('export type OnUserUpdatedEventHandler');
 		expect(result.content).toContain('export type OnUserUpdatedEvent');
 	});
 });

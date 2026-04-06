@@ -5,9 +5,9 @@ import {
 	split,
 } from '@apollo/client/core';
 import { onError } from '@apollo/client/link/error';
-import { RetryLink } from '@apollo/client/link/retry';
+import { RetryLink as RetryLinkClass } from '@apollo/client/link/retry';
 import { setContext } from '@apollo/client/link/context';
-import { HttpLink } from '@apollo/client/link/http';
+import { HttpLink as HttpLinkClass } from '@apollo/client/link/http';
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { getMainDefinition } from '@apollo/client/utilities';
 import { createClient } from 'graphql-ws';
@@ -28,6 +28,7 @@ export interface IGraphQLClientOptions {
 // Export under old name for backward compatibility
 export type TGraphQLClientOptions = IGraphQLClientOptions;
 /** @deprecated Use TGraphQLClientOptions instead */
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export type GraphQLClientOptions = TGraphQLClientOptions;
 
 export class GraphQLClient {
@@ -65,7 +66,7 @@ export class GraphQLClient {
 		return this.OnErrorEvent.asEvent();
 	}
 
-	public constructor(options: IGraphQLClientOptions) {
+	constructor(options: IGraphQLClientOptions) {
 		this.Name = options.Name;
 		this.HTTP_URI = options.HTTP_URI;
 		this.WS_URI = options.WS_URI;
@@ -80,10 +81,13 @@ export class GraphQLClient {
 	private _BuildClient(
 		options: IGraphQLClientOptions,
 	): ApolloClient<NormalizedCacheObject> {
-		const errorLink = onError(({ graphQLErrors, networkError }): void => {
+		const PING_TIMEOUT_CODE = 4408;
+		const PING_TIMEOUT_WAIT_MS = 5000;
+
+		const ErrorLink = onError(({ graphQLErrors, networkError }): void => {
 			if (options.LogGraphQLErrors && graphQLErrors) {
-				for (const err of graphQLErrors) {
-					console.error('[GraphQL Error]', err);
+				for (const Error of graphQLErrors) {
+					console.error('[GraphQL Error]', Error);
 				}
 			}
 			if (options.LogNetworkErrors && networkError) {
@@ -91,7 +95,7 @@ export class GraphQLClient {
 			}
 		});
 
-		const retryLink = new RetryLink({
+		const RetryLink = new RetryLinkClass({
 			delay: {
 				initial: 1000,
 				max: 10000,
@@ -100,40 +104,40 @@ export class GraphQLClient {
 			attempts: {
 				max: 10,
 				retryIf: (error) => {
-					const isNetworkError = !error.message.startsWith('[GraphQL error]');
-					return isNetworkError;
+					const IsNetworkError = !error.message.startsWith('[GraphQL error]');
+					return IsNetworkError;
 				},
 			},
 		});
 
-		const authLink = setContext(async (_, { headers }) => {
-			const token =
+		const AuthLink = setContext(async (_, { headers }) => {
+			const Token =
 				options.UseTokenFunction && options.TokenFunction
 					? await options.TokenFunction()
 					: options.Token;
 			return {
 				headers: {
 					...headers,
-					...(token ? { Authorization: `Bearer ${token}` } : {}),
+					...(Token ? { Authorization: `Bearer ${Token}` } : {}),
 				},
 			};
 		});
 
-		const wsClient = createClient({
+		const WsClient = createClient({
 			url: options.WS_URI,
 			connectionParams: async () => {
-				const token =
+				const Token =
 					options.UseTokenFunction && options.TokenFunction
 						? await options.TokenFunction()
 						: options.Token;
-				return token ? { authorization: `Bearer ${token}` } : {};
+				return Token ? { authorization: `Bearer ${Token}` } : {};
 			},
 			on: {
 				connecting: () => {
 					this.OnConnectingEvent.dispatch();
 				},
 				opened: (socket) => {
-					this.Socket = socket as unknown as WebSocket;
+					this.Socket = socket as WebSocket;
 					this.OnOpenedEvent.dispatch();
 				},
 				connected: () => {
@@ -150,9 +154,9 @@ export class GraphQLClient {
 						// Client sent ping, set 5s timeout for pong
 						this.PingTimeout = setTimeout(() => {
 							if (this.Socket) {
-								this.Socket.close(4408, 'Ping timeout');
+								this.Socket.close(PING_TIMEOUT_CODE, 'Ping timeout');
 							}
-						}, 5000);
+						}, PING_TIMEOUT_WAIT_MS);
 					}
 				},
 				pong: (received) => {
@@ -165,29 +169,29 @@ export class GraphQLClient {
 			},
 		});
 
-		const wsLink = new GraphQLWsLink(wsClient);
+		const WsLink = new GraphQLWsLink(WsClient);
 
-		const httpLink = new HttpLink({
+		const HttpLink = new HttpLinkClass({
 			uri: options.HTTP_URI,
 			credentials: 'include',
 		});
 
-		const splitLink = split(
+		const SplitLink = split(
 			({ query }) => {
-				const definition = getMainDefinition(query);
+				const Definition = getMainDefinition(query);
 				return (
-					definition.kind === 'OperationDefinition' &&
-					definition.operation === 'subscription'
+					Definition.kind === 'OperationDefinition' &&
+					Definition.operation === 'subscription'
 				);
 			},
-			wsLink,
-			httpLink,
+			WsLink,
+			HttpLink,
 		);
 
-		const link = errorLink.concat(retryLink).concat(authLink).concat(splitLink);
+		const Link = ErrorLink.concat(RetryLink).concat(AuthLink).concat(SplitLink);
 
 		return new ApolloClient({
-			link,
+			link: Link,
 			cache: new InMemoryCache(),
 			defaultOptions: {
 				watchQuery: { fetchPolicy: 'no-cache' },

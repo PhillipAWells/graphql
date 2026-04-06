@@ -7,6 +7,7 @@ export interface IRawPluginConfig {
 }
 
 // Export under old name for backward compatibility
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export type RawPluginConfig = IRawPluginConfig;
 
 interface IGQLOperation {
@@ -51,46 +52,46 @@ function IsOptionalVariables(definition: OperationDefinitionNode): boolean {
 }
 
 function ExtractOperations(files: Types.DocumentFile[]): IGQLOperationGroup {
-	const operations: IGQLOperationGroup = {
+	const Operations: IGQLOperationGroup = {
 		queries: [],
 		mutations: [],
 		subscriptions: [],
 	};
 
-	for (const file of files) {
-		if (!file.document) continue;
+	for (const File of files) {
+		if (!File.document) continue;
 
-		for (const def of file.document.definitions) {
+		for (const Def of File.document.definitions) {
 			if (
-				def.kind === 'OperationDefinition' &&
-				def.name &&
-				def.operation
+				Def.kind === 'OperationDefinition' &&
+				Def.name &&
+				Def.operation
 			) {
-				const operationType = def.operation as 'query' | 'mutation' | 'subscription';
+				const OperationType = Def.operation as 'query' | 'mutation' | 'subscription';
 				const { TypeName, VariablesTypeName, DocumentName } =
-					DetermineTypeNames(def.name.value, operationType);
+					DetermineTypeNames(Def.name.value, OperationType);
 
-				const operation: IGQLOperation = {
-					Name: def.name.value,
-					OperationType: operationType,
-					IsOptionalVariables: IsOptionalVariables(def),
+				const Operation: IGQLOperation = {
+					Name: Def.name.value,
+					OperationType,
+					IsOptionalVariables: IsOptionalVariables(Def),
 					TypeName,
 					VariablesTypeName,
 					DocumentName,
 				};
 
-				if (operationType === 'query') {
-					operations.queries.push(operation);
-				} else if (operationType === 'mutation') {
-					operations.mutations.push(operation);
-				} else if (operationType === 'subscription') {
-					operations.subscriptions.push(operation);
+				if (OperationType === 'query') {
+					Operations.queries.push(Operation);
+				} else if (OperationType === 'mutation') {
+					Operations.mutations.push(Operation);
+				} else if (OperationType === 'subscription') {
+					Operations.subscriptions.push(Operation);
 				}
 			}
 		}
 	}
 
-	return operations;
+	return Operations;
 }
 
 function ValidateRequiredPlugins(info: {
@@ -104,19 +105,22 @@ function ValidateRequiredPlugins(info: {
 		'typescript-apollo-client-helpers',
 	];
 
-	const InstalledPlugins = (info.allPlugins || []).map((p) => {
-		if (typeof p === 'string') return p;
-		if (typeof p === 'object' && p !== null) {
-			const key = Object.keys(p)[0];
-			return key;
+	const AllPlugins = info.allPlugins ?? [];
+	const InstalledPlugins = AllPlugins.map((plugin): string => {
+		if (typeof plugin === 'string') {
+			return plugin;
+		}
+		if (typeof plugin === 'object' && plugin !== null) {
+			const [Key] = Object.entries(plugin);
+			return Key?.[0] ?? '';
 		}
 		return '';
 	});
 
-	for (const required of RequiredPlugins) {
-		if (!InstalledPlugins.includes(required)) {
+	for (const Required of RequiredPlugins) {
+		if (!InstalledPlugins.includes(Required)) {
 			throw new Error(
-				`Missing required plugin: ${required}. Required plugins: ${RequiredPlugins.join(', ')}`,
+				`Missing required plugin: ${Required}. Required plugins: ${RequiredPlugins.join(', ')}`,
 			);
 		}
 	}
@@ -133,20 +137,21 @@ function GenerateApolloQueriesClass(operations: IGQLOperation[]): string {
 }`;
 	}
 
-	const methods = operations
-		.map((op) => {
-			const variablesParam = op.IsOptionalVariables
-				? `variables?: ${op.VariablesTypeName}`
-				: `variables: ${op.VariablesTypeName}`;
+	const Methods = operations
+		.map((operation) => {
+			const VariablesParam = operation.IsOptionalVariables
+				? `variables?: ${operation.VariablesTypeName}`
+				: `variables: ${operation.VariablesTypeName}`;
 
-			return `	public async ${op.Name}(${variablesParam}): Promise<ApolloQueryResult<${op.TypeName}>> {
+			return `	public async ${operation.Name}(${VariablesParam}): Promise<ApolloQueryResult<${operation.TypeName}>> {
 		const result = await this.Apollo.query({
-			query: ${op.DocumentName},
+			query: ${operation.DocumentName},
 			variables,
 			errorPolicy: 'all',
 		});
-		if (result.errors !== undefined && result.errors.length > 0) {
-			throw new Error(result.errors[0].message);
+		if (result.errors && result.errors.length > 0) {
+			const error = result.errors[0];
+			throw new Error(\`GraphQL error in ${operation.Name}: \${error.message}\`);
 		}
 		return result;
 	}`;
@@ -160,7 +165,7 @@ function GenerateApolloQueriesClass(operations: IGQLOperation[]): string {
 		this.Apollo = apollo;
 	}
 
-${methods}
+${Methods}
 }`;
 }
 
@@ -175,20 +180,21 @@ function GenerateApolloMutationsClass(operations: IGQLOperation[]): string {
 }`;
 	}
 
-	const methods = operations
-		.map((op) => {
-			const variablesParam = op.IsOptionalVariables
-				? `variables?: ${op.VariablesTypeName}`
-				: `variables: ${op.VariablesTypeName}`;
+	const Methods = operations
+		.map((operation) => {
+			const VariablesParam = operation.IsOptionalVariables
+				? `variables?: ${operation.VariablesTypeName}`
+				: `variables: ${operation.VariablesTypeName}`;
 
-			return `	public async ${op.Name}(${variablesParam}): Promise<FetchResult<${op.TypeName}>> {
+			return `	public async ${operation.Name}(${VariablesParam}): Promise<FetchResult<${operation.TypeName}>> {
 		const result = await this.Apollo.mutate({
-			mutation: ${op.DocumentName},
+			mutation: ${operation.DocumentName},
 			variables,
 			errorPolicy: 'all',
 		});
-		if (result.errors !== undefined && result.errors.length > 0) {
-			throw new Error(result.errors[0].message);
+		if (result.errors && result.errors.length > 0) {
+			const error = result.errors[0];
+			throw new Error(\`GraphQL error in ${operation.Name}: \${error.message}\`);
 		}
 		return result;
 	}`;
@@ -202,7 +208,7 @@ function GenerateApolloMutationsClass(operations: IGQLOperation[]): string {
 		this.Apollo = apollo;
 	}
 
-${methods}
+${Methods}
 }`;
 }
 
@@ -217,15 +223,15 @@ function GenerateApolloSubscriptionsClass(operations: IGQLOperation[]): string {
 }`;
 	}
 
-	const methods = operations
-		.map((op) => {
-			const variablesParam = op.IsOptionalVariables
-				? `variables?: ${op.VariablesTypeName}`
-				: `variables: ${op.VariablesTypeName}`;
+	const Methods = operations
+		.map((operation) => {
+			const VariablesParam = operation.IsOptionalVariables
+				? `variables?: ${operation.VariablesTypeName}`
+				: `variables: ${operation.VariablesTypeName}`;
 
-			return `	public async ${op.Name}(handler: ${op.Name}EventHandler, ${variablesParam}): Promise<ZenObservable.Subscription> {
+			return `	public async ${operation.Name}(${VariablesParam}, handler: ${operation.Name}EventHandler): Promise<ZenObservable.Subscription> {
 		const observable = this.Apollo.subscribe({
-			query: ${op.DocumentName},
+			query: ${operation.DocumentName},
 			variables,
 			errorPolicy: 'all',
 		});
@@ -241,7 +247,7 @@ function GenerateApolloSubscriptionsClass(operations: IGQLOperation[]): string {
 		this.Apollo = apollo;
 	}
 
-${methods}
+${Methods}
 }`;
 }
 
@@ -252,7 +258,7 @@ function GenerateSubscriptionTypes(operations: IGQLOperation[]): string {
 
 	return operations
 		.map((op) => {
-			return `type ${op.Name}EventHandler = SubscriptionHandler<${op.TypeName}>;
+			return `export type ${op.Name}EventHandler = SubscriptionHandler<${op.TypeName}>;
 export type ${op.Name}Event = SubscriptionResult<${op.TypeName}>;`;
 		})
 		.join('\n\n');
@@ -279,7 +285,7 @@ function GenerateApolloWrapperClass(): string {
 }`;
 }
 
-export function plugin(
+export function Plugin(
 	_schema: GraphQLSchema,
 	files: Types.DocumentFile[],
 	_config: IRawPluginConfig,
@@ -317,7 +323,7 @@ export function plugin(
 	);
 	const WrapperClass = GenerateApolloWrapperClass();
 
-	const content = [
+	const Content = [
 		ImportStatements,
 		SubscriptionTypes,
 		'',
@@ -332,6 +338,10 @@ export function plugin(
 		.join('\n');
 
 	return {
-		content,
+		content: Content,
 	};
 }
+
+/** @deprecated Use Plugin instead */
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const plugin = Plugin;
