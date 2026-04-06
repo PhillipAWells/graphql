@@ -252,10 +252,6 @@ ${Methods}
 }
 
 function GenerateSubscriptionTypes(operations: IGQLOperation[]): string {
-	if (operations.length === 0) {
-		return '';
-	}
-
 	return operations
 		.map((op) => {
 			return `export type ${op.Name}EventHandler = SubscriptionHandler<${op.TypeName}>;
