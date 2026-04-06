@@ -4,4 +4,4 @@ export { GraphQLProvider } from './provider';
 export type { IGraphQLProviderProps } from './provider';
 export { useConnectionState, useGraphQLReconnect } from './hooks';
 export { GraphQLConnectionState } from './types';
-export type { GraphQLClientOptions, GraphQLConnectionEvent } from './types';
+export type { TGraphQLClientOptions, TGraphQLConnectionEvent } from './types';

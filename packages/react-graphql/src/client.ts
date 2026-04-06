@@ -7,10 +7,15 @@ import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { getMainDefinition } from '@apollo/client/utilities';
 import { createClient as createWsClient } from 'graphql-ws';
 import type { DocumentNode } from 'graphql';
-import type { GraphQLClientOptions, GraphQLConnectionState } from './types';
+import type { TGraphQLClientOptions, GraphQLConnectionState } from './types';
 import { GraphQLConnectionState as State } from './types';
 
 export type TDisposeFunction = () => void;
+
+interface IContextPrevious {
+	headers?: Record<string, string | undefined>;
+	[key: string]: unknown;
+}
 
 export interface IGraphQLClientResult {
 	client: ApolloClient;
@@ -19,13 +24,15 @@ export interface IGraphQLClientResult {
 	onStateChange: (handler: (state: GraphQLConnectionState) => void) => () => void;
 }
 
-export function CreateGraphQLClient(options: GraphQLClientOptions): IGraphQLClientResult {
+export function CreateGraphQLClient(options: TGraphQLClientOptions): IGraphQLClientResult {
 	let _ConnectionState: GraphQLConnectionState = State.Connecting;
 	const _StateHandlers: Array<(state: GraphQLConnectionState) => void> = [];
 
 	function SetState(state: GraphQLConnectionState): void {
 		_ConnectionState = state;
-		for (const Handler of _StateHandlers) Handler(state);
+		for (const Handler of _StateHandlers) {
+			Handler(state);
+		}
 	}
 
 	// eslint-disable-next-line require-await
@@ -95,7 +102,7 @@ export function CreateGraphQLClient(options: GraphQLClientOptions): IGraphQLClie
 		attempts: { max: 10 },
 	});
 
-	const AuthLink = setContext(async (_: unknown, prevContext: Record<string, unknown>): Promise<Record<string, unknown>> => {
+	const AuthLink = setContext(async (_: unknown, prevContext: IContextPrevious): Promise<IContextPrevious> => {
 		const Token = await ResolveToken();
 		const PrevHeaders = (prevContext.headers as Record<string, string | undefined>) || {};
 		return {

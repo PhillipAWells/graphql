@@ -19,15 +19,9 @@ export interface IGraphQLClientOptions {
 
 export type TGraphQLClientOptions = IGraphQLClientOptions;
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export type GraphQLClientOptions = TGraphQLClientOptions;
-
 export interface IGraphQLConnectionEvent {
 	state: GraphQLConnectionState;
 	error?: unknown;
 }
 
 export type TGraphQLConnectionEvent = IGraphQLConnectionEvent;
-
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export type GraphQLConnectionEvent = TGraphQLConnectionEvent;
