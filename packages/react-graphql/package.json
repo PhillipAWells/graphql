@@ -3,6 +3,18 @@
 	"displayName": "@pawells/react-graphql",
 	"version": "2.0.0",
 	"description": "React runtime companion providing Apollo Client setup, connection state management, and GraphQLProvider",
+	"keywords": [
+		"react",
+		"graphql",
+		"apollo",
+		"apollo-client",
+		"typescript",
+		"provider",
+		"subscriptions",
+		"websocket",
+		"connection-state",
+		"graphql-ws"
+	],
 	"type": "module",
 	"main": "./build/index.js",
 	"types": "./build/index.d.ts",
