@@ -16,8 +16,8 @@
 	"scripts": {
 		"build": "tsc --project tsconfig.build.json",
 		"typecheck": "tsc --noEmit",
-		"lint": "true",
-		"lint:fix": "true",
+		"lint": "eslint src/",
+		"lint:fix": "eslint src/ --fix",
 		"test": "vitest run",
 		"test:coverage": "vitest run --coverage",
 		"pipeline": "yarn typecheck && yarn test && yarn build"
