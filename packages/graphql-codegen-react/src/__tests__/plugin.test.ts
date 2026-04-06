@@ -1,7 +1,7 @@
 import { buildSchema, parse } from 'graphql';
 import type { Types } from '@graphql-codegen/plugin-helpers';
 import { describe, it, expect } from 'vitest';
-import { plugin } from '../plugin';
+import { Plugin as plugin } from '../plugin';
 
 describe('plugin', () => {
 	const baseSchema = buildSchema(`
