@@ -3,6 +3,18 @@
 	"displayName": "@pawells/nx-graphql",
 	"version": "2.0.0",
 	"description": "NX executors for GraphQL schema generation and code generation",
+	"keywords": [
+		"nx",
+		"nrwl",
+		"graphql",
+		"codegen",
+		"schema",
+		"typescript",
+		"executors",
+		"monorepo",
+		"plugin",
+		"code-generation"
+	],
 	"type": "module",
 	"main": "./build/index.js",
 	"types": "./build/index.d.ts",

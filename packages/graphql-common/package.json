@@ -3,6 +3,18 @@
 	"displayName": "@pawells/graphql-common",
 	"version": "2.0.0",
 	"description": "Framework-agnostic shared GraphQL primitive types and utilities",
+	"keywords": [
+		"graphql",
+		"typescript",
+		"types",
+		"utilities",
+		"relay",
+		"pagination",
+		"connection",
+		"cursor",
+		"pageinfo",
+		"scalars"
+	],
 	"type": "module",
 	"main": "./build/index.js",
 	"types": "./build/index.d.ts",
