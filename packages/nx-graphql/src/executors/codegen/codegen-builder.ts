@@ -31,29 +31,29 @@ export async function ExecuteCodegen(params: ICodegenBuilderParams): Promise<voi
 	}
 
 	// Build the add plugin for eslint-disable comment
-	const AddPlugin = { add: { content: '/* eslint-disable */' } };
+	const addPlugin = { add: { content: '/* eslint-disable */' } };
 
 	// Build plugin config objects
-	const PluginObjects = Plugins.map((p) => ({ [p]: {} }));
+	const pluginObjects = Plugins.map((p) => ({ [p]: {} }));
 
-	const Generates = {
+	const generates = {
 		[OutputFile]: {
 			schema: SchemaFile,
 			documents: DocumentsGlob,
-			plugins: [AddPlugin, ...PluginObjects] as Types.ConfiguredPlugin[],
+			plugins: [addPlugin, ...pluginObjects] as Types.ConfiguredPlugin[],
 			config: Config,
 		},
 	};
 
-	const CodegenConfig = {
+	const codegenConfig = {
 		schema: SchemaFile,
 		documents: DocumentsGlob,
-		generates: Generates,
+		generates,
 		watch: Watch,
 	};
 
 	const { generate } = await import('@graphql-codegen/cli');
-	await generate(CodegenConfig, true);
+	await generate(codegenConfig, true);
 }
 
 export function GetDefaultPluginsForTarget(_target: 'typescript'): string[] {
