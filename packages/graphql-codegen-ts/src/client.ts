@@ -74,7 +74,9 @@ export class GraphQLClient {
 	}
 
 	public Reset(): void {
-		this.Apollo.resetStore().catch(() => void 0);
+		this.Apollo.resetStore().catch((): void => {
+			// Ignore reset errors
+		});
 		this.Apollo.stop();
 	}
 
@@ -103,8 +105,8 @@ export class GraphQLClient {
 			},
 			attempts: {
 				max: 10,
-				retryIf: (error) => {
-					const IsNetworkError = !error.message.startsWith('[GraphQL error]');
+				retryIf: (error): boolean => {
+					const IsNetworkError = !error.message.startsWith('[GraphQL error');
 					return IsNetworkError;
 				},
 			},
