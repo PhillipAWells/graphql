@@ -43,7 +43,7 @@ export function GraphQLProvider({ options, children, fallback }: IGraphQLProvide
 			Result.dispose();
 			ClientRef.current = null;
 		};
-	}, []);
+	}, [options]);
 
 	function Reconnect(): void {
 		if (ClientRef.current) {
@@ -60,7 +60,7 @@ export function GraphQLProvider({ options, children, fallback }: IGraphQLProvide
 
 	return (
 		<GraphQLContext.Provider value={{ connectionState: ConnectionState, reconnect: Reconnect }}>
-			<ApolloProvider client={ClientRef.current.client as unknown as ApolloClient}>
+			<ApolloProvider client={ClientRef.current.client as ApolloClient}>
 				{children}
 			</ApolloProvider>
 		</GraphQLContext.Provider>
