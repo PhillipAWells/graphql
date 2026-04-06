@@ -268,14 +268,13 @@ export type ${op.Name}Event = SubscriptionResult<${op.TypeName}>;`;
 function GenerateApolloWrapperClass(): string {
 	return `export class ApolloWrapper {
 	public readonly Handle: GraphQLClient;
+	public readonly Queries: ApolloQueries;
+	public readonly Mutations: ApolloMutations;
+	public readonly Subscriptions: ApolloSubscriptions;
 
 	public get Apollo(): ApolloClient<NormalizedCacheObject> {
 		return this.Handle.Apollo;
 	}
-
-	public readonly Queries: ApolloQueries;
-	public readonly Mutations: ApolloMutations;
-	public readonly Subscriptions: ApolloSubscriptions;
 
 	public constructor(options: GraphQLClientOptions) {
 		this.Handle = new GraphQLClient(options);
