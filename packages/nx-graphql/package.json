@@ -36,7 +36,8 @@
 	},
 	"peerDependencies": {
 		"@pawells/graphql-codegen-ts": "*",
-		"nx": ">=21.0.0"
+		"nx": ">=21.0.0",
+		"rxjs": ">=7.0.0"
 	},
 	"peerDependenciesMeta": {
 		"@pawells/graphql-codegen-ts": {
