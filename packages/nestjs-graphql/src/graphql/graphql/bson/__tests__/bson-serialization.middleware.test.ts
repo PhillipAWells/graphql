@@ -62,7 +62,7 @@ describe('BsonSerializationMiddleware', () => {
 	describe('BSON requests', () => {
 		it('should deserialize BSON body and set req.body', async () => {
 			const testData = { hello: 'world', number: 42 };
-			const buffer = await bsonService.serialize(testData);
+			const buffer = await bsonService.Serialize(testData);
 
 			mockRequest = {
 				get: vi.fn().mockReturnValue('application/bson'),
@@ -90,7 +90,7 @@ describe('BsonSerializationMiddleware', () => {
 
 		it('should handle multiple data chunks', async () => {
 			const testData = { test: 'data', array: [1, 2, 3] };
-			const buffer = await bsonService.serialize(testData);
+			const buffer = await bsonService.Serialize(testData);
 
 			// Split buffer into chunks
 			const chunk1 = buffer.slice(0, Math.floor(buffer.length / 2));
@@ -143,7 +143,7 @@ describe('BsonSerializationMiddleware', () => {
 
 		it('should mark request with _bsonRequest flag', async () => {
 			const testData = { test: 'flag' };
-			const buffer = await bsonService.serialize(testData);
+			const buffer = await bsonService.Serialize(testData);
 
 			mockRequest = {
 				get: vi.fn().mockReturnValue('application/bson'),

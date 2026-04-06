@@ -12,14 +12,22 @@ import { SLOW_OPERATION_THRESHOLD_MS, PERFORMANCE_WARNING_THRESHOLD_MS } from '.
  * GraphQL Performance Interceptor
  *
  * Tracks execution time for GraphQL operations and resolvers.
- * Logs warnings for slow operations and collects performance metrics.
+ * Logs warnings for slow operations using local logging and Pyroscope profiling.
+ *
+ * Use this for:
+ * - Local performance logging (debug, warn, error levels)
+ * - Pyroscope profiling integration via @ProfileMethod decorator
+ * - Real-time alerting on slow queries
+ *
+ * This is complementary to GraphQLPerformanceMonitoringInterceptor which records
+ * metrics to external services (e.g., Prometheus, metrics backends).
  *
  * @example
  * ```typescript
  * @UseInterceptors(GraphQLPerformanceInterceptor)
  * @Query(() => [IUser], { name: 'GetUsers' })
  * async getUsers(): Promise<IUser[]> {
- *   // This operation's performance will be monitored
+ *   // This operation's performance will be logged and profiled
  * }
  * ```
  */

@@ -1,5 +1,5 @@
 import DataLoader from 'dataloader';
-import { Injectable, Scope } from '@nestjs/common';
+import { Injectable, Scope, OnModuleDestroy } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import type { ILazyModuleRefService, IContextualLogger } from '@pawells/nestjs-shared/common';
 import { AppLogger } from '@pawells/nestjs-shared/common';
@@ -8,9 +8,14 @@ import { DataLoaderFactory, IBatchLoadFn, IDataLoaderOptions } from './dataloade
 /**
  * Registry for managing DataLoader instances per request context
  * Ensures DataLoaders are created once per request and properly cleaned up
+ *
+ * The OnModuleDestroy hook is used to ensure Cleanup() is called at the end of
+ * each request. For request-scoped injectables (Scope.REQUEST), the framework
+ * triggers OnModuleDestroy (repurposed as "on request end") when the request
+ * context is destroyed.
  */
 @Injectable({ scope: Scope.REQUEST })
-export class DataLoaderRegistry implements ILazyModuleRefService {
+export class DataLoaderRegistry implements ILazyModuleRefService, OnModuleDestroy {
 	public readonly Module: ModuleRef;
 
 	public get AppLogger(): AppLogger {
@@ -147,5 +152,14 @@ export class DataLoaderRegistry implements ILazyModuleRefService {
 		this.ClearAllCaches();
 		this.Loaders.clear();
 		this.Logger.debug('DataLoader registry cleaned up');
+	}
+
+	/**
+   * Lifecycle hook: automatically called at the end of the request context
+   * for request-scoped injectables. Ensures all DataLoaders are cleaned up
+   * and no stale data persists to the next request.
+   */
+	public onModuleDestroy(): void {
+		this.Cleanup();
 	}
 }

@@ -39,6 +39,8 @@ export class BsonSerializationService {
 				this.BsonLib = Bson;
 				return Bson;
 			} catch (error) {
+				// Clear LoadPromise on failure so the next call gets a fresh attempt
+				this.LoadPromise = null;
 				throw new Error(
 					'BSON package is not installed. Please install it with: npm install bson or yarn add bson',
 					{ cause: error },
@@ -55,7 +57,7 @@ export class BsonSerializationService {
 	 * @returns BSON buffer
 	 * @throws Error if bson is not available or serialization fails
 	 */
-	public async serialize(data: unknown): Promise<Buffer> {
+	public async Serialize(data: unknown): Promise<Buffer> {
 		try {
 			const Bson = await this.GetBson();
 			// Use BSON.serialize to convert object to buffer

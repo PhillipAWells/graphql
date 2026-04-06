@@ -32,7 +32,7 @@ export class BsonSerializationMiddleware implements NestMiddleware, ILazyModuleR
 		const ContentType = req.get('content-type')?.toLowerCase() ?? '';
 
 		// If not a BSON request, pass through
-		if (!ContentType.includes('application/bson')) {
+		if (!ContentType.startsWith('application/bson')) {
 			next();
 			return;
 		}
@@ -50,6 +50,7 @@ export class BsonSerializationMiddleware implements NestMiddleware, ILazyModuleR
 				req.removeListener('data', OnData);
 				req.removeListener('end', OnEnd);
 				req.removeListener('error', OnError);
+				req.removeListener('close', OnClose);
 			}
 		};
 
@@ -65,17 +66,22 @@ export class BsonSerializationMiddleware implements NestMiddleware, ILazyModuleR
 				},
 				(error: unknown) => {
 					RemoveListeners();
-					res.status(HTTP_STATUS_BAD_REQUEST).json({
-						errors: [
-							{
-								message: 'Failed to parse BSON body',
-								extensions: {
-									code: 'BAD_REQUEST',
-									details: getErrorMessage(error),
+					try {
+						res.status(HTTP_STATUS_BAD_REQUEST).json({
+							errors: [
+								{
+									message: 'Failed to parse BSON body',
+									extensions: {
+										code: 'BAD_REQUEST',
+										details: getErrorMessage(error),
+									},
 								},
-							},
-						],
-					});
+							],
+						});
+					} catch (err) {
+						// If res.json() fails (e.g., headers already sent), call next with error
+						next(err as Error);
+					}
 				},
 			);
 		};
@@ -83,22 +89,33 @@ export class BsonSerializationMiddleware implements NestMiddleware, ILazyModuleR
 		// Handle error event
 		const OnError = (err: Error): void => {
 			RemoveListeners();
-			res.status(HTTP_STATUS_BAD_REQUEST).json({
-				errors: [
-					{
-						message: 'Request body read error',
-						extensions: {
-							code: 'BAD_REQUEST',
-							details: err.message,
+			try {
+				res.status(HTTP_STATUS_BAD_REQUEST).json({
+					errors: [
+						{
+							message: 'Request body read error',
+							extensions: {
+								code: 'BAD_REQUEST',
+								details: err.message,
+							},
 						},
-					},
-				],
-			});
+					],
+				});
+			} catch (sendErr) {
+				// If res.json() fails (e.g., headers already sent), call next with error
+				next(sendErr as Error);
+			}
+		};
+
+		// Handle close event (fires on both normal and abrupt close)
+		const OnClose = (): void => {
+			RemoveListeners();
 		};
 
 		// Attach listeners
 		req.on('data', OnData);
 		req.on('end', OnEnd);
 		req.on('error', OnError);
+		req.on('close', OnClose);
 	}
 }

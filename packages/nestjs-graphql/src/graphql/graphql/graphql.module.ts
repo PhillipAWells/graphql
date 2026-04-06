@@ -33,6 +33,17 @@ import { JSONScalar } from './scalars/json.scalar.js';
 export class GraphQLModule implements NestModule, OnModuleInit {
 	/**
 	 * Store config for use in onModuleInit
+	 *
+	 * KNOWN LIMITATION: This static field is mutated by forRoot() / forRootAsync().
+	 * If forRoot() is called multiple times (e.g., in tests), the last call wins.
+	 * This is used by the configure() method to conditionally register middleware.
+	 *
+	 * Thread safety: In test environments with parallel execution, this field may
+	 * be read/written concurrently, leading to race conditions. Workaround: call
+	 * forRoot() only once per test suite, or use describe.sequential() in vitest.
+	 *
+	 * A cleaner solution would thread the config through DI providers, but that
+	 * would require major refactoring of the middleware registration pattern.
 	 */
 	private static BsonConfig: IGraphQLConfigOptions['bson'] = undefined;
 
@@ -73,7 +84,7 @@ export class GraphQLModule implements NestModule, OnModuleInit {
     * @param options Configuration options for Apollo Server
     * @returns Dynamic module configuration
     */
-	public static ForRoot(options: IGraphQLConfigOptions = {}): DynamicModule {
+	public static forRoot(options: IGraphQLConfigOptions = {}): DynamicModule {
 		// Validate configuration
 		this.ValidateGraphQLConfig(options);
 
@@ -150,8 +161,26 @@ export class GraphQLModule implements NestModule, OnModuleInit {
    * Configure the GraphQL module asynchronously
    * @param options Asynchronous configuration options
    * @returns Dynamic module configuration
+   *
+   * ASYMMETRY NOTE: forRoot() conditionally registers BsonSerializationService and
+   * BsonResponseInterceptor only when options.bson?.enabled === true.
+   *
+   * forRootAsync() always registers them regardless of the async config.
+   * This is because with async factory config, the BSON enabled flag is not known
+   * at module initialization time — it's only resolved after the factory runs.
+   *
+   * To minimize this asymmetry and memory waste:
+   * - BsonSerializationService is lightweight and safe to instantiate even when unused
+   * - BsonResponseInterceptor is registered but will be a no-op if the service is not used
+   * - The middleware (BsonSerializationMiddleware) is still only registered conditionally
+   *   in configure() based on the static BsonConfig field
+   *
+   * If conditional provider registration for async config becomes important, consider:
+   * 1. Wrapping BSON providers with a no-op mode (check config at call time)
+   * 2. Using a multi() provider pattern with a factory that checks config
+   * 3. Refactoring to thread config through DI instead of static fields
    */
-	public static ForRootAsync(options: IGraphQLAsyncConfig): DynamicModule {
+	public static forRootAsync(options: IGraphQLAsyncConfig): DynamicModule {
 		const Providers: Provider[] = [
 			GraphQLService,
 			RateLimitService,

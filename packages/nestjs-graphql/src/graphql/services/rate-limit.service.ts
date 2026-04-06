@@ -60,7 +60,7 @@ interface IRateLimitEntry {
 export class MemoryRateLimitStorage implements IRateLimitStorage {
 	private readonly Storage = new Map<string, { count: number; resetTime: number }>();
 
-	// eslint-disable-next-line require-await
+	// eslint-disable-next-line require-await, @typescript-eslint/naming-convention
 	public async increment(key: string, windowMs: number): Promise<number> {
 		const Now = Date.now();
 		const Entry = this.Storage.get(key);
@@ -78,7 +78,7 @@ export class MemoryRateLimitStorage implements IRateLimitStorage {
 		}
 	}
 
-	// eslint-disable-next-line require-await
+	// eslint-disable-next-line require-await, @typescript-eslint/naming-convention
 	public async get(key: string): Promise<number> {
 		const Entry = this.Storage.get(key);
 		const Now = Date.now();
@@ -90,12 +90,12 @@ export class MemoryRateLimitStorage implements IRateLimitStorage {
 		return Entry.count;
 	}
 
-	// eslint-disable-next-line require-await
+	// eslint-disable-next-line require-await, @typescript-eslint/naming-convention
 	public async reset(key: string): Promise<void> {
 		this.Storage.delete(key);
 	}
 
-	// eslint-disable-next-line require-await
+	// eslint-disable-next-line require-await, @typescript-eslint/naming-convention
 	public async cleanup(): Promise<void> {
 		const Now = Date.now();
 		for (const [Key, Entry] of this.Storage.entries()) {
@@ -190,7 +190,8 @@ export class RateLimitService implements OnModuleInit, OnModuleDestroy, ILazyMod
 	public async CheckLimit(clientId: string, operation?: string): Promise<IRateLimitResult> {
 		const Config = operation ? this.GetConfigForOperation(operation) : this.DefaultConfig;
 
-		// Use storage backend if available, otherwise fall back to in-memory
+		// Use storage backend (Redis) if available as single source of truth
+		// In-memory store is used only when storage is unavailable
 		const { Storage } = this;
 		if (Storage) {
 			return this.CheckLimitWithStorage(clientId, Config, Storage);
@@ -283,14 +284,16 @@ export class RateLimitService implements OnModuleInit, OnModuleDestroy, ILazyMod
 	 * @param clientId - Client identifier to reset
 	 */
 	public async ResetLimit(clientId: string): Promise<void> {
-		this.Store.delete(clientId);
-		// Also reset in storage backend if available
+		// If storage backend is available, reset there (source of truth)
+		// Otherwise reset in-memory store (fallback)
 		if (this.Storage) {
 			try {
 				await this.Storage.reset(clientId);
 			} catch (error) {
 				this.Logger.error(`Failed to reset rate limit in storage for ${clientId}:`, getErrorMessage(error));
 			}
+		} else {
+			this.Store.delete(clientId);
 		}
 		this.Logger.info(`Reset rate limit for client: ${clientId}`);
 	}
@@ -305,7 +308,7 @@ export class RateLimitService implements OnModuleInit, OnModuleDestroy, ILazyMod
 	public async GetStatus(clientId: string, operation?: string): Promise<IRateLimitResult | null> {
 		const Config = operation ? this.GetConfigForOperation(operation) : this.DefaultConfig;
 
-		// Check storage backend first if available
+		// Check storage backend first if available (source of truth)
 		if (this.Storage) {
 			try {
 				const Count = await this.Storage.get(clientId);
@@ -321,11 +324,11 @@ export class RateLimitService implements OnModuleInit, OnModuleDestroy, ILazyMod
 				}
 			} catch (error) {
 				this.Logger.error(`Storage status check failed for ${clientId}:`, getErrorMessage(error));
-				// Fall back to in-memory
+				// Fall back to in-memory store only on storage error
 			}
 		}
 
-		// Fall back to in-memory store
+		// Fall back to in-memory store (used when storage is unavailable)
 		const Entry = this.Store.get(clientId);
 
 		if (!Entry) {

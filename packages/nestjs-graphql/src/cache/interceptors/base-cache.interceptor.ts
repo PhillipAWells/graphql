@@ -6,7 +6,7 @@ import type { ExecutionContext, CallHandler } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 import { Observable, of, from } from 'rxjs';
-import { tap, switchMap } from 'rxjs/operators';
+import { switchMap } from 'rxjs/operators';
 import { ModuleRef } from '@nestjs/core';
 import type { ILazyModuleRefService, IContextualLogger } from '@pawells/nestjs-shared/common';
 import { AppLogger } from '@pawells/nestjs-shared/common';
@@ -122,13 +122,14 @@ export abstract class BaseCacheInterceptor implements NestInterceptor, ILazyModu
 
 				// Execute handler and cache response
 				return next.handle().pipe(
-					tap(async (data) => {
+					switchMap(async (data) => {
 						try {
 							await this.CacheManager.set(CacheKey, data, Ttl);
 							this.GetLogger().debug(`Cached response for ${CacheKey} (TTL: ${Ttl}s)`);
 						} catch (error) {
 							this.GetLogger().error(`Failed to cache response for ${CacheKey}:`, error as string);
 						}
+						return data; // Pass data through the pipeline
 					}),
 				);
 			}),

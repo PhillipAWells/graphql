@@ -86,27 +86,38 @@ export class QueryComplexityGuard implements CanActivate, OnModuleDestroy, ILazy
 
 	/**
 	 * Gets cached complexity for a query
+	 * Implements LRU by moving accessed key to end (most recently used position)
 	 * @param query GraphQL query document
 	 * @returns Cached complexity or undefined
 	 */
 	private GetComplexityFromCache(query: any): number | undefined {
-		return this.ComplexityCache.get(this.HashQuery(query));
+		const Key = this.HashQuery(query);
+		const Value = this.ComplexityCache.get(Key);
+
+		if (Value !== undefined) {
+			// LRU: Move to end (most recently used) by deleting and re-inserting
+			this.ComplexityCache.delete(Key);
+			this.ComplexityCache.set(Key, Value);
+		}
+
+		return Value;
 	}
 
 	/**
 	 * Sets cached complexity for a query
-	 * Implements FIFO eviction when cache exceeds max size
+	 * Implements LRU eviction when cache exceeds max size
+	 * Evicts the least recently used key (oldest, at the start of Map)
 	 * @param query GraphQL query document
 	 * @param complexity Calculated complexity
 	 */
 	private SetComplexityCache(query: any, complexity: number): void {
 		const Key = this.HashQuery(query);
 
-		// Clean up cache if it exceeds max size (FIFO)
+		// Clean up cache if it exceeds max size (LRU eviction)
 		if (this.ComplexityCache.size >= QUERY_COMPLEXITY_CACHE_MAX_SIZE) {
-			const FirstKey = this.ComplexityCache.keys().next().value as string;
-			if (FirstKey) {
-				this.ComplexityCache.delete(FirstKey);
+			const LruKey = this.ComplexityCache.keys().next().value as string;
+			if (LruKey) {
+				this.ComplexityCache.delete(LruKey);
 			}
 		}
 
