@@ -7,7 +7,6 @@ export interface IRawPluginConfig {
 }
 
 // Export under old name for backward compatibility
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export type RawPluginConfig = IRawPluginConfig;
 
 interface IGQLOperation {
@@ -111,8 +110,12 @@ function ValidateRequiredPlugins(info: {
 			return plugin;
 		}
 		if (typeof plugin === 'object' && plugin !== null) {
-			const [Key] = Object.entries(plugin);
-			return Key?.[0] ?? '';
+			const Entries = Object.entries(plugin) as Array<[string, unknown]>;
+			if (Entries.length === 0) {
+				return '';
+			}
+			const [PluginName] = Entries[0];
+			return PluginName ?? '';
 		}
 		return '';
 	});
