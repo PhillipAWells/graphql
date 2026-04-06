@@ -14,8 +14,8 @@ export const CursorUtils = {
 	},
 	decodeCursor(cursor: string): IDecodedCursor {
 		try {
-			const decoded = JSON.parse(Buffer.from(cursor, 'base64').toString('utf-8')) as ICursorPayload;
-			return { Id: decoded.id, Timestamp: decoded.timestamp };
+			const Decoded = JSON.parse(Buffer.from(cursor, 'base64').toString('utf-8')) as ICursorPayload;
+			return { Id: Decoded.id, Timestamp: Decoded.timestamp };
 		} catch {
 			throw new Error(`Invalid cursor: ${cursor}`);
 		}
