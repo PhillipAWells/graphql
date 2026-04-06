@@ -1,2 +1,2 @@
 export { SortDirection } from './sort-direction.enum';
-export type { Sort, SortProperty } from './sort.types';
+export type { TSort as Sort, TSortProperty as SortProperty } from './sort.types';

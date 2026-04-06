@@ -1,32 +1,32 @@
 import { PubSub, type PubSubEngine } from 'graphql-subscriptions';
 import { randomUUID } from 'node:crypto';
 
-const _defaultPubSub = new PubSub();
+const _DefaultPubSub = new PubSub();
 
 export class GraphQLEventHandler<TObject extends object, TEvent> {
-	private readonly _topicKey: string;
-	private readonly _pubSub: PubSubEngine;
-	private readonly name: string;
+	private readonly _TopicKey: string;
+	private readonly _PubSub: PubSubEngine;
+	private readonly _Name: string;
 
 	constructor(name: string, pubSub?: PubSubEngine) {
-		this.name = name;
-		this._topicKey = randomUUID();
-		this._pubSub = pubSub ?? _defaultPubSub;
+		this._Name = name;
+		this._TopicKey = randomUUID();
+		this._PubSub = pubSub ?? _DefaultPubSub;
 	}
 
 	public GetAsyncIterator(): AsyncIterable<TEvent> {
-		return this._pubSub.asyncIterableIterator<TEvent>(this._topicKey) as AsyncIterable<TEvent>;
+		return this._PubSub.asyncIterableIterator<TEvent>(this._TopicKey) as AsyncIterable<TEvent>;
 	}
 
 	public Trigger(data: TObject): void {
-		void this._pubSub.publish(this._topicKey, { [this.name]: data });
+		void this._PubSub.publish(this._TopicKey, { [this._Name]: data });
 	}
 
-	public async Subscribe(handler: (...args: unknown[]) => void): Promise<number> {
-		return this._pubSub.subscribe(this._topicKey, handler, {});
+	public Subscribe(handler: (...args: unknown[]) => void): Promise<number> | number {
+		return this._PubSub.subscribe(this._TopicKey, handler, {});
 	}
 
 	public Unsubscribe(id: number): void {
-		this._pubSub.unsubscribe(id);
+		this._PubSub.unsubscribe(id);
 	}
 }

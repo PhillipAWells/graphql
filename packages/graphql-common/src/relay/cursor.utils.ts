@@ -1,12 +1,22 @@
+interface ICursorPayload {
+	id: string;
+	timestamp: number;
+}
+
+interface IDecodedCursor {
+	Id: string;
+	Timestamp: number;
+}
+
 export const CursorUtils = {
-	EncodeCursor(id: string, timestamp?: number): string {
+	encodeCursor(id: string, timestamp?: number): string {
 		return Buffer.from(JSON.stringify({ id, timestamp: timestamp ?? Date.now() })).toString('base64');
 	},
-	DecodeCursor(cursor: string): { Id: string; Timestamp: number } {
-		const decoded = JSON.parse(Buffer.from(cursor, 'base64').toString('utf-8')) as { id: string; timestamp: number };
-		return { Id: decoded.id, Timestamp: decoded.timestamp };
+	decodeCursor(cursor: string): IDecodedCursor {
+		const Decoded = JSON.parse(Buffer.from(cursor, 'base64').toString('utf-8')) as ICursorPayload;
+		return { Id: Decoded.id, Timestamp: Decoded.timestamp };
 	},
-	CreateCursor(node: { Id: string }): string {
-		return CursorUtils.EncodeCursor(node.Id);
+	createCursor(node: { Id: string }): string {
+		return CursorUtils.encodeCursor(node.Id);
 	},
 };
