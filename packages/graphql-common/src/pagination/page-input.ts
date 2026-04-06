@@ -1,10 +1,10 @@
 export class PageInput {
-	public Page?: number;
-	public Length?: number;
+	public readonly Page?: number;
+	public readonly Length?: number;
 }
 
 export class CachedPageInput {
-	public RequestID?: string;
-	public Page?: number;
-	public PageLength?: number;
+	public readonly RequestID?: string;
+	public readonly Page?: number;
+	public readonly PageLength?: number;
 }

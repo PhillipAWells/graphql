@@ -17,17 +17,33 @@ export interface ICachedRequest<T> {
 }
 
 export class PageInfo implements IPageInfo {
-	public Count: number = 0;
-	public Page: number = 0;
-	public PageLength: number = 0;
-	public TotalPages: number = 0;
+	public readonly Count: number;
+	public readonly Page: number;
+	public readonly PageLength: number;
+	public readonly TotalPages: number;
+
+	constructor(count: number = 0, page: number = 0, pageLength: number = 0, totalPages: number = 0) {
+		this.Count = count;
+		this.Page = page;
+		this.PageLength = pageLength;
+		this.TotalPages = totalPages;
+	}
 }
 
 export class CachedPageInfo implements ICachedPageInfo {
-	public RequestID: string = '';
-	public Count: number = 0;
-	public Page: number = 0;
-	public PageLength: number = 0;
-	public TotalPages: number = 0;
-	public ExpiresAt: Date = new Date();
+	public readonly RequestID: string;
+	public readonly Count: number;
+	public readonly Page: number;
+	public readonly PageLength: number;
+	public readonly TotalPages: number;
+	public readonly ExpiresAt: Date;
+
+	constructor(requestId: string = '', count: number = 0, page: number = 0, pageLength: number = 0, totalPages: number = 0, expiresAt: Date = new Date()) {
+		this.RequestID = requestId;
+		this.Count = count;
+		this.Page = page;
+		this.PageLength = pageLength;
+		this.TotalPages = totalPages;
+		this.ExpiresAt = expiresAt;
+	}
 }

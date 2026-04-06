@@ -1,9 +1,19 @@
 export class KeyValuePair {
-	public Key: string = '';
-	public Value: unknown = null;
+	public readonly Key: string;
+	public readonly Value: unknown;
+
+	constructor(key: string = '', value: unknown = null) {
+		this.Key = key;
+		this.Value = value;
+	}
 }
 
 export class KeyValuePairInput {
-	public Key: string = '';
-	public Value: unknown = null;
+	public readonly Key: string;
+	public readonly Value: unknown;
+
+	constructor(key: string = '', value: unknown = null) {
+		this.Key = key;
+		this.Value = value;
+	}
 }
