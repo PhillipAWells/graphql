@@ -38,9 +38,9 @@
 		"graphql": ">=16.0.0"
 	},
 	"devDependencies": {
-		"@apollo/client": "^3.11.7",
+		"@apollo/client": "^4.1.6",
 		"@pawells/graphql-common": "^2.0.0",
-		"@types/node": "^20.18.10",
+		"@types/node": "^25.5.2",
 		"graphql": "^16.13.2"
 	},
 	"engines": {
