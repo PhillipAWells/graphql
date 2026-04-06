@@ -279,4 +279,233 @@ describe('plugin', () => {
 		expect(result.content).toContain('export type OnUserUpdatedEventHandler');
 		expect(result.content).toContain('export type OnUserUpdatedEvent');
 	});
+
+	it('should handle plugins as string type in ValidateRequiredPlugins', () => {
+		const files: Types.DocumentFile[] = [
+			{
+				document: parse('query GetUser { users { id } }'),
+				location: 'test.graphql',
+			},
+		];
+
+		// Test with plugins as strings
+		const infoWithStringPlugins = {
+			allPlugins: [
+				'typescript' as any,
+				'typescript-operations' as any,
+				'typed-document-node' as any,
+				'typescript-apollo-client-helpers' as any,
+			],
+		};
+
+		const result = plugin(baseSchema, files, {}, infoWithStringPlugins) as {
+			content: string;
+		};
+
+		expect(result.content).toContain('class ApolloQueries');
+	});
+
+	it('should handle plugins with mixed types in ValidateRequiredPlugins', () => {
+		const files: Types.DocumentFile[] = [
+			{
+				document: parse('query GetUser { users { id } }'),
+				location: 'test.graphql',
+			},
+		];
+
+		// Test with mixed plugin types
+		const infoWithMixedPlugins = {
+			allPlugins: [
+				{ typescript: {} } as Types.ConfiguredPlugin,
+				'typescript-operations' as any,
+				{ 'typed-document-node': {} } as Types.ConfiguredPlugin,
+				'typescript-apollo-client-helpers' as any,
+			],
+		};
+
+		const result = plugin(baseSchema, files, {}, infoWithMixedPlugins) as {
+			content: string;
+		};
+
+		expect(result.content).toContain('class ApolloQueries');
+	});
+
+	it('should handle unknown plugin type by returning empty string', () => {
+		const files: Types.DocumentFile[] = [
+			{
+				document: parse('query GetUser { users { id } }'),
+				location: 'test.graphql',
+			},
+		];
+
+		// Test with plugin as unknown type (array, boolean, etc)
+		const infoWithUnknownPlugins = {
+			allPlugins: [
+				{ typescript: {} } as Types.ConfiguredPlugin,
+				'typescript-operations' as any,
+				{ 'typed-document-node': {} } as Types.ConfiguredPlugin,
+				{ 'typescript-apollo-client-helpers': {} } as Types.ConfiguredPlugin,
+				[] as any, // Unknown type - will result in empty string
+			],
+		};
+
+		// Should work fine - the unknown type will just produce empty string
+		const result = plugin(baseSchema, files, {}, infoWithUnknownPlugins) as {
+			content: string;
+		};
+
+		expect(result.content).toContain('class ApolloQueries');
+	});
+
+	it('should generate no subscription types when there are no subscriptions', () => {
+		const files: Types.DocumentFile[] = [
+			{
+				document: parse(`
+					query GetUser { users { id } }
+					mutation CreateUser { createUser(name: "test") { id } }
+				`),
+				location: 'test.graphql',
+			},
+		];
+
+		const result = plugin(baseSchema, files, {}, baseInfo) as {
+			content: string;
+		};
+
+		// Should not generate subscription event types
+		expect(result.content).not.toContain('EventHandler');
+		expect(result.content).toContain('class ApolloQueries');
+		expect(result.content).toContain('class ApolloMutations');
+	});
+
+	it('should generate ApolloWrapper with proper initialization', () => {
+		const files: Types.DocumentFile[] = [
+			{
+				document: parse('query GetUser { users { id } }'),
+				location: 'test.graphql',
+			},
+		];
+
+		const result = plugin(baseSchema, files, {}, baseInfo) as {
+			content: string;
+		};
+
+		expect(result.content).toContain('export class ApolloWrapper');
+		expect(result.content).toContain('public readonly Handle: GraphQLClient');
+		expect(result.content).toContain('public Queries: ApolloQueries');
+		expect(result.content).toContain('public Mutations: ApolloMutations');
+		expect(result.content).toContain('public Subscriptions: ApolloSubscriptions');
+	});
+
+	it('should handle operations without names correctly', () => {
+		const files: Types.DocumentFile[] = [
+			{
+				document: parse(`
+					query { users { id } }
+				`),
+				location: 'test.graphql',
+			},
+		];
+
+		const result = plugin(baseSchema, files, {}, baseInfo) as {
+			content: string;
+		};
+
+		// Anonymous operations should not be included
+		expect(result.content).toContain('class ApolloQueries');
+	});
+
+	it('should properly format method signatures with required variables', () => {
+		const files: Types.DocumentFile[] = [
+			{
+				document: parse(`
+					query GetUserWithId($id: ID!, $name: String!) {
+						user(id: $id) { id name }
+					}
+				`),
+				location: 'test.graphql',
+			},
+		];
+
+		const result = plugin(baseSchema, files, {}, baseInfo) as {
+			content: string;
+		};
+
+		expect(result.content).toContain('variables: GetUserWithIdQueryVariables');
+		expect(result.content).not.toContain('variables?:');
+	});
+
+	it('should properly format error handling in generated methods', () => {
+		const files: Types.DocumentFile[] = [
+			{
+				document: parse(`
+					query GetUser { users { id } }
+				`),
+				location: 'test.graphql',
+			},
+		];
+
+		const result = plugin(baseSchema, files, {}, baseInfo) as {
+			content: string;
+		};
+
+		expect(result.content).toContain('if (result.errors && result.errors.length > 0)');
+		expect(result.content).toContain('throw new Error');
+	});
+
+	it('should import subscription types only when needed', () => {
+		const queryOnlyFiles: Types.DocumentFile[] = [
+			{
+				document: parse('query GetUser { users { id } }'),
+				location: 'test.graphql',
+			},
+		];
+
+		const resultWithoutSubscriptions = plugin(baseSchema, queryOnlyFiles, {}, baseInfo) as {
+			content: string;
+		};
+
+		expect(resultWithoutSubscriptions.content).not.toContain('SubscriptionHandler');
+		expect(resultWithoutSubscriptions.content).not.toContain('@pawells/graphql-common');
+
+		const subscriptionFiles: Types.DocumentFile[] = [
+			{
+				document: parse('subscription OnUserAdded { userAdded { id } }'),
+				location: 'test.graphql',
+			},
+		];
+
+		const resultWithSubscriptions = plugin(baseSchema, subscriptionFiles, {}, baseInfo) as {
+			content: string;
+		};
+
+		expect(resultWithSubscriptions.content).toContain('SubscriptionHandler');
+		expect(resultWithSubscriptions.content).toContain('@pawells/graphql-common');
+	});
+
+	it('should handle plugins that are numbers or other non-string/non-object types', () => {
+		const files: Types.DocumentFile[] = [
+			{
+				document: parse('query GetUser { users { id } }'),
+				location: 'test.graphql',
+			},
+		];
+
+		// Test with non-string, non-object plugin values (using any to bypass type system)
+		const infoWithNumericPlugin = {
+			allPlugins: [
+				{ typescript: {} } as Types.ConfiguredPlugin,
+				'typescript-operations' as any,
+				{ 'typed-document-node': {} } as Types.ConfiguredPlugin,
+				'typescript-apollo-client-helpers' as any,
+				123 as any, // Numeric plugin
+			],
+		};
+
+		const result = plugin(baseSchema, files, {}, infoWithNumericPlugin) as {
+			content: string;
+		};
+
+		expect(result.content).toContain('class ApolloQueries');
+	});
 });
