@@ -1,74 +1,86 @@
 {
-	"name": "@pawells/react-graphql",
-	"displayName": "@pawells/react-graphql",
-	"version": "2.0.0",
-	"description": "React runtime companion providing Apollo Client setup, connection state management, and GraphQLProvider",
-	"type": "module",
-	"main": "./build/index.js",
-	"types": "./build/index.d.ts",
-	"exports": {
-		".": {
-			"types": "./build/index.d.ts",
-			"require": "./build/index.js",
-			"import": "./build/index.js"
-		}
-	},
-	"scripts": {
-		"build": "tsc --project tsconfig.build.json",
-		"typecheck": "tsc --noEmit",
-		"lint": "eslint src/",
-		"lint:fix": "eslint src/ --fix",
-		"test": "vitest run",
-		"test:watch": "vitest",
-		"test:coverage": "vitest run --coverage",
-		"clean": "rimraf build",
-		"pipeline": "yarn typecheck && yarn lint && yarn test && yarn build"
-	},
-	"dependencies": {
-		"graphql-ws": ">=5.0.0"
-	},
-	"peerDependencies": {
-		"@apollo/client": ">=4.0.0",
-		"graphql": ">=16.0.0",
-		"react": ">=18.0.0",
-		"rxjs": ">=7.0.0"
-	},
-	"peerDependenciesMeta": {
-		"@react-native-async-storage/async-storage": {
-			"optional": true
-		},
-		"@react-native-community/netinfo": {
-			"optional": true
-		},
-		"react-native": {
-			"optional": true
-		}
-	},
-	"devDependencies": {
-		"@apollo/client": "^4.1.0",
-		"@types/react": "^18.2.45",
-		"graphql": "^16.13.2",
-		"graphql-ws": "^5.16.0",
-		"react": "^18.3.1",
-		"react-dom": "^18.3.1",
-		"rxjs": "^7.8.2"
-	},
-	"engines": {
-		"node": ">=22.0.0"
-	},
-	"packageManager": "yarn@4.12.0",
-	"author": "Aaron Wells <69355326+PhillipAWells@users.noreply.github.com>",
-	"license": "MIT",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/PhillipAWells/graphql"
-	},
-	"files": [
-		"build/",
-		"README.md",
-		"LICENSE"
-	],
-	"publishConfig": {
-		"access": "public"
-	}
+  "name": "@pawells/react-graphql",
+  "displayName": "@pawells/react-graphql",
+  "version": "2.0.1",
+  "description": "React runtime companion providing Apollo Client setup, connection state management, and GraphQLProvider",
+  "keywords": [
+    "react",
+    "graphql",
+    "apollo",
+    "apollo-client",
+    "typescript",
+    "provider",
+    "subscriptions",
+    "websocket",
+    "connection-state",
+    "graphql-ws"
+  ],
+  "type": "module",
+  "main": "./build/index.js",
+  "types": "./build/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./build/index.d.ts",
+      "require": "./build/index.js",
+      "import": "./build/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "clean": "rimraf build",
+    "pipeline": "yarn typecheck && yarn lint && yarn test && yarn build"
+  },
+  "dependencies": {
+    "graphql-ws": ">=6.0.8"
+  },
+  "peerDependencies": {
+    "@apollo/client": ">=4.0.0",
+    "graphql": ">=16.0.0",
+    "react": ">=18.0.0",
+    "rxjs": ">=7.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@react-native-async-storage/async-storage": {
+      "optional": true
+    },
+    "@react-native-community/netinfo": {
+      "optional": true
+    },
+    "react-native": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@apollo/client": "^4.1.6",
+    "@types/react": "^19.2.14",
+    "graphql": "^16.13.2",
+    "graphql-ws": "^6.0.8",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "rxjs": "^7.8.2"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "packageManager": "yarn@4.12.0",
+  "author": "Aaron Wells <69355326+PhillipAWells@users.noreply.github.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PhillipAWells/graphql"
+  },
+  "files": [
+    "build/",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }

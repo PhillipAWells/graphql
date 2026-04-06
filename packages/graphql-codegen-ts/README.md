@@ -4,7 +4,7 @@
 [![CI](https://github.com/PhillipAWells/graphql/actions/workflows/ci.yml/badge.svg)](https://github.com/PhillipAWells/graphql/actions/workflows/ci.yml)
 [![npm version](https://img.shields.io/npm/v/@pawells/graphql-codegen-ts.svg?style=flat)](https://www.npmjs.com/package/@pawells/graphql-codegen-ts)
 [![Node](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](https://nodejs.org)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/PhillipAWells/graphql/blob/main/LICENSE)
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/PhillipAWells?style=social)](https://github.com/sponsors/PhillipAWells)
 
 ## Installation
@@ -207,11 +207,11 @@ main().catch(console.error);
 
 ## Related Packages
 
-- **[@pawells/graphql-codegen-react](../graphql-codegen-react)** — The React equivalent of this plugin. Generates typed Apollo Client hooks for React applications instead of class wrappers.
-- **[@pawells/react-graphql](../react-graphql)** — React runtime companion providing Apollo Client setup, connection state management, and `GraphQLProvider`.
-- **[@pawells/graphql-common](../graphql-common)** — Shared GraphQL primitive types and utilities consumed by the generated output.
-- **[@pawells/nx-graphql](../nx-graphql)** — NX executors and builders for running GraphQL codegen as part of an NX pipeline.
-- **[@pawells/nestjs-graphql](../nestjs-graphql)** — Server-side NestJS module providing Apollo Server integration, guards, interceptors, and DataLoaders.
+- **[@pawells/graphql-codegen-react](https://www.npmjs.com/package/@pawells/graphql-codegen-react)** — The React equivalent of this plugin. Generates typed Apollo Client hooks for React applications instead of class wrappers.
+- **[@pawells/react-graphql](https://www.npmjs.com/package/@pawells/react-graphql)** — React runtime companion providing Apollo Client setup, connection state management, and `GraphQLProvider`.
+- **[@pawells/graphql-common](https://www.npmjs.com/package/@pawells/graphql-common)** — Shared GraphQL primitive types and utilities consumed by the generated output.
+- **[@pawells/nx-graphql](https://www.npmjs.com/package/@pawells/nx-graphql)** — NX executors and builders for running GraphQL codegen as part of an NX pipeline.
+- **[@pawells/nestjs-graphql](https://www.npmjs.com/package/@pawells/nestjs-graphql)** — Server-side NestJS module providing Apollo Server integration, guards, interceptors, and DataLoaders.
 
 ## License
 
