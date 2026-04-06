@@ -3669,6 +3669,7 @@ __metadata:
   dependencies:
     "@apollo/client": "npm:^3.11.7"
     "@graphql-codegen/plugin-helpers": "npm:>=5.0.0"
+    "@pawells/graphql-common": "npm:^2.0.0"
     "@types/node": "npm:^20.18.10"
     graphql: "npm:^16.13.2"
     graphql-ws: "npm:>=5.0.0"
@@ -3683,7 +3684,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@pawells/graphql-common@workspace:packages/graphql-common":
+"@pawells/graphql-common@npm:^2.0.0, @pawells/graphql-common@workspace:packages/graphql-common":
   version: 0.0.0-use.local
   resolution: "@pawells/graphql-common@workspace:packages/graphql-common"
   dependencies:
@@ -3987,7 +3988,12 @@ __metadata:
     "@nx/devkit": "npm:^21.2.0"
     "@types/node": "npm:^20.18.14"
   peerDependencies:
+    "@nestjs/common": ">=11.0.0"
+    "@nestjs/core": ">=11.0.0"
+    "@nestjs/graphql": ">=12.0.0"
     "@pawells/graphql-codegen-ts": "*"
+    graphql: ">=16.0.0"
+    nx: ">=21.0.0"
   peerDependenciesMeta:
     "@pawells/graphql-codegen-ts":
       optional: true
