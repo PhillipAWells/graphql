@@ -17,7 +17,7 @@
     },
     "target": {
       "type": "string",
-      "enum": ["typescript", "angular"],
+      "enum": ["typescript"],
       "default": "typescript",
       "description": "Target platform"
     },
