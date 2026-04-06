@@ -4,7 +4,7 @@
 [![CI](https://github.com/PhillipAWells/graphql/actions/workflows/ci.yml/badge.svg)](https://github.com/PhillipAWells/graphql/actions/workflows/ci.yml)
 [![npm version](https://img.shields.io/npm/v/@pawells/nestjs-graphql.svg?style=flat)](https://www.npmjs.com/package/@pawells/nestjs-graphql)
 [![Node](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](https://nodejs.org)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/PhillipAWells/graphql/blob/main/LICENSE)
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/PhillipAWells?style=social)](https://github.com/sponsors/PhillipAWells)
 
 Enterprise-grade NestJS GraphQL module with Apollo Server 5.x, Redis caching, DataLoaders, WebSocket subscriptions, query complexity analysis, and comprehensive error handling.

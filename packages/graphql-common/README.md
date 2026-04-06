@@ -4,7 +4,7 @@
 [![CI](https://github.com/PhillipAWells/graphql/actions/workflows/ci.yml/badge.svg)](https://github.com/PhillipAWells/graphql/actions/workflows/ci.yml)
 [![npm version](https://img.shields.io/npm/v/@pawells/graphql-common.svg?style=flat)](https://www.npmjs.com/package/@pawells/graphql-common)
 [![Node](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](https://nodejs.org)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/PhillipAWells/graphql/blob/main/LICENSE)
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/PhillipAWells?style=social)](https://github.com/sponsors/PhillipAWells)
 
 ## Installation
@@ -198,11 +198,11 @@ async function updateUser(input: UpdateUserInput): MutationResultPromise<User> {
 
 ## Related Packages
 
-- **[@pawells/react-graphql](../react-graphql)** — React runtime companion; Apollo Client setup, connection state, and `GraphQLProvider`. Consumes the types exported from this package.
-- **[@pawells/graphql-codegen-ts](../graphql-codegen-ts)** — TypeScript code generator that emits typed operations using the type macros from this package.
-- **[@pawells/graphql-codegen-react](../graphql-codegen-react)** — React hooks code generator; generated hooks use the type macros and relay types from this package.
-- **[@pawells/nx-graphql](../nx-graphql)** — NX executors and builders for GraphQL codegen pipelines.
-- **[@pawells/nestjs-graphql](../nestjs-graphql)** — Server-side NestJS module providing Apollo Server integration, guards, interceptors, and DataLoaders.
+- **[@pawells/react-graphql](https://www.npmjs.com/package/@pawells/react-graphql)** — React runtime companion; Apollo Client setup, connection state, and `GraphQLProvider`. Consumes the types exported from this package.
+- **[@pawells/graphql-codegen-ts](https://www.npmjs.com/package/@pawells/graphql-codegen-ts)** — TypeScript code generator that emits typed operations using the type macros from this package.
+- **[@pawells/graphql-codegen-react](https://www.npmjs.com/package/@pawells/graphql-codegen-react)** — React hooks code generator; generated hooks use the type macros and relay types from this package.
+- **[@pawells/nx-graphql](https://www.npmjs.com/package/@pawells/nx-graphql)** — NX executors and builders for GraphQL codegen pipelines.
+- **[@pawells/nestjs-graphql](https://www.npmjs.com/package/@pawells/nestjs-graphql)** — Server-side NestJS module providing Apollo Server integration, guards, interceptors, and DataLoaders.
 
 ## License
 

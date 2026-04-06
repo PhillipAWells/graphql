@@ -1,7 +1,7 @@
 import {
 	ApolloClient,
+	CombinedGraphQLErrors,
 	InMemoryCache,
-	NormalizedCacheObject,
 	split,
 } from '@apollo/client/core';
 import { onError } from '@apollo/client/link/error';
@@ -32,7 +32,7 @@ export type TGraphQLClientOptions = IGraphQLClientOptions;
 export type GraphQLClientOptions = TGraphQLClientOptions;
 
 export class GraphQLClient {
-	public readonly Apollo: ApolloClient<NormalizedCacheObject>;
+	public readonly Apollo: ApolloClient;
 	public readonly Name: string;
 	public readonly HTTP_URI: string;
 	public readonly WS_URI: string;
@@ -82,18 +82,19 @@ export class GraphQLClient {
 
 	private _BuildClient(
 		options: IGraphQLClientOptions,
-	): ApolloClient<NormalizedCacheObject> {
+	): ApolloClient {
 		const pingTimeoutCode = 4408;
 		const pingTimeoutWaitMs = 5000;
 
-		const errorLink = onError(({ graphQLErrors, networkError }): void => {
-			if (options.LogGraphQLErrors && graphQLErrors) {
-				for (const error of graphQLErrors) {
-					console.error('[GraphQL Error]', error);
+		const errorLink = onError(({ error }): void => {
+			if (CombinedGraphQLErrors.is(error)) {
+				if (options.LogGraphQLErrors) {
+					for (const gqlError of error.errors) {
+						console.error('[GraphQL Error]', gqlError);
+					}
 				}
-			}
-			if (options.LogNetworkErrors && networkError) {
-				console.error('[Network Error]', networkError);
+			} else if (options.LogNetworkErrors) {
+				console.error('[Network Error]', error);
 			}
 		});
 

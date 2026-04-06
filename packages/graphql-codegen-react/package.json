@@ -1,61 +1,74 @@
 {
-	"name": "@pawells/graphql-codegen-react",
-	"displayName": "@pawells/graphql-codegen-react",
-	"version": "2.0.0",
-	"description": "graphql-codegen plugin generating typed Apollo Client 4 hooks for React",
-	"type": "module",
-	"main": "./build/index.js",
-	"types": "./build/index.d.ts",
-	"exports": {
-		".": {
-			"types": "./build/index.d.ts",
-			"require": "./build/index.js",
-			"import": "./build/index.js"
-		}
-	},
-	"scripts": {
-		"build": "tsc --project tsconfig.build.json",
-		"typecheck": "tsc --noEmit",
-		"lint": "eslint src/",
-		"lint:fix": "eslint src/ --fix",
-		"test": "vitest run",
-		"test:watch": "vitest",
-		"test:coverage": "vitest run --coverage",
-		"clean": "rimraf build",
-		"pipeline": "yarn typecheck && yarn lint && yarn test && yarn build"
-	},
-	"dependencies": {
-		"@graphql-codegen/plugin-helpers": ">=5.0.0"
-	},
-	"peerDependencies": {
-		"@apollo/client": ">=4.0.0",
-		"@graphql-codegen/typed-document-node": ">=5.0.0",
-		"@graphql-codegen/typescript": ">=4.0.0",
-		"@graphql-codegen/typescript-operations": ">=4.0.0",
-		"graphql": ">=16.0.0",
-		"react": ">=18.0.0"
-	},
-	"devDependencies": {
-		"@types/node": "^25.5.0",
-		"graphql": "^16.13.2",
-		"react": "^18.3.1"
-	},
-	"engines": {
-		"node": ">=22.0.0"
-	},
-	"packageManager": "yarn@4.12.0",
-	"author": "Aaron Wells <69355326+PhillipAWells@users.noreply.github.com>",
-	"license": "MIT",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/PhillipAWells/graphql"
-	},
-	"files": [
-		"build/",
-		"README.md",
-		"LICENSE"
-	],
-	"publishConfig": {
-		"access": "public"
-	}
+  "name": "@pawells/graphql-codegen-react",
+  "displayName": "@pawells/graphql-codegen-react",
+  "version": "2.0.1",
+  "description": "graphql-codegen plugin generating typed Apollo Client 4 hooks for React",
+  "keywords": [
+    "graphql",
+    "graphql-codegen",
+    "codegen",
+    "apollo",
+    "apollo-client",
+    "react",
+    "hooks",
+    "typescript",
+    "code-generation",
+    "typed",
+    "plugin"
+  ],
+  "type": "module",
+  "main": "./build/index.js",
+  "types": "./build/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./build/index.d.ts",
+      "require": "./build/index.js",
+      "import": "./build/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "clean": "rimraf build",
+    "pipeline": "yarn typecheck && yarn lint && yarn test && yarn build"
+  },
+  "dependencies": {
+    "@graphql-codegen/plugin-helpers": ">=6.2.1"
+  },
+  "peerDependencies": {
+    "@apollo/client": ">=4.0.0",
+    "@graphql-codegen/typed-document-node": ">=5.0.0",
+    "@graphql-codegen/typescript": ">=4.0.0",
+    "@graphql-codegen/typescript-operations": ">=4.0.0",
+    "graphql": ">=16.0.0",
+    "react": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.2",
+    "graphql": "^16.13.2",
+    "react": "^19.2.4"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "packageManager": "yarn@4.12.0",
+  "author": "Aaron Wells <69355326+PhillipAWells@users.noreply.github.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PhillipAWells/graphql"
+  },
+  "files": [
+    "build/",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }
