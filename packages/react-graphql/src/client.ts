@@ -132,8 +132,8 @@ export function CreateGraphQLClient(options: TGraphQLClientOptions): IGraphQLCli
 	const cache = (options.cache as InMemoryCache | undefined) ?? new InMemoryCache();
 
 	const client = new ApolloClient({
-		link: link,
-		cache: cache,
+		link,
+		cache,
 		defaultOptions: {
 			watchQuery: { fetchPolicy: 'no-cache' },
 			query: { fetchPolicy: 'no-cache' },
@@ -148,8 +148,8 @@ export function CreateGraphQLClient(options: TGraphQLClientOptions): IGraphQLCli
 	};
 
 	return {
-		client: client,
-		dispose: dispose,
+		client,
+		dispose,
 		getConnectionState: (): GraphQLConnectionState => _connectionState,
 		onStateChange: (handler): (() => void) => {
 			_stateHandlers.push(handler);
