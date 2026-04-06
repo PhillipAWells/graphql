@@ -182,13 +182,17 @@ function GenerateSubscriptionHooks(operations: IGQLOperation[]): string {
 				? `variables?: ${op.VariablesTypeName}`
 				: `variables: ${op.VariablesTypeName}`;
 
+			const SubscriptionArg = op.IsOptionalVariables
+				? '{ ...(variables && { variables }), ...options }'
+				: '{ variables, ...options }';
+
 			return `export function ${op.HookName}(
 	${VariablesParam},
 	options?: SubscriptionHookOptions<${op.TypeName}, ${op.VariablesTypeName}>,
 ): SubscriptionResult<${op.TypeName}> {
 	return useSubscription<${op.TypeName}, ${op.VariablesTypeName}>(
 		${op.DocumentName},
-		{ variables, ...options },
+		${SubscriptionArg},
 	);
 }`;
 		})
@@ -263,7 +267,6 @@ export function Plugin(
 	const Content = ContentParts.join('\n\n');
 
 	return {
-		prepend: [ImportStatements],
 		content: Content,
 	};
 }
