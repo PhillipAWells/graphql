@@ -25,7 +25,7 @@
 		"pipeline": "yarn typecheck && yarn lint && yarn test && yarn build"
 	},
 	"dependencies": {
-		"@graphql-codegen/plugin-helpers": ">=5.0.0"
+		"@graphql-codegen/plugin-helpers": ">=6.2.1"
 	},
 	"peerDependencies": {
 		"@apollo/client": ">=4.0.0",
