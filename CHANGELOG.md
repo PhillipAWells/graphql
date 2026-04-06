@@ -23,6 +23,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `@pawells/graphql-codegen-ngx` — Angular graphql-codegen plugin package removed
 - `nx-graphql`: removed `@pawells/graphql-codegen-ngx` optional peer dependency and `target: "angular"` codegen executor option
 
+### Fixed
+- `@pawells/graphql-codegen-ts`: Apollo Client v4 compatibility — removed `<NormalizedCacheObject>` type parameter from `ApolloClient` (no longer generic in v4) and updated `onError` link callback from the v3 `{ graphQLErrors, networkError }` destructuring pattern to the v4 `{ error }` pattern using `CombinedGraphQLErrors.is(error)` ([474e396](https://github.com/PhillipAWells/graphql/commit/474e396))
+
 ## [2.0.0] - 2026-04-04
 
 ### Added
