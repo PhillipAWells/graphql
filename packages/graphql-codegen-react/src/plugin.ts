@@ -60,23 +60,23 @@ function ExtractOperations(files: Types.DocumentFile[]): IGQLOperationGroup {
 		subscriptions: [],
 	};
 
-	for (const file of files) {
-		if (!file.document) continue;
+	for (const File of files) {
+		if (!File.document) continue;
 
-		for (const def of file.document.definitions) {
+		for (const Def of File.document.definitions) {
 			if (
-				def.kind === 'OperationDefinition' &&
-				def.name &&
-				def.operation
+				Def.kind === 'OperationDefinition' &&
+				Def.name &&
+				Def.operation
 			) {
-				const OperationType = def.operation as 'query' | 'mutation' | 'subscription';
+				const OperationType = Def.operation as 'query' | 'mutation' | 'subscription';
 				const { TypeName, VariablesTypeName, DocumentName, HookName } =
-					DetermineTypeNames(def.name.value, OperationType);
+					DetermineTypeNames(Def.name.value, OperationType);
 
 				const Operation: IGQLOperation = {
-					Name: def.name.value,
+					Name: Def.name.value,
 					OperationType,
-					IsOptionalVariables: IsOptionalVariables(def),
+					IsOptionalVariables: IsOptionalVariables(Def),
 					TypeName,
 					VariablesTypeName,
 					DocumentName,
@@ -110,16 +110,16 @@ function ValidateRequiredPlugins(info: {
 	const InstalledPlugins = (info.allPlugins ?? []).map((p) => {
 		if (typeof p === 'string') return p;
 		if (typeof p === 'object' && p !== null) {
-			const Key = Object.keys(p)[0];
+			const [Key] = Object.keys(p);
 			return Key;
 		}
 		return '';
 	});
 
-	for (const required of RequiredPlugins) {
-		if (!InstalledPlugins.includes(required)) {
+	for (const Required of RequiredPlugins) {
+		if (!InstalledPlugins.includes(Required)) {
 			throw new Error(
-				`Missing required plugin: ${required}. Required plugins: ${RequiredPlugins.join(', ')}`,
+				`Missing required plugin: ${Required}. Required plugins: ${RequiredPlugins.join(', ')}`,
 			);
 		}
 	}
@@ -180,7 +180,7 @@ function GenerateUseGraphQLClientHook(): string {
 }`;
 }
 
-export function plugin(
+export function Plugin(
 	_schema: GraphQLSchema,
 	files: Types.DocumentFile[],
 	_config: IRawPluginConfig,
