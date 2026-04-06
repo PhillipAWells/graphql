@@ -3477,6 +3477,7 @@ __metadata:
     "@types/node": "npm:^25.5.2"
     graphql: "npm:^16.13.2"
     graphql-ws: "npm:>=6.0.8"
+    rxjs: "npm:^7.8.2"
     strongly-typed-events: "npm:>=3.0.11"
   peerDependencies:
     "@apollo/client": ">=3.0.0"
@@ -3485,6 +3486,7 @@ __metadata:
     "@graphql-codegen/typescript-apollo-client-helpers": ">=3.0.0"
     "@graphql-codegen/typescript-operations": ">=4.0.0"
     graphql: ">=16.0.0"
+    rxjs: ">=7.0.0"
   languageName: unknown
   linkType: soft
 
@@ -3498,11 +3500,13 @@ __metadata:
     graphql: "npm:^16.13.2"
     graphql-subscriptions: "npm:^3.0.0"
     graphql-type-json: "npm:^0.3.2"
+    rxjs: "npm:^7.8.2"
     typescript: "npm:^6.0.2"
     vitest: "npm:^4.1.2"
   peerDependencies:
     "@apollo/client": ">=3.0.0"
     graphql: ">=16.0.0"
+    rxjs: ">=7.0.0"
   languageName: unknown
   linkType: soft
 
