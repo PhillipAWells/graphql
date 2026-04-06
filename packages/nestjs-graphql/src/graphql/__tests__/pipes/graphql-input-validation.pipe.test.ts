@@ -267,5 +267,20 @@ describe('GraphQLInputValidationPipe - Security Validation', () => {
 
 			expect(result).toBeDefined();
 		});
+
+		it('should handle input with no metatype', async () => {
+			const validInput = {
+				name: 'John Doe',
+				email: 'john@example.com',
+			};
+
+			const result = await pipe.transform(validInput, {
+				metatype: undefined,
+				type: 'body',
+				data: undefined,
+			});
+
+			expect(result).toEqual(validInput);
+		});
 	});
 });
