@@ -16,29 +16,91 @@ permissions:
   contents: read
 
 jobs:
-  pipeline:
-    name: Pipeline
+  validate:
+    name: Validate
     runs-on: ubuntu-latest
     env:
       CI: true
       NX_DAEMON: false
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Enable corepack
         run: corepack enable
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: '22'
           cache: 'yarn'
 
       - name: Install dependencies
-        run: yarn install --immutable
+        run: yarn install --frozen-lockfile
         env:
           HUSKY: '0'
 
-      - name: Pipeline
-        run: yarn pipeline
+      - name: Typecheck
+        run: yarn typecheck
+
+      - name: Lint
+        run: yarn lint
+
+  test:
+    name: Test
+    needs: validate
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [22, 24]
+    env:
+      CI: true
+      NX_DAEMON: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+        env:
+          HUSKY: '0'
+
+      - name: Test
+        run: yarn test
+
+  build:
+    name: Build
+    needs: test
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+      NX_DAEMON: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+        env:
+          HUSKY: '0'
+
+      - name: Build
+        run: yarn build
