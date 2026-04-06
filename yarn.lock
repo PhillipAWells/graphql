@@ -2960,7 +2960,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nestjs/common@npm:^11.1.17":
+"@nestjs/common@npm:>=11.0.0, @nestjs/common@npm:^11.1.17":
   version: 11.1.18
   resolution: "@nestjs/common@npm:11.1.18"
   dependencies:
@@ -2997,7 +2997,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nestjs/core@npm:^11.1.17":
+"@nestjs/core@npm:>=11.0.0, @nestjs/core@npm:^11.1.17":
   version: 11.1.18
   resolution: "@nestjs/core@npm:11.1.18"
   dependencies:
@@ -3984,15 +3984,15 @@ __metadata:
   resolution: "@pawells/nx-graphql@workspace:packages/nx-graphql"
   dependencies:
     "@graphql-codegen/cli": "npm:^5.0.2"
+    "@nestjs/common": "npm:>=11.0.0"
+    "@nestjs/core": "npm:>=11.0.0"
     "@nestjs/graphql": "npm:^13.2.4"
     "@nx/devkit": "npm:^21.2.0"
     "@types/node": "npm:^20.18.14"
+    graphql: "npm:>=16.0.0"
+    reflect-metadata: "npm:>=0.1.0"
   peerDependencies:
-    "@nestjs/common": ">=11.0.0"
-    "@nestjs/core": ">=11.0.0"
-    "@nestjs/graphql": ">=12.0.0"
     "@pawells/graphql-codegen-ts": "*"
-    graphql: ">=16.0.0"
     nx: ">=21.0.0"
   peerDependenciesMeta:
     "@pawells/graphql-codegen-ts":
@@ -8301,7 +8301,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"graphql@npm:^16.13.2":
+"graphql@npm:>=16.0.0, graphql@npm:^16.13.2":
   version: 16.13.2
   resolution: "graphql@npm:16.13.2"
   checksum: 10c0/64e822a0a0e4398781e4bc9765b88d370c08261498b517add4b878038ef7be2005b6b394a79a5102b9379d57052f60bc7f23fec8f39808d101984a74772ebd9d
@@ -11033,7 +11033,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"reflect-metadata@npm:^0.2.2":
+"reflect-metadata@npm:>=0.1.0, reflect-metadata@npm:^0.2.2":
   version: 0.2.2
   resolution: "reflect-metadata@npm:0.2.2"
   checksum: 10c0/1cd93a15ea291e420204955544637c264c216e7aac527470e393d54b4bb075f10a17e60d8168ec96600c7e0b9fcc0cb0bb6e91c3fbf5b0d8c9056f04e6ac1ec2

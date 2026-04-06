@@ -27,15 +27,15 @@
 	},
 	"dependencies": {
 		"@graphql-codegen/cli": ">=5.0.0",
-		"@nestjs/graphql": ">=12.0.0",
-		"@nx/devkit": ">=21.0.0"
-	},
-	"peerDependencies": {
 		"@nestjs/common": ">=11.0.0",
 		"@nestjs/core": ">=11.0.0",
 		"@nestjs/graphql": ">=12.0.0",
-		"@pawells/graphql-codegen-ts": "*",
+		"@nx/devkit": ">=21.0.0",
 		"graphql": ">=16.0.0",
+		"reflect-metadata": ">=0.1.0"
+	},
+	"peerDependencies": {
+		"@pawells/graphql-codegen-ts": "*",
 		"nx": ">=21.0.0"
 	},
 	"peerDependenciesMeta": {
