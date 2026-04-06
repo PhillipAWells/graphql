@@ -152,11 +152,15 @@ function GenerateQueryHooks(operations: IGQLOperation[]): string {
 				? `variables?: ${op.VariablesTypeName}`
 				: `variables: ${op.VariablesTypeName}`;
 
+			const VariablesArg = op.IsOptionalVariables
+				? '{ ...(variables && { variables }), ...options }'
+				: '{ variables, ...options }';
+
 			return `export function ${op.HookName}(
 	${VariablesParam},
 	options?: QueryHookOptions<${op.TypeName}, ${op.VariablesTypeName}>,
 ): QueryResult<${op.TypeName}, ${op.VariablesTypeName}> {
-	return useQuery<${op.TypeName}, ${op.VariablesTypeName}>(${op.DocumentName}, { variables, ...options });
+	return useQuery<${op.TypeName}, ${op.VariablesTypeName}>(${op.DocumentName}, ${VariablesArg});
 }`;
 		})
 		.join('\n\n');
