@@ -81,12 +81,12 @@ export function CreateGraphQLClient(options: GraphQLClientOptions): IGraphQLClie
 		},
 	});
 
-	const ErrorLink = onError((optionsErr: any) => {
-		if (options.logGraphQLErrors && optionsErr.graphQLErrors) {
-			optionsErr.graphQLErrors.forEach((err: unknown) => console.error('[GraphQL error]', err));
+	const ErrorLink = onError((errorResponse: any): void => {
+		if (options.logGraphQLErrors && errorResponse?.graphQLErrors) {
+			errorResponse.graphQLErrors.forEach((err: unknown) => console.error('[GraphQL error]', err));
 		}
-		if (options.logNetworkErrors && optionsErr.networkError) {
-			console.error('[Network error]', optionsErr.networkError);
+		if (options.logNetworkErrors && errorResponse?.networkError) {
+			console.error('[Network error]', errorResponse.networkError);
 		}
 	});
 
@@ -95,11 +95,13 @@ export function CreateGraphQLClient(options: GraphQLClientOptions): IGraphQLClie
 		attempts: { max: 10 },
 	});
 
-	const AuthLink = setContext(async (_op, { headers }) => {
+	const AuthLink = setContext(async (_operation: unknown, prevContext: Record<string, unknown>): Promise<Record<string, unknown>> => {
 		const Token = await ResolveToken();
+		const PrevHeaders = (prevContext.headers as Record<string, string | undefined>) || {};
 		return {
+			...prevContext,
 			headers: {
-				...headers,
+				...PrevHeaders,
 				...(Token ? { Authorization: `Bearer ${Token}` } : {}),
 			},
 		};
@@ -108,7 +110,7 @@ export function CreateGraphQLClient(options: GraphQLClientOptions): IGraphQLClie
 	const HttpLinkInstance = new HttpLink({ uri: options.httpUri });
 	const WsLinkInstance = new GraphQLWsLink(WsClient);
 
-	function IsSubscription(op: { query: DocumentNode }): boolean {
+	function IsSubscription(op: { readonly query: DocumentNode }): boolean {
 		const Def = getMainDefinition(op.query);
 		return Def.kind === 'OperationDefinition' && Def.operation === 'subscription';
 	}
