@@ -31,10 +31,10 @@ export function WriteSchemaToFile(
 	schemaOutputPath: string,
 	schemaContent: string,
 ): void {
-	const outputPath = path.resolve(workspaceRoot, schemaOutputPath);
-	const outputDir = path.dirname(outputPath);
-	mkdirSync(outputDir, { recursive: true });
-	writeFileSync(outputPath, schemaContent, 'utf-8');
+	const OutputPath = path.resolve(workspaceRoot, schemaOutputPath);
+	const OutputDir = path.dirname(OutputPath);
+	mkdirSync(OutputDir, { recursive: true });
+	writeFileSync(OutputPath, schemaContent, 'utf-8');
 	console.log(`Schema written to ${schemaOutputPath}`);
 }
 
@@ -44,17 +44,17 @@ async function BuildNestJSGraphQLSchema(resolvers: unknown[]): Promise<string> {
 	const { GraphQLSchemaBuilderModule, GraphQLSchemaFactory } = await import('@nestjs/graphql');
 
 	// Create the NestJS app
-	const app = await NestFactory.create(GraphQLSchemaBuilderModule, { logger: ['error'] });
-	await app.init();
+	const App = await NestFactory.create(GraphQLSchemaBuilderModule, { logger: ['error'] });
+	await App.init();
 
 	try {
 		// Build the GraphQL schema
-		const gqlSchemaFactory = app.get(GraphQLSchemaFactory);
-		const schema = await gqlSchemaFactory.create(resolvers as unknown as Function[]);
-		return printSchema(schema);
+		const GqlSchemaFactory = App.get(GraphQLSchemaFactory);
+		const Schema = await GqlSchemaFactory.create(resolvers as unknown as Function[]);
+		return printSchema(Schema);
 	} finally {
 		// Clean up the app
-		await app.close();
+		await App.close();
 	}
 }
 
@@ -65,15 +65,15 @@ export async function BuildGraphQLSchema(params: IBuildSchemaParams): Promise<vo
 	ValidateResolversModuleExists(ResolversModulePath);
 
 	// Import the resolvers module
-	const module = await import(ResolversModulePath);
-	const resolvers = module['GraphQLSchema'] as unknown;
+	const Module = await import(ResolversModulePath);
+	const Resolvers = Module['GraphQLSchema'] as unknown;
 
 	// Validate the export is an array
-	ValidateResolversExport(resolvers);
+	ValidateResolversExport(Resolvers);
 
 	// Build the schema using NestJS
-	const schemaContent = await BuildNestJSGraphQLSchema(resolvers);
+	const SchemaContent = await BuildNestJSGraphQLSchema(Resolvers);
 
 	// Write the schema to disk
-	WriteSchemaToFile(WorkspaceRoot, SchemaOutputPath, schemaContent);
+	WriteSchemaToFile(WorkspaceRoot, SchemaOutputPath, SchemaContent);
 }

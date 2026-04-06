@@ -13,12 +13,12 @@ export default async function BuildSchemaExecutor(
 	context: ExecutorContext,
 ): Promise<{ success: boolean }> {
 	try {
-		const workspaceRoot = context.root;
-		const resolversModulePath = path.resolve(workspaceRoot, options.resolversModule);
+		const WorkspaceRoot = context.root;
+		const ResolversModulePath = path.resolve(WorkspaceRoot, options.resolversModule);
 
 		await BuildGraphQLSchema({
-			WorkspaceRoot: workspaceRoot,
-			ResolversModulePath: resolversModulePath,
+			WorkspaceRoot,
+			ResolversModulePath,
 			SchemaOutputPath: options.schemaFile,
 		});
 
