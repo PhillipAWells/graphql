@@ -31,9 +31,6 @@ tmp/
 .yarn/build-state.yml
 .yarn/install-state.gz
 
-# Scripts
-scripts/publish-rc.sh
-
 # Logs
 logs/
 *.log
