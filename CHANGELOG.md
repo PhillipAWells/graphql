@@ -1,3 +1,14 @@
+## 2.0.1 (2026-04-06)
+
+### 🩹 Fixes
+
+- add rxjs peer/dev dependency to resolve transitive peer warnings ([dedf835](https://github.com/PhillipAWells/graphql/commit/dedf835))
+
+### ❤️ Thank You
+
+- Aaron Wells @PhillipAWells
+- Claude Sonnet 4.6
+
 # Changelog
 
 All notable changes to this project will be documented in this file.

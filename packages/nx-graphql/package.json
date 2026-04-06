@@ -1,85 +1,85 @@
 {
-	"name": "@pawells/nx-graphql",
-	"displayName": "@pawells/nx-graphql",
-	"version": "2.0.0",
-	"description": "NX executors for GraphQL schema generation and code generation",
-	"keywords": [
-		"nx",
-		"nrwl",
-		"graphql",
-		"codegen",
-		"schema",
-		"typescript",
-		"executors",
-		"monorepo",
-		"plugin",
-		"code-generation"
-	],
-	"type": "module",
-	"main": "./build/index.js",
-	"types": "./build/index.d.ts",
-	"exports": {
-		".": {
-			"types": "./build/index.d.ts",
-			"require": "./build/index.js",
-			"import": "./build/index.js"
-		}
-	},
-	"executors": "./executors.json",
-	"scripts": {
-		"build": "tsc --project tsconfig.build.json",
-		"typecheck": "tsc --noEmit",
-		"lint": "eslint src/",
-		"lint:fix": "eslint src/ --fix",
-		"test": "vitest run",
-		"test:watch": "vitest",
-		"test:coverage": "vitest run --coverage",
-		"clean": "rimraf build",
-		"pipeline": "yarn typecheck && yarn lint && yarn test && yarn build"
-	},
-	"dependencies": {
-		"@graphql-codegen/cli": ">=6.2.1",
-		"@nestjs/common": ">=11.1.18",
-		"@nestjs/core": ">=11.1.18",
-		"@nestjs/graphql": ">=13.2.4",
-		"@nx/devkit": ">=22.6.4",
-		"graphql": ">=16.13.2",
-		"reflect-metadata": ">=0.2.2"
-	},
-	"peerDependencies": {
-		"@pawells/graphql-codegen-ts": "*",
-		"nx": ">=21.0.0",
-		"rxjs": ">=7.0.0"
-	},
-	"peerDependenciesMeta": {
-		"@pawells/graphql-codegen-ts": {
-			"optional": true
-		}
-	},
-	"devDependencies": {
-		"@graphql-codegen/cli": "^6.2.1",
-		"@nestjs/graphql": "^13.2.4",
-		"@nx/devkit": "^22.6.4",
-		"@types/node": "^25.5.2",
-		"nx": "^22.6.4",
-		"rxjs": "^7.8.2"
-	},
-	"engines": {
-		"node": ">=22.0.0"
-	},
-	"packageManager": "yarn@4.12.0",
-	"author": "Aaron Wells <69355326+PhillipAWells@users.noreply.github.com>",
-	"license": "MIT",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/PhillipAWells/graphql"
-	},
-	"files": [
-		"build/",
-		"README.md",
-		"LICENSE"
-	],
-	"publishConfig": {
-		"access": "public"
-	}
+  "name": "@pawells/nx-graphql",
+  "displayName": "@pawells/nx-graphql",
+  "version": "2.0.1",
+  "description": "NX executors for GraphQL schema generation and code generation",
+  "keywords": [
+    "nx",
+    "nrwl",
+    "graphql",
+    "codegen",
+    "schema",
+    "typescript",
+    "executors",
+    "monorepo",
+    "plugin",
+    "code-generation"
+  ],
+  "type": "module",
+  "main": "./build/index.js",
+  "types": "./build/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./build/index.d.ts",
+      "require": "./build/index.js",
+      "import": "./build/index.js"
+    }
+  },
+  "executors": "./executors.json",
+  "scripts": {
+    "build": "tsc --project tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "clean": "rimraf build",
+    "pipeline": "yarn typecheck && yarn lint && yarn test && yarn build"
+  },
+  "dependencies": {
+    "@graphql-codegen/cli": ">=6.2.1",
+    "@nestjs/common": ">=11.1.18",
+    "@nestjs/core": ">=11.1.18",
+    "@nestjs/graphql": ">=13.2.4",
+    "@nx/devkit": ">=22.6.4",
+    "graphql": ">=16.13.2",
+    "reflect-metadata": ">=0.2.2"
+  },
+  "peerDependencies": {
+    "@pawells/graphql-codegen-ts": "*",
+    "nx": ">=21.0.0",
+    "rxjs": ">=7.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@pawells/graphql-codegen-ts": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@graphql-codegen/cli": "^6.2.1",
+    "@nestjs/graphql": "^13.2.4",
+    "@nx/devkit": "^22.6.4",
+    "@types/node": "^25.5.2",
+    "nx": "^22.6.4",
+    "rxjs": "^7.8.2"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "packageManager": "yarn@4.12.0",
+  "author": "Aaron Wells <69355326+PhillipAWells@users.noreply.github.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PhillipAWells/graphql"
+  },
+  "files": [
+    "build/",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }
