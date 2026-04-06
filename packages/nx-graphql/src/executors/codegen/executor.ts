@@ -13,23 +13,23 @@ export interface ICodegenExecutorSchema {
 
 export default async function CodegenExecutor(
 	options: ICodegenExecutorSchema,
-	context: ExecutorContext,
+	_context: ExecutorContext,
 ): Promise<{ success: boolean }> {
 	try {
-		const target = (options.target ?? 'typescript') as 'typescript';
+		const Target = (options.target ?? 'typescript') as 'typescript';
 
-		const defaultPlugins = GetDefaultPluginsForTarget(target);
-		const plugins = options.plugins ?? defaultPlugins;
-		const defaultConfig = GetDefaultConfig();
-		const config = { ...defaultConfig, ...(options.config ?? {}) };
+		const DefaultPlugins = GetDefaultPluginsForTarget(Target);
+		const Plugins = options.plugins ?? DefaultPlugins;
+		const DefaultConfig = GetDefaultConfig();
+		const Config = { ...DefaultConfig, ...(options.config ?? {}) };
 
 		await ExecuteCodegen({
 			SchemaFile: options.schemaFile,
 			DocumentsGlob: options.documentsGlob,
 			OutputFile: options.outputFile,
-			Target: target,
-			Plugins: plugins,
-			Config: config,
+			Target,
+			Plugins,
+			Config,
 			Watch: options.watch,
 		});
 
