@@ -95,7 +95,7 @@ export function CreateGraphQLClient(options: GraphQLClientOptions): IGraphQLClie
 		attempts: { max: 10 },
 	});
 
-	const AuthLink = setContext(async (_operation: unknown, prevContext: Record<string, unknown>): Promise<Record<string, unknown>> => {
+	const AuthLink = setContext(async (_: unknown, prevContext: Record<string, unknown>): Promise<Record<string, unknown>> => {
 		const Token = await ResolveToken();
 		const PrevHeaders = (prevContext.headers as Record<string, string | undefined>) || {};
 		return {
