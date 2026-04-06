@@ -21,11 +21,14 @@ interface IGQLOperation {
 }
 
 interface IGQLOperationGroup {
-	queries: IGQLOperation[];
-	mutations: IGQLOperation[];
-	subscriptions: IGQLOperation[];
+	Queries: IGQLOperation[];
+	Mutations: IGQLOperation[];
+	Subscriptions: IGQLOperation[];
 }
 
+/**
+ * Determine the type names for a GraphQL operation based on its name and type.
+ */
 function DetermineTypeNames(
 	name: string,
 	operationType: 'query' | 'mutation' | 'subscription',
@@ -45,6 +48,9 @@ function DetermineTypeNames(
 	return { TypeName, VariablesTypeName, DocumentName, HookName };
 }
 
+/**
+ * Check if an operation's variables are optional (all are nullable or none exist).
+ */
 function IsOptionalVariables(definition: OperationDefinitionNode): boolean {
 	if (!definition.variableDefinitions || definition.variableDefinitions.length === 0) {
 		return true;
@@ -53,11 +59,14 @@ function IsOptionalVariables(definition: OperationDefinitionNode): boolean {
 	return !definition.variableDefinitions.some((v) => v.type.kind === 'NonNullType');
 }
 
+/**
+ * Extract GraphQL operations from document files and organize them by type.
+ */
 function ExtractOperations(files: Types.DocumentFile[]): IGQLOperationGroup {
 	const Operations: IGQLOperationGroup = {
-		queries: [],
-		mutations: [],
-		subscriptions: [],
+		Queries: [],
+		Mutations: [],
+		Subscriptions: [],
 	};
 
 	for (const File of files) {
@@ -84,11 +93,11 @@ function ExtractOperations(files: Types.DocumentFile[]): IGQLOperationGroup {
 				};
 
 				if (OperationType === 'query') {
-					Operations.queries.push(Operation);
+					Operations.Queries.push(Operation);
 				} else if (OperationType === 'mutation') {
-					Operations.mutations.push(Operation);
+					Operations.Mutations.push(Operation);
 				} else if (OperationType === 'subscription') {
-					Operations.subscriptions.push(Operation);
+					Operations.Subscriptions.push(Operation);
 				}
 			}
 		}
@@ -97,6 +106,9 @@ function ExtractOperations(files: Types.DocumentFile[]): IGQLOperationGroup {
 	return Operations;
 }
 
+/**
+ * Validate that all required GraphQL Codegen plugins are installed.
+ */
 function ValidateRequiredPlugins(info: {
 	allPlugins?: Types.ConfiguredPlugin[];
 	[key: string]: unknown;
@@ -114,7 +126,7 @@ function ValidateRequiredPlugins(info: {
 			return Key;
 		}
 		return '';
-	});
+	}).filter(Boolean);
 
 	for (const Required of RequiredPlugins) {
 		if (!InstalledPlugins.includes(Required)) {
@@ -125,6 +137,9 @@ function ValidateRequiredPlugins(info: {
 	}
 }
 
+/**
+ * Generate React hook code for GraphQL query operations.
+ */
 function GenerateQueryHooks(operations: IGQLOperation[]): string {
 	return operations
 		.map((op) => {
@@ -142,6 +157,9 @@ function GenerateQueryHooks(operations: IGQLOperation[]): string {
 		.join('\n\n');
 }
 
+/**
+ * Generate React hook code for GraphQL mutation operations.
+ */
 function GenerateMutationHooks(operations: IGQLOperation[]): string {
 	return operations
 		.map((op) => {
@@ -154,6 +172,9 @@ function GenerateMutationHooks(operations: IGQLOperation[]): string {
 		.join('\n\n');
 }
 
+/**
+ * Generate React hook code for GraphQL subscription operations.
+ */
 function GenerateSubscriptionHooks(operations: IGQLOperation[]): string {
 	return operations
 		.map((op) => {
@@ -174,6 +195,9 @@ function GenerateSubscriptionHooks(operations: IGQLOperation[]): string {
 		.join('\n\n');
 }
 
+/**
+ * Generate a hook for accessing the Apollo GraphQL client.
+ */
 function GenerateUseGraphQLClientHook(): string {
 	return `export function useGraphQLClient(): ApolloClient<NormalizedCacheObject> {
 	return useApolloClient() as ApolloClient<NormalizedCacheObject>;
@@ -214,16 +238,16 @@ export function Plugin(
 		'} from \'@apollo/client/react\';',
 	].join('\n');
 
-	const QueryHooks = OperationGroups.queries.length > 0
-		? GenerateQueryHooks(OperationGroups.queries)
+	const QueryHooks = OperationGroups.Queries.length > 0
+		? GenerateQueryHooks(OperationGroups.Queries)
 		: '';
 
-	const MutationHooks = OperationGroups.mutations.length > 0
-		? GenerateMutationHooks(OperationGroups.mutations)
+	const MutationHooks = OperationGroups.Mutations.length > 0
+		? GenerateMutationHooks(OperationGroups.Mutations)
 		: '';
 
-	const SubscriptionHooks = OperationGroups.subscriptions.length > 0
-		? GenerateSubscriptionHooks(OperationGroups.subscriptions)
+	const SubscriptionHooks = OperationGroups.Subscriptions.length > 0
+		? GenerateSubscriptionHooks(OperationGroups.Subscriptions)
 		: '';
 
 	const UseGraphQLClientHook = GenerateUseGraphQLClientHook();
