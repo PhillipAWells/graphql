@@ -398,4 +398,28 @@ describe('plugin', () => {
 		expect(result.content).toContain('useOnUserAddedSubscription');
 		expect(result.content).toContain('variables?: OnUserAddedSubscriptionVariables');
 	});
+
+	it('should handle invalid plugin types gracefully', () => {
+		const files: Types.DocumentFile[] = [
+			{
+				document: parse('query GetUser { users { id } }'),
+				location: 'test.graphql',
+			},
+		];
+
+		// Test with invalid plugin type (number), which should be filtered out
+		const invalidPlugins = [
+			{ typescript: {} },
+			{ 'typescript-operations': {} },
+			{ 'typed-document-node': {} },
+			123,
+		] as unknown;
+
+		const result = plugin(baseSchema, files, {}, { allPlugins: invalidPlugins as Types.ConfiguredPlugin[] }) as {
+			content: string;
+		};
+
+		// Should still pass validation since we have the required plugins
+		expect(result.content).toBeDefined();
+	});
 });
