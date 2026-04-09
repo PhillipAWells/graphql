@@ -13,3 +13,7 @@ export const QUERY_COMPLEXITY_SCALAR_WEIGHT = 10;
 export const QUERY_COMPLEXITY_DEFAULT_DEPTH_MULTIPLIER = 2;
 export const QUERY_COMPLEXITY_CACHE_CLEANUP_INTERVAL_MS = 600_000; // 10 minutes
 export const QUERY_COMPLEXITY_CACHE_MAX_SIZE = 1_000;
+
+// Cache eviction thresholds (in milliseconds)
+export const QUERY_COMPLEXITY_CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
+export const QUERY_COMPLEXITY_CACHE_IDLE_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes
