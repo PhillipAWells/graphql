@@ -4,7 +4,7 @@ export default defineConfig({
 	test: {
 		globals: false,
 		environment: 'node',
-		include: ['src/**/*.test.{ts,tsx}'],
+		include: ['src/**/*.test.{ts,tsx}', 'src/**/*.advanced.test.{ts,tsx}', 'src/**/*.integration.test.{ts,tsx}', 'src/**/*.regression.test.{ts,tsx}'],
 		exclude: ['node_modules', 'build', 'tmp'],
 		silent: true,
 		typecheck: {
@@ -19,6 +19,12 @@ export default defineConfig({
 				'tmp/',
 				'**/*.test.ts',
 				'**/*.test.tsx',
+				'**/*.advanced.test.ts',
+				'**/*.advanced.test.tsx',
+				'**/*.integration.test.ts',
+				'**/*.integration.test.tsx',
+				'**/*.regression.test.ts',
+				'**/*.regression.test.tsx',
 				'**/types/**',
 			],
 			thresholds: {
