@@ -262,8 +262,8 @@ describe('Filter Input Types', () => {
 			expect(filter).toBeInstanceOf(DateFilterInput);
 		});
 
-		it('should support Eq operator with ISO date string', () => {
-			const date = '2024-01-01T00:00:00Z';
+		it('should support Eq operator with Date object', () => {
+			const date = new Date('2024-01-01T00:00:00Z');
 			const filter: IFilterCondition<DateFilterInput> = {
 				Eq: date,
 			};
@@ -271,7 +271,7 @@ describe('Filter Input Types', () => {
 		});
 
 		it('should support Ne operator', () => {
-			const date = '2024-01-01T00:00:00Z';
+			const date = new Date('2024-01-01T00:00:00Z');
 			const filter: IFilterCondition<DateFilterInput> = {
 				Ne: date,
 			};
@@ -279,7 +279,7 @@ describe('Filter Input Types', () => {
 		});
 
 		it('should support Lt operator', () => {
-			const date = '2024-12-31T23:59:59Z';
+			const date = new Date('2024-12-31T23:59:59Z');
 			const filter: IFilterCondition<DateFilterInput> = {
 				Lt: date,
 			};
@@ -287,7 +287,7 @@ describe('Filter Input Types', () => {
 		});
 
 		it('should support Lte operator', () => {
-			const date = '2024-12-31T23:59:59Z';
+			const date = new Date('2024-12-31T23:59:59Z');
 			const filter: IFilterCondition<DateFilterInput> = {
 				Lte: date,
 			};
@@ -295,7 +295,7 @@ describe('Filter Input Types', () => {
 		});
 
 		it('should support Gt operator', () => {
-			const date = '2024-01-01T00:00:00Z';
+			const date = new Date('2024-01-01T00:00:00Z');
 			const filter: IFilterCondition<DateFilterInput> = {
 				Gt: date,
 			};
@@ -303,27 +303,11 @@ describe('Filter Input Types', () => {
 		});
 
 		it('should support Gte operator', () => {
-			const date = '2024-01-01T00:00:00Z';
+			const date = new Date('2024-01-01T00:00:00Z');
 			const filter: IFilterCondition<DateFilterInput> = {
 				Gte: date,
 			};
 			expect(filter.Gte).toBe(date);
-		});
-
-		it('should support In operator', () => {
-			const dates = ['2024-01-01T00:00:00Z', '2024-06-01T00:00:00Z'];
-			const filter: IFilterCondition<DateFilterInput> = {
-				In: dates,
-			};
-			expect(filter.In).toEqual(dates);
-		});
-
-		it('should support Nin operator', () => {
-			const dates = ['2024-01-01T00:00:00Z', '2024-06-01T00:00:00Z'];
-			const filter: IFilterCondition<DateFilterInput> = {
-				Nin: dates,
-			};
-			expect(filter.Nin).toEqual(dates);
 		});
 
 		it('should support Exists operator', () => {
@@ -335,11 +319,11 @@ describe('Filter Input Types', () => {
 
 		it('should support date range queries', () => {
 			const filter: IFilterCondition<DateFilterInput> = {
-				Gte: '2024-01-01T00:00:00Z',
-				Lte: '2024-12-31T23:59:59Z',
+				Gte: new Date('2024-01-01T00:00:00Z'),
+				Lte: new Date('2024-12-31T23:59:59Z'),
 			};
-			expect(filter.Gte).toBe('2024-01-01T00:00:00Z');
-			expect(filter.Lte).toBe('2024-12-31T23:59:59Z');
+			expect(filter.Gte).toEqual(new Date('2024-01-01T00:00:00Z'));
+			expect(filter.Lte).toEqual(new Date('2024-12-31T23:59:59Z'));
 		});
 	});
 
@@ -350,54 +334,54 @@ describe('Filter Input Types', () => {
 		});
 
 		it('should support All operator', () => {
-			const filter: IFilterCondition<ArrayFilterInput> = {
-				All: ['a', 'b', 'c'],
+			const filter: IFilterCondition<ArrayFilterInput<StringFilterInput>> = {
+				All: [{ Eq: 'a' }, { Eq: 'b' }, { Eq: 'c' }],
 			};
-			expect(filter.All).toEqual(['a', 'b', 'c']);
+			expect(filter.All).toEqual([{ Eq: 'a' }, { Eq: 'b' }, { Eq: 'c' }]);
 		});
 
 		it('should support Size operator', () => {
-			const filter: IFilterCondition<ArrayFilterInput> = {
+			const filter: IFilterCondition<ArrayFilterInput<StringFilterInput>> = {
 				Size: 3,
 			};
 			expect(filter.Size).toBe(3);
 		});
 
 		it('should support ElemMatch operator', () => {
-			const filter: IFilterCondition<ArrayFilterInput> = {
+			const filter: IFilterCondition<ArrayFilterInput<StringFilterInput>> = {
 				ElemMatch: { Eq: 'value' },
 			};
 			expect(filter.ElemMatch).toEqual({ Eq: 'value' });
 		});
 
 		it('should support Exists operator', () => {
-			const filter: IFilterCondition<ArrayFilterInput> = {
+			const filter: IFilterCondition<ArrayFilterInput<StringFilterInput>> = {
 				Exists: true,
 			};
 			expect(filter.Exists).toBe(true);
 		});
 
 		it('should support combining array operators', () => {
-			const filter: IFilterCondition<ArrayFilterInput> = {
+			const filter: IFilterCondition<ArrayFilterInput<StringFilterInput>> = {
 				Size: 5,
-				All: ['x', 'y', 'z'],
+				All: [{ Eq: 'x' }, { Eq: 'y' }, { Eq: 'z' }],
 			};
 			expect(filter.Size).toBe(5);
-			expect(filter.All).toEqual(['x', 'y', 'z']);
+			expect(filter.All).toEqual([{ Eq: 'x' }, { Eq: 'y' }, { Eq: 'z' }]);
 		});
 
 		it('should support logical And with array operators', () => {
-			const filter: IFilterCondition<ArrayFilterInput> = {
+			const filter: IFilterCondition<ArrayFilterInput<StringFilterInput>> = {
 				And: [
 					{ Size: 5 },
-					{ All: ['x', 'y'] },
+					{ All: [{ Eq: 'x' }, { Eq: 'y' }] },
 				],
 			};
 			expect(filter.And).toHaveLength(2);
 		});
 
 		it('should support logical Or with array operators', () => {
-			const filter: IFilterCondition<ArrayFilterInput> = {
+			const filter: IFilterCondition<ArrayFilterInput<StringFilterInput>> = {
 				Or: [
 					{ Size: 1 },
 					{ Size: 10 },
@@ -529,15 +513,15 @@ describe('Filter Input Types', () => {
 			const filters = {
 				string: { Eq: 'test' } as IFilterCondition<StringFilterInput>,
 				number: { Gte: 10 } as IFilterCondition<NumberFilterInput>,
-				date: { Gte: '2024-01-01T00:00:00Z' } as IFilterCondition<DateFilterInput>,
+				date: { Gte: new Date('2024-01-01T00:00:00Z') } as IFilterCondition<DateFilterInput>,
 				objectId: { Eq: '507f1f77bcf86cd799439011' } as IFilterCondition<ObjectIdFilterInput>,
-				array: { Size: 5 } as IFilterCondition<ArrayFilterInput>,
+				array: { Size: 5 } as IFilterCondition<ArrayFilterInput<StringFilterInput>>,
 				boolean: { Eq: true } as IFilterCondition<BooleanFilterInput>,
 			};
 
 			expect(filters.string.Eq).toBe('test');
 			expect(filters.number.Gte).toBe(10);
-			expect(filters.date.Gte).toBe('2024-01-01T00:00:00Z');
+			expect(filters.date.Gte).toEqual(new Date('2024-01-01T00:00:00Z'));
 			expect(filters.objectId.Eq).toBe('507f1f77bcf86cd799439011');
 			expect(filters.array.Size).toBe(5);
 			expect(filters.boolean.Eq).toBe(true);

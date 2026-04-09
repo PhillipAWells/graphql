@@ -1,6 +1,7 @@
 import { describe,it,expect,beforeEach } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { GraphQLService } from '../graphql/graphql.service.js';
+import { CursorUtils } from '../graphql/types/connection.type.js';
 import { GraphQLSchema } from 'graphql';
 
 describe('GraphQLService', () => {
@@ -65,7 +66,7 @@ describe('GraphQLService', () => {
 
 	describe('createCursor', () => {
 		it('should create base64 encoded cursor', () => {
-			const cursor = service.CreateCursor('123', 1234567890);
+			const cursor = CursorUtils.EncodeCursor('123', 1234567890);
 
 			expect(cursor).toBeDefined();
 			expect(typeof cursor).toBe('string');
@@ -80,13 +81,13 @@ describe('GraphQLService', () => {
 			const original = { id: '123', timestamp: 1234567890 };
 			const cursor = Buffer.from(JSON.stringify(original)).toString('base64');
 
-			const decoded = service.DecodeCursor(cursor);
+			const decoded = CursorUtils.DecodeCursor(cursor);
 
 			expect(decoded).toEqual(original);
 		});
 
 		it('should throw error for invalid cursor', () => {
-			expect(() => service.DecodeCursor('invalid')).toThrow('Invalid cursor format');
+			expect(() => CursorUtils.DecodeCursor('invalid')).toThrow('Invalid cursor format');
 		});
 	});
 
@@ -114,7 +115,7 @@ describe('GraphQLService', () => {
 		});
 
 		it('should paginate with after cursor', () => {
-			const cursor = service.CreateCursor('1');
+			const cursor = CursorUtils.CreateCursor({ id: '1' });
 			const result = service.PaginateItems(items, 2, cursor);
 
 			expect(result.edges).toHaveLength(2);

@@ -1,19 +1,16 @@
 {
-  "name": "@pawells/graphql-common",
-  "displayName": "@pawells/graphql-common",
+  "name": "@pawells/graphql-mongoose",
+  "displayName": "@pawells/graphql-mongoose",
   "version": "2.1.0",
-  "description": "Framework-agnostic shared GraphQL primitive types and utilities",
+  "description": "GraphQL-to-Mongoose filter builder — translates GraphQL filter inputs to Mongoose FilterQuery",
   "keywords": [
     "graphql",
+    "mongoose",
+    "mongodb",
+    "filter",
+    "query",
     "typescript",
-    "types",
-    "utilities",
-    "relay",
-    "pagination",
-    "connection",
-    "cursor",
-    "pageinfo",
-    "scalars"
+    "builder"
   ],
   "type": "module",
   "main": "./build/index.js",
@@ -34,24 +31,16 @@
     "test:coverage": "vitest run --coverage",
     "pipeline": "yarn typecheck && yarn test && yarn build"
   },
-  "dependencies": {
-    "async-mutex": ">=0.5.0",
-    "graphql-subscriptions": ">=3.0.0",
-    "graphql-type-json": ">=0.3.2"
-  },
   "peerDependencies": {
-    "@apollo/client": ">=3.0.0",
+    "@pawells/graphql-common": ">=2.0.0",
     "graphql": ">=16.0.0",
-    "rxjs": ">=7.0.0"
+    "mongoose": ">=8.0.0"
   },
   "devDependencies": {
-    "@apollo/client": "^4.1.6",
+    "@pawells/graphql-common": "^2.1.0",
     "@types/node": "^25.5.2",
-    "async-mutex": "^0.5.0",
     "graphql": "^16.13.2",
-    "graphql-subscriptions": "^3.0.0",
-    "graphql-type-json": "^0.3.2",
-    "rxjs": "^7.8.2",
+    "mongoose": "^8.0.0",
     "typescript": "^6.0.2",
     "vitest": "^4.1.2"
   },
@@ -67,8 +56,7 @@
   },
   "files": [
     "build/",
-    "README.md",
-    "LICENSE"
+    "README.md"
   ],
   "publishConfig": {
     "access": "public"

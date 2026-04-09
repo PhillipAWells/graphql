@@ -42,7 +42,7 @@ export class GraphQLRateLimitGuard implements CanActivate, ILazyModuleRefService
 		}
 	}
 
-	public get RateLimitService(): RateLimitService {
+	private get RateLimitService(): RateLimitService {
 		return this.Module.get(RateLimitService, { strict: false });
 	}
 

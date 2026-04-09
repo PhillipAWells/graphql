@@ -20,6 +20,12 @@ export interface IGraphQLClientOptions {
 	UseTokenFunction?: boolean;
 	Token?: string;
 	TokenFunction?: () => Promise<string>;
+	/**
+	 * @deprecated - IsBrowser option is currently unused.
+	 * It was intended for runtime environment detection but is not yet implemented.
+	 * Future versions may use this to conditionally enable browser-specific features.
+	 * For now, this option is accepted but ignored.
+	 */
 	IsBrowser?: boolean;
 	LogGraphQLErrors?: boolean;
 	LogNetworkErrors?: boolean;

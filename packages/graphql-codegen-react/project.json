@@ -21,6 +21,7 @@
 		},
 		"typecheck": {
 			"executor": "nx:run-commands",
+			"outputs": [],
 			"options": { "command": "tsc --noEmit", "cwd": "{projectRoot}" }
 		},
 		"lint": {
