@@ -98,7 +98,7 @@ packages/nestjs-graphql/src/
 │   │   └── graphql-input-validation.pipe.ts  # Input validation with XSS detection
 │   │
 │   ├── services/
-│   │   ├── rate-limit.service.ts       # Redis-backed token bucket rate limiting
+│   │   ├── rate-limit.service.ts       # Redis-backed fixed-window rate limiting with configurable storage backends
 │   │   ├── cache.service.ts            # GraphQL resolver response caching
 │   │   └── performance.service.ts      # Performance tracking and slow query logging
 │   │
@@ -151,7 +151,7 @@ packages/nestjs-graphql/src/
     └── Consumer pattern: Import in root AppModule
 ```
 
-**Security defaults:** Playground and introspection are disabled by default. WebSocket auth is fail-closed. Query complexity limits are enforced. Rate limiting uses a token-bucket algorithm per user.
+**Security defaults:** Playground and introspection are disabled by default. WebSocket auth is fail-closed. Query complexity limits are enforced. Rate limiting uses a fixed-window (tumbling window) algorithm per user, resetting counters at fixed time boundaries (allows up to 2× the limit at window boundaries due to the nature of fixed-window algorithms; for 100 req/min limit, this means up to 200 requests within a 2-minute span if sent at the exact boundary). For stricter burst protection, use a sliding-window or token-bucket implementation instead.
 
 **Configuration:** `CacheModule` reads `REDIS_HOST`, `REDIS_PORT`, `REDIS_DB`, `REDIS_PASSWORD`, `REDIS_KEY_PREFIX`, `REDIS_TTL` (validated via Joi; defaults: localhost:6379, TTL 1 hour). `GraphQLModule` is configured via `IGraphQLConfigOptions` (Apollo Server options, context factory, CORS, error formatter, optional BSON config).
 
