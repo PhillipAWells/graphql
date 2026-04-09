@@ -30,7 +30,7 @@ Peer dependencies that must be present in your project:
 
 This plugin requires **four co-plugins** to be configured in your `codegen.ts`: `typescript`, `typescript-operations`, `typed-document-node`, and `typescript-apollo-client-helpers`. If any are missing, codegen will throw an error listing all required plugins.
 
-This plugin targets Apollo Client **3.x** and is not compatible with Apollo Client 4.x.
+This plugin targets Apollo Client **4.x**.
 
 ## Quick Start
 
@@ -204,6 +204,23 @@ async function main() {
 
 main().catch(console.error);
 ```
+
+## Known Limitations
+
+### IsBrowser Option
+
+The `IsBrowser` option in `IGraphQLClientOptions` is accepted for forward compatibility but is currently unused. It was intended for runtime environment detection to conditionally enable browser-specific features (such as automatic cookie handling or localStorage integration).
+
+```typescript
+new GraphQLClient({
+  Name: 'my-client',
+  HTTP_URI: 'http://localhost:4000/graphql',
+  WS_URI: 'ws://localhost:4000/graphql',
+  IsBrowser: true, // Currently ignored, but accepted
+});
+```
+
+**Status:** Reserved for future use. This option will be implemented in a future release to enable environment-specific behavior. For now, it has no effect and can be safely omitted.
 
 ## Related Packages
 
