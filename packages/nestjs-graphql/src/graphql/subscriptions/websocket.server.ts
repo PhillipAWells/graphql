@@ -2,7 +2,39 @@ import { Injectable, OnApplicationBootstrap, OnModuleDestroy } from '@nestjs/com
 import { HttpAdapterHost , ModuleRef } from '@nestjs/core';
 import { GraphQLSchemaHost } from '@nestjs/graphql';
 import { WebSocketServer } from 'ws';
-import { useServer } from 'graphql-ws';
+import { useServer } from 'graphql-ws/use/ws';
+import type { ILazyModuleRefService } from '@pawells/nestjs-shared/common';
+import { AppLogger } from '@pawells/nestjs-shared/common';
+import { WebSocketAuthService } from './websocket-auth.service.js';
+import type { IWebSocketServerConfig } from './websocket-config.interface.js';
+
+/**
+ * GraphQL WebSocket server for subscription support
+ *
+ * Integrates graphql-ws with the NestJS HTTP server to enable real-time
+ * GraphQL subscriptions over WebSocket. Uses the ILazyModuleRefService pattern
+ * to resolve dependencies after module initialization.
+ *
+ * Lifecycle:
+ * 1. Module initializes (OnModuleInit on other services)
+ * 2. Schema is built by Apollo driver
+ * 3. onApplicationBootstrap fires — WebSocket server is attached
+ * 4. onModuleDestroy fires — connections are cleanly disposed
+ *
+ * @example
+ * ```typescript
+ * // In your GraphQL module:
+ * @Module({
+ *   providers: [GraphQLWebSocketServer],
+ * })
+ * export class SubscriptionModule {}
+ * ```
+ */
+import { Injectable, OnApplicationBootstrap, OnModuleDestroy } from '@nestjs/common';
+import { HttpAdapterHost , ModuleRef } from '@nestjs/core';
+import { GraphQLSchemaHost } from '@nestjs/graphql';
+import { WebSocketServer } from 'ws';
+import { useServer } from 'graphql-ws/lib/use/ws';
 import type { ILazyModuleRefService } from '@pawells/nestjs-shared/common';
 import { AppLogger } from '@pawells/nestjs-shared/common';
 import { WebSocketAuthService } from './websocket-auth.service.js';
