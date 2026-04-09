@@ -2,7 +2,7 @@ import { describe,it,expect,beforeEach } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { GraphQLService } from '../graphql/graphql.service.js';
 import { CursorUtils } from '../graphql/types/connection.type.js';
-import { GraphQLSchema } from 'graphql';
+import { GraphQLSchema, GraphQLObjectType, GraphQLString } from 'graphql';
 
 describe('GraphQLService', () => {
 	let service: GraphQLService;
@@ -21,17 +21,15 @@ describe('GraphQLService', () => {
 
 	describe('validateSchema', () => {
 		it('should validate a valid schema', () => {
-			const schema = new GraphQLSchema({
-				query: undefined, // Will be set later
+			const ValidSchema = new GraphQLSchema({
+				query: new GraphQLObjectType({
+					name: 'Query',
+					fields: { _: { type: GraphQLString } },
+				}),
 			});
 
-			// Mock schema with query type
-			Object.defineProperty(schema, 'getQueryType', {
-				value: () => ({}),
-			});
-
-			expect(() => service.ValidateSchema(schema)).not.toThrow();
-			expect(service.GetSchema()).toBe(schema);
+			expect(() => service.ValidateSchema(ValidSchema)).not.toThrow();
+			expect(service.GetSchema()).toBe(ValidSchema);
 		});
 
 		it('should throw error for invalid schema', () => {
