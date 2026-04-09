@@ -231,7 +231,7 @@ describe('Regression Tests', () => {
 
 		it('should handle id remapping with In operator', () => {
 			// Regression: ensure remapping works with array operators like In
-			// Note: Array values in operators are NOT coerced (only single string values are)
+			// Note: Array values in operators ARE coerced to ObjectId instances
 			const id1String = '507f1f77bcf86cd799439011';
 			const id2String = '507f1f77bcf86cd799439012';
 			const result = BuildMongooseFilter(
@@ -244,9 +244,11 @@ describe('Regression Tests', () => {
 			expect(idField).toHaveProperty('$in');
 			const inValues = idField.$in as Array<unknown>;
 			expect(inValues).toHaveLength(2);
-			// Array values are NOT coerced by the implementation
-			expect(inValues[0]).toBe(id1String);
-			expect(inValues[1]).toBe(id2String);
+			// Array values ARE coerced to ObjectId instances
+			expect(inValues[0]).toBeInstanceOf(Types.ObjectId);
+			expect(inValues[1]).toBeInstanceOf(Types.ObjectId);
+			expect((inValues[0] as Types.ObjectId).toString()).toBe(id1String);
+			expect((inValues[1] as Types.ObjectId).toString()).toBe(id2String);
 		});
 	});
 
