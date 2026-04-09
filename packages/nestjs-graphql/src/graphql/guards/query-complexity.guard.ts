@@ -26,7 +26,13 @@ import {
 	ExceedsComplexityLimit,
 	DEFAULT_COMPLEXITY_CONFIG,
 } from '../graphql/query-complexity.js';
-import { QUERY_COMPLEXITY_CACHE_MAX_SIZE, QUERY_COMPLEXITY_CACHE_CLEANUP_INTERVAL_MS, QUERY_COMPLEXITY_THRESHOLD } from '../constants/complexity.constants.js';
+import {
+	QUERY_COMPLEXITY_CACHE_MAX_SIZE,
+	QUERY_COMPLEXITY_CACHE_CLEANUP_INTERVAL_MS,
+	QUERY_COMPLEXITY_THRESHOLD,
+	QUERY_COMPLEXITY_CACHE_TTL_MS,
+	QUERY_COMPLEXITY_CACHE_IDLE_THRESHOLD_MS,
+} from '../constants/complexity.constants.js';
 
 /**
  * Guard that enforces query complexity limits
@@ -55,7 +61,21 @@ export class QueryComplexityGuard implements CanActivate, OnModuleDestroy, ILazy
 		}
 	}
 
-	private readonly ComplexityCache = new Map<string, number>();
+	// Cache entry with metadata for LRU and TTL eviction
+	private readonly ComplexityCache = new Map<
+		string,
+		{
+			readonly Complexity: number;
+			CreatedAt: number;
+			LastAccessedAt: number;
+		}
+	>();
+
+	private readonly CacheMetrics = {
+		Hits: 0,
+		Misses: 0,
+		Evictions: 0,
+	};
 
 	// eslint-disable-next-line no-undef
 	private CleanupIntervalRef: NodeJS.Timeout | null = null;
@@ -88,49 +108,107 @@ export class QueryComplexityGuard implements CanActivate, OnModuleDestroy, ILazy
 
 	/**
 	 * Gets cached complexity for a query
-	 * Implements LRU by moving accessed key to end (most recently used position)
+	 * Updates last access time for LRU tracking and TTL calculation
 	 * @param query GraphQL query document
 	 * @param variables Query variables used in the query
 	 * @returns Cached complexity or undefined
 	 */
 	private GetComplexityFromCache(query: any, variables?: Record<string, unknown>): number | undefined {
 		const Key = this.HashQuery(query, variables);
-		const Value = this.ComplexityCache.get(Key);
+		const Entry = this.ComplexityCache.get(Key);
 
-		if (Value !== undefined) {
-			// LRU: Move to end (most recently used) by deleting and re-inserting
-			this.ComplexityCache.delete(Key);
-			this.ComplexityCache.set(Key, Value);
+		if (Entry !== undefined) {
+			// Update last access time for LRU tracking
+			Entry.LastAccessedAt = Date.now();
+			this.CacheMetrics.Hits++;
+			return Entry.Complexity;
 		}
 
-		return Value;
+		this.CacheMetrics.Misses++;
+		return undefined;
 	}
 
 	/**
 	 * Sets cached complexity for a query
 	 * Implements LRU eviction when cache exceeds max size
-	 * Evicts the least recently used key (oldest, at the start of Map)
+	 * Evicts the least recently used key (oldest last access)
 	 * @param query GraphQL query document
 	 * @param complexity Calculated complexity
 	 * @param variables Query variables used in the query
 	 */
 	private SetComplexityCache(query: any, complexity: number, variables?: Record<string, unknown>): void {
 		const Key = this.HashQuery(query, variables);
+		const Now = Date.now();
 
 		// Clean up cache if it exceeds max size (LRU eviction)
 		if (this.ComplexityCache.size >= QUERY_COMPLEXITY_CACHE_MAX_SIZE) {
-			const LruKey = this.ComplexityCache.keys().next().value as string;
+			let LruKey: string | undefined;
+			let LruTime = Date.now();
+
+			// Find the least recently used entry
+			for (const [CacheKey, Entry] of this.ComplexityCache.entries()) {
+				if (Entry.LastAccessedAt < LruTime) {
+					LruKey = CacheKey;
+					LruTime = Entry.LastAccessedAt;
+				}
+			}
+
 			if (LruKey) {
 				this.ComplexityCache.delete(LruKey);
+				this.CacheMetrics.Evictions++;
 			}
 		}
 
-		this.ComplexityCache.set(Key, complexity);
+		this.ComplexityCache.set(Key, {
+			Complexity: complexity,
+			CreatedAt: Now,
+			LastAccessedAt: Now,
+		});
+	}
+
+	/**
+	 * Performs smart cache cleanup using age-based and TTL eviction
+	 * Only evicts entries older than the cleanup interval or with expired TTL
+	 * Prevents cold-start storms by retaining recently accessed entries
+	 */
+	private PerformSmartCleanup(): void {
+		const Now = Date.now();
+		const CleanupThreshold = QUERY_COMPLEXITY_CACHE_CLEANUP_INTERVAL_MS;
+		const TtlMs = QUERY_COMPLEXITY_CACHE_TTL_MS;
+		const IdleThreshold = QUERY_COMPLEXITY_CACHE_IDLE_THRESHOLD_MS;
+		let EvictionCount = 0;
+
+		for (const [Key, Entry] of this.ComplexityCache.entries()) {
+			const Age = Now - Entry.CreatedAt;
+			const TimeSinceAccess = Now - Entry.LastAccessedAt;
+			const IsExpiredTtl = Age > TtlMs;
+			const IsOlderThanCleanupInterval = Age > CleanupThreshold;
+			const IsIdle = TimeSinceAccess > IdleThreshold;
+
+			// Evict if:
+			// 1. TTL expired (>30 minutes old, regardless of access)
+			// 2. OR older than cleanup interval AND idle (not accessed in >5 minutes)
+			if (IsExpiredTtl || (IsOlderThanCleanupInterval && IsIdle)) {
+				this.ComplexityCache.delete(Key);
+				EvictionCount++;
+				this.CacheMetrics.Evictions++;
+			}
+		}
+
+		if (EvictionCount > 0) {
+			this.Logger?.debug(
+				`Smart cache cleanup: evicted ${EvictionCount} stale entries, ` +
+				`cache size: ${this.ComplexityCache.size}, ` +
+				`hits: ${this.CacheMetrics.Hits}, ` +
+				`misses: ${this.CacheMetrics.Misses}`,
+			);
+		}
 	}
 
 	/**
 	 * Starts periodic cleanup of the complexity cache
-	 * Clears cache every 10 minutes to prevent stale entries
+	 * Uses smart age-based eviction instead of full clear
+	 * Prevents cold-start storms by keeping recently accessed entries
 	 */
 	private StartPeriodicCleanup(): void {
 		if (this.CleanupIntervalRef) {
@@ -138,8 +216,7 @@ export class QueryComplexityGuard implements CanActivate, OnModuleDestroy, ILazy
 		}
 
 		this.CleanupIntervalRef = setInterval(() => {
-			this.Logger?.debug(`Clearing complexity cache (size: ${this.ComplexityCache.size})`);
-			this.ComplexityCache.clear();
+			this.PerformSmartCleanup();
 		}, QUERY_COMPLEXITY_CACHE_CLEANUP_INTERVAL_MS);
 	}
 
