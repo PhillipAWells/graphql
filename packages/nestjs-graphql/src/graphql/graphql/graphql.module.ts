@@ -1,5 +1,6 @@
 import Joi from 'joi';
 import { Module, DynamicModule, Global, MiddlewareConsumer, NestModule, Optional, Provider, Type } from '@nestjs/common';
+import { ModuleRef } from '@nestjs/core';
 import { GraphQLModule as NestGraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 // Note: AuthModule NOT imported here to avoid circular dependency
@@ -245,13 +246,11 @@ export class GraphQLModule implements NestModule {
 			},
 			{
 				provide: BsonResponseInterceptor,
-				useFactory: (config: IGraphQLConfigOptions) => {
-					if (config?.bson?.enabled) {
-						return BsonResponseInterceptor;
-					}
-					return undefined;
-				},
-				inject: [GraphQLAsyncConfigToken],
+				useClass: BsonResponseInterceptor,
+			},
+			{
+				provide: BsonSerializationMiddleware,
+				useClass: BsonSerializationMiddleware,
 			},
 		];
 
@@ -282,6 +281,7 @@ export class GraphQLModule implements NestModule {
 				GraphQLPerformanceService,
 				BsonSerializationService,
 				BsonResponseInterceptor,
+				BsonSerializationMiddleware,
 				ObjectIdScalar,
 				DateTimeScalar,
 				JSONScalar,
