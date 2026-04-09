@@ -77,21 +77,24 @@ export class QueryComplexityGuard implements CanActivate, OnModuleDestroy, ILazy
 	 * Hashes a query for cache key generation using SHA-256
 	 * Collision-safe hash for reliable cache lookups
 	 * @param query GraphQL query document
+	 * @param variables Query variables used in the query
 	 * @returns SHA-256 hex string
 	 */
-	private HashQuery(query: any): string {
-		const QueryStr = JSON.stringify(query);
-		return createHash('sha256').update(QueryStr).digest('hex');
+	private HashQuery(query: any, variables?: Record<string, unknown>): string {
+		return createHash('sha256')
+			.update(JSON.stringify({ query, variables }))
+			.digest('hex');
 	}
 
 	/**
 	 * Gets cached complexity for a query
 	 * Implements LRU by moving accessed key to end (most recently used position)
 	 * @param query GraphQL query document
+	 * @param variables Query variables used in the query
 	 * @returns Cached complexity or undefined
 	 */
-	private GetComplexityFromCache(query: any): number | undefined {
-		const Key = this.HashQuery(query);
+	private GetComplexityFromCache(query: any, variables?: Record<string, unknown>): number | undefined {
+		const Key = this.HashQuery(query, variables);
 		const Value = this.ComplexityCache.get(Key);
 
 		if (Value !== undefined) {
@@ -109,9 +112,10 @@ export class QueryComplexityGuard implements CanActivate, OnModuleDestroy, ILazy
 	 * Evicts the least recently used key (oldest, at the start of Map)
 	 * @param query GraphQL query document
 	 * @param complexity Calculated complexity
+	 * @param variables Query variables used in the query
 	 */
-	private SetComplexityCache(query: any, complexity: number): void {
-		const Key = this.HashQuery(query);
+	private SetComplexityCache(query: any, complexity: number, variables?: Record<string, unknown>): void {
+		const Key = this.HashQuery(query, variables);
 
 		// Clean up cache if it exceeds max size (LRU eviction)
 		if (this.ComplexityCache.size >= QUERY_COMPLEXITY_CACHE_MAX_SIZE) {
@@ -165,7 +169,7 @@ export class QueryComplexityGuard implements CanActivate, OnModuleDestroy, ILazy
 
 		try {
 			// Check cache first
-			const CachedComplexity = this.GetComplexityFromCache(document);
+			const CachedComplexity = this.GetComplexityFromCache(document, variables);
 			let Complexity: number;
 
 			if (CachedComplexity !== undefined) {
@@ -182,7 +186,7 @@ export class QueryComplexityGuard implements CanActivate, OnModuleDestroy, ILazy
 				);
 
 				// Store in cache
-				this.SetComplexityCache(document, Complexity);
+				this.SetComplexityCache(document, Complexity, variables);
 				this.Logger?.debug(`Query complexity calculated: ${Complexity}`);
 			}
 
