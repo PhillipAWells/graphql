@@ -6,7 +6,7 @@ import { CursorUtils } from '../../graphql/types/connection.type.js';
 import { GraphQLSchema, GraphQLObjectType, GraphQLString } from 'graphql';
 import { ICursorData, GraphQLErrorCode } from '../../graphql/types/graphql-safety.types.js';
 
-describe('GraphQLService - Type Safety', describe('GraphQLService - Type Safety', () => {
+describe('GraphQLService - Type Safety', () => {
 	let service: GraphQLService;
 
 	beforeEach(async () => {
@@ -295,4 +295,4 @@ describe('GraphQLService - Type Safety', describe('GraphQLService - Type Safety'
 			expect(errorCode).toBe('INTERNAL_ERROR');
 		});
 	});
-}););
+});

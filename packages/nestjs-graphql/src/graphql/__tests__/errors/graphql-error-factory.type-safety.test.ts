@@ -71,7 +71,7 @@ describe('GraphQL Error Factory - Type Safety', () => {
 			const error = new AuthError('Token expired');
 
 			expect(error.message).toBe('Token expired');
-			expect(error.Code).toBe('UNAUTHORIZED');
+			expect(error.Code).toBe('UNAUTHENTICATED');
 			expect(error.StatusCode).toBe(401);
 		});
 
@@ -174,7 +174,7 @@ describe('GraphQL Error Factory - Type Safety', () => {
 			expect(plainObject).toHaveProperty('code');
 			expect(plainObject).toHaveProperty('statusCode');
 			expect(plainObject).toHaveProperty('graphqlCode');
-			expect(plainObject.code).toBe('UNAUTHORIZED');
+			expect(plainObject.code).toBe('UNAUTHENTICATED');
 			expect(plainObject.statusCode).toBe(401);
 		});
 
