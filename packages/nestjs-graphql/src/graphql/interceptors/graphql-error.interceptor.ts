@@ -4,7 +4,8 @@ import { GqlExecutionContext } from '@nestjs/graphql';
 import { Observable, catchError, throwError } from 'rxjs';
 import { GraphQLError } from 'graphql';
 import type { ILazyModuleRefService, IContextualLogger } from '@pawells/nestjs-shared/common';
-import { AppLogger, HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_UNAUTHORIZED, HTTP_STATUS_FORBIDDEN, HTTP_STATUS_NOT_FOUND, HTTP_STATUS_INTERNAL_SERVER_ERROR, getErrorMessage, getErrorStack } from '@pawells/nestjs-shared/common';
+import { AppLogger, getErrorMessage, getErrorStack } from '@pawells/nestjs-shared/common';
+import { ErrorClassifier } from '../errors/error-classifier.js';
 
 /**
  * GraphQL Error Interceptor
@@ -118,72 +119,25 @@ export class GraphQLErrorInterceptor implements NestInterceptor, ILazyModuleRefS
 
 	/**
 	 * Categorizes errors and determines appropriate codes and messages
+	 * Uses ErrorClassifier for consistent classification across the application
 	 *
 	 * @param error - The original error
 	 * @returns object - Error categorization result
 	 */
 	private CategorizeError(error: any): { code: string; message: string; statusCode: number } {
-		// MongoDB duplicate key error code
-		const MONGODB_DUPLICATE_KEY_ERROR = 11_000;
-		// HTTP status for conflict
-		const HTTP_STATUS_CONFLICT = 409;
+		const Classification = ErrorClassifier.Classify(error);
 
-		// Handle specific error types
-		if (error.name === 'ValidationError' || error.message?.includes('validation')) {
-			return {
-				code: 'VALIDATION_ERROR',
-				message: 'Input validation failed',
-				statusCode: HTTP_STATUS_BAD_REQUEST,
-			};
-		}
+		// In production, use generic message for internal errors; in development, expose actual error
+		const Message = Classification.code === 'INTERNAL_ERROR' && process.env['NODE_ENV'] === 'production'
+			? Classification.message
+			: Classification.code === 'INTERNAL_ERROR'
+				? getErrorMessage(error)
+				: Classification.message;
 
-		if (error.name === 'CastError' || error.message?.includes('cast')) {
-			return {
-				code: 'VALIDATION_ERROR',
-				message: 'Invalid input format',
-				statusCode: HTTP_STATUS_BAD_REQUEST,
-			};
-		}
-
-		if (error.name === 'UnauthorizedError' || error.status === HTTP_STATUS_UNAUTHORIZED) {
-			return {
-				code: 'UNAUTHENTICATED',
-				message: 'Authentication required',
-				statusCode: HTTP_STATUS_UNAUTHORIZED,
-			};
-		}
-
-		if (error.name === 'ForbiddenError' || error.status === HTTP_STATUS_FORBIDDEN) {
-			return {
-				code: 'FORBIDDEN',
-				message: 'Access denied',
-				statusCode: HTTP_STATUS_FORBIDDEN,
-			};
-		}
-
-		if (error.status === HTTP_STATUS_NOT_FOUND || error.message?.includes('not found')) {
-			return {
-				code: 'NOT_FOUND',
-				message: 'Resource not found',
-				statusCode: HTTP_STATUS_NOT_FOUND,
-			};
-		}
-
-		if (error.code === MONGODB_DUPLICATE_KEY_ERROR || error.message?.includes('duplicate')) {
-			return {
-				code: 'CONFLICT',
-				message: 'Resource already exists',
-				statusCode: HTTP_STATUS_CONFLICT,
-			};
-		}
-
-		// Default to internal server error
 		return {
-			code: 'INTERNAL_ERROR',
-			message: process.env['NODE_ENV'] === 'production'
-				? 'An unexpected error occurred'
-				: getErrorMessage(error),
-			statusCode: HTTP_STATUS_INTERNAL_SERVER_ERROR,
+			code: Classification.code,
+			message: Message,
+			statusCode: Classification.statusCode,
 		};
 	}
 }
