@@ -100,7 +100,10 @@ export function GetFieldComplexityWeight(
 	const TypeRules = FIELD_COMPLEXITY_RULES[type];
 	if (!TypeRules) return COMPLEXITY_WEIGHTS.SIMPLE_FIELD;
 
-	return (TypeRules as any)[field] ?? COMPLEXITY_WEIGHTS.SIMPLE_FIELD;
+	if (Object.prototype.hasOwnProperty.call(TypeRules, field)) {
+		return (TypeRules as Record<string, number>)[field];
+	}
+	return COMPLEXITY_WEIGHTS.SIMPLE_FIELD;
 }
 
 /**

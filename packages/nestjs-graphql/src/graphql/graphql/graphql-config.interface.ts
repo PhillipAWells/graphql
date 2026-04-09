@@ -23,6 +23,28 @@ export interface ICorsOptions {
 
 /**
  * Configuration options for the GraphQL module
+ *
+ * **Security Defaults & Option Merging:**
+ * The module sets secure defaults (playground: false, introspection: false) for production.
+ * These defaults are intentionally mergeable - you can explicitly re-enable these features
+ * by passing `playground: true` or `introspection: true` in options. This is a documented
+ * escape hatch for development/staging environments.
+ *
+ * @example
+ * ```typescript
+ * // Production (secure defaults)
+ * GraphQLModule.forRoot({
+ *   autoSchemaFile: true,
+ * });
+ * // Result: playground=false, introspection=false
+ *
+ * // Development (explicitly enable unsafe features)
+ * GraphQLModule.forRoot({
+ *   autoSchemaFile: true,
+ *   playground: true,   // Explicitly re-enable
+ *   introspection: true, // Explicitly re-enable
+ * });
+ * ```
  */
 export interface IGraphQLConfigOptions extends Omit<ApolloDriverConfig, 'driver'> {
 	/**
@@ -38,20 +60,31 @@ export interface IGraphQLConfigOptions extends Omit<ApolloDriverConfig, 'driver'
 	sortSchema?: boolean;
 
 	/**
-   * Enable GraphQL Playground for development
-   * @default true
+   * Enable GraphQL Playground for development.
+   *
+   * **Security:** Defaults to false (disabled) for production safety.
+   * Explicitly set to true to enable in development/staging environments.
+   *
+   * @default false
    */
 	playground?: boolean;
 
 	/**
-   * Enable GraphQL introspection
-   * @default true
+   * Enable GraphQL introspection.
+   *
+   * **Security:** Defaults to false (disabled) for production safety.
+   * Explicitly set to true to enable schema introspection in development/staging.
+   *
+   * @default false
    */
 	introspection?: boolean;
 
 	/**
-   * Custom context function or object
-   */
+	   * Custom context function or object.
+	   * Uses `any` because Apollo Server's context can be a function returning a context object,
+	   * a plain context object, or a factory. Consumers should type-cast or provide their own
+	   * IGraphQLContext interface to this field when initializing GraphQLModule for type safety.
+	   */
 	context?: any;
 
 	/**
