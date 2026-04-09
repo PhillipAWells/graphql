@@ -109,15 +109,26 @@ export class GraphQLService {
 			? error.message.toLowerCase()
 			: String(ErrorRecord['message'] ?? '').toLowerCase();
 
-		// Default error codes mapping
-		if (ErrorMessage.includes('validation')) {
-			return GraphQLErrorCode.VALIDATION_ERROR;
+		// Check specific authorization-related errors first, before validation
+		if (ErrorMessage.includes('authorization')) {
+			return GraphQLErrorCode.FORBIDDEN;
 		}
+		if (ErrorMessage.includes('forbidden')) {
+			return GraphQLErrorCode.FORBIDDEN;
+		}
+		if (ErrorMessage.includes('unauthorized')) {
+			return GraphQLErrorCode.UNAUTHENTICATED;
+		}
+		if (ErrorMessage.includes('not allowed')) {
+			return GraphQLErrorCode.FORBIDDEN;
+		}
+		// Then check authentication
 		if (ErrorMessage.includes('authentication')) {
 			return GraphQLErrorCode.UNAUTHENTICATED;
 		}
-		if (ErrorMessage.includes('authorization')) {
-			return GraphQLErrorCode.FORBIDDEN;
+		// Then check validation and other general errors
+		if (ErrorMessage.includes('validation')) {
+			return GraphQLErrorCode.VALIDATION_ERROR;
 		}
 		if (ErrorMessage.includes('not found')) {
 			return GraphQLErrorCode.NOT_FOUND;
