@@ -43,7 +43,19 @@ export class DataLoaderFactory implements ILazyModuleRefService {
 	}
 
 	/**
-    * Creates a new DataLoader instance with the provided options
+    * Creates a new DataLoader instance with the provided options.
+    *
+    * Batch function contract:
+    * - Must return exactly `keys.length` results (values or Error objects)
+    * - Result order must correspond to input key order
+    *
+    * Error handling:
+    * - If batch function returns fewer results: excess keys get Error objects ("Batch load function returned insufficient results")
+    * - If batch function returns more results: excess results are replaced with Error objects ("Batch function returned too many results")
+    * - If batch function throws: all keys get the thrown error
+    *
+    * This ensures bugs in batch functions are surfaced as errors, not silent failures.
+    *
     * @param options DataLoader configuration options
     * @returns Configured DataLoader instance
     */
@@ -68,12 +80,16 @@ export class DataLoaderFactory implements ILazyModuleRefService {
 						this.Logger.warn(
 							`Batch load function returned ${Results.length} results for ${keys.length} keys`,
 						);
-						// Pad with errors if necessary
+						// Pad with errors if too few results
 						while (Results.length < keys.length) {
 							Results.push(new Error('Batch load function returned insufficient results'));
 						}
 						// DataLoader requires results[i] to correspond to keys[i] with exactly keys.length results
+						// Replace excess results with error objects instead of silently truncating
 						if (Results.length > keys.length) {
+							for (let i = keys.length; i < Results.length; i++) {
+								Results[i] = new Error('Batch function returned too many results');
+							}
 							Results.length = keys.length;
 						}
 					}
