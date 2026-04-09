@@ -215,8 +215,6 @@ export class RedisPubSubFactory implements OnModuleDestroy {
 			}
 		}
 
-		this.PubSubInstances = [];
-
 		// Close all Redis clients
 		for (const Client of this.PublisherClients) {
 			try {
@@ -235,6 +233,7 @@ export class RedisPubSubFactory implements OnModuleDestroy {
 			}
 		}
 
+		this.PubSubInstances.length = 0;
 		this.PublisherClients.length = 0;
 		this.SubscriberClients.length = 0;
 
