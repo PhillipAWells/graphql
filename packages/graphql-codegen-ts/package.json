@@ -42,7 +42,7 @@
     "strongly-typed-events": ">=3.0.11"
   },
   "peerDependencies": {
-    "@apollo/client": ">=3.0.0",
+    "@apollo/client": ">=4.0.0",
     "@graphql-codegen/typed-document-node": ">=5.0.0",
     "@graphql-codegen/typescript": ">=4.0.0",
     "@graphql-codegen/typescript-apollo-client-helpers": ">=3.0.0",
