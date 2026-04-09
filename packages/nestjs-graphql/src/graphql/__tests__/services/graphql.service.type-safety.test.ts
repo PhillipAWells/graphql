@@ -1,4 +1,4 @@
-import { describe,it,expect,beforeEach } from 'vitest';
+import { describe,it,expect,beforeEach,vi } from 'vitest';
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { GraphQLService } from '../../graphql/graphql.service.js';
@@ -6,7 +6,7 @@ import { CursorUtils } from '../../graphql/types/connection.type.js';
 import { GraphQLSchema, GraphQLObjectType, GraphQLString } from 'graphql';
 import { ICursorData, GraphQLErrorCode } from '../../graphql/types/graphql-safety.types.js';
 
-describe('GraphQLService - Type Safety', () => {
+describe('GraphQLService - Type Safety', describe('GraphQLService - Type Safety', () => {
 	let service: GraphQLService;
 
 	beforeEach(async () => {
@@ -231,32 +231,28 @@ describe('GraphQLService - Type Safety', () => {
 		});
 
 		it('should include stack trace in development', () => {
-			const originalEnv = process.env['NODE_ENV'];
+			vi.stubEnv('NODE_ENV', 'development');
 
 			try {
-				process.env['NODE_ENV'] = 'development';
-
 				const error = new Error('Test error');
 				const formatted = service.FormatError(error);
 
 				expect((formatted.extensions as any).stack).toBeDefined();
 			} finally {
-				process.env['NODE_ENV'] = originalEnv;
+				vi.unstubAllEnvs();
 			}
 		});
 
 		it('should exclude stack trace in production', () => {
-			const originalEnv = process.env['NODE_ENV'];
+			vi.stubEnv('NODE_ENV', 'production');
 
 			try {
-				process.env['NODE_ENV'] = 'production';
-
 				const error = new Error('Test error');
 				const formatted = service.FormatError(error);
 
 				expect((formatted.extensions as any).stack).toBeUndefined();
 			} finally {
-				process.env['NODE_ENV'] = originalEnv;
+				vi.unstubAllEnvs();
 			}
 		});
 	});
@@ -299,4 +295,4 @@ describe('GraphQLService - Type Safety', () => {
 			expect(errorCode).toBe('INTERNAL_ERROR');
 		});
 	});
-});
+}););
