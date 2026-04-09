@@ -6,6 +6,7 @@ import { Traced } from '@pawells/nestjs-open-telemetry';
 import { AppLogger } from '@pawells/nestjs-shared/common';
 import type { IContextualLogger } from '@pawells/nestjs-shared/common';
 import { GraphQLErrorCode } from './error-codes.js';
+import { CursorUtils } from './types/connection.type.js';
 
 /**
  * Service for GraphQL module management and utilities
@@ -125,35 +126,7 @@ export class GraphQLService {
 		return GraphQLErrorCode.INTERNAL_ERROR;
 	}
 
-	/**
-   * Helper method to create cursor from entity ID and timestamp
-   * @param id Entity ID
-   * @param timestamp Timestamp
-   * @returns Base64 encoded cursor
-   */
-	public CreateCursor(id: string, timestamp?: number): string {
-		const CursorData = {
-			id,
-			timestamp: timestamp ?? Date.now(),
-		};
-		return Buffer.from(JSON.stringify(CursorData)).toString('base64');
-	}
-
-	/**
-   * Helper method to decode cursor
-   * @param cursor Base64 encoded cursor
-   * @returns Decoded cursor data
-   */
-	public DecodeCursor(cursor: string): { id: string; timestamp: number } {
-		try {
-			const Decoded = Buffer.from(cursor, 'base64').toString('utf-8');
-			return JSON.parse(Decoded);
-		} catch {
-			throw new Error('Invalid cursor format');
-		}
-	}
-
-	/**
+/**
    * Helper method for pagination logic
    * @param items Array of items to paginate
    * @param first Number of items to take from start
@@ -176,7 +149,7 @@ export class GraphQLService {
 		let StartIndex = 0;
 
 		if (after) {
-			const AfterData = this.DecodeCursor(after);
+			const AfterData = CursorUtils.DecodeCursor(after);
 			const AfterIndex = items.findIndex(item => item.id === AfterData.id);
 			if (AfterIndex !== -1) {
 				StartIndex = AfterIndex + 1;
@@ -187,7 +160,7 @@ export class GraphQLService {
 		const PaginatedItems = items.slice(StartIndex, EndIndex);
 
 		const Edges = PaginatedItems.map(item => ({
-			cursor: this.CreateCursor(item.id, item.createdAt ? item.createdAt.getTime() : undefined),
+			cursor: CursorUtils.CreateCursor(item as { id: string; createdAt?: Date }),
 			node: item,
 		}));
 
