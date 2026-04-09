@@ -193,7 +193,7 @@ describe('createGraphQLError', () => {
 				'BAD_USER_INPUT',
 				'CONFLICT',
 				'VALIDATION_ERROR',
-				'INTERNAL_SERVER_ERROR',
+				'INTERNAL_ERROR',
 				'RATE_LIMIT_EXCEEDED',
 			];
 

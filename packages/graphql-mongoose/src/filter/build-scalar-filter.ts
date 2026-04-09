@@ -136,6 +136,20 @@ export function BuildScalarFieldFilter(
 				// Invalid ObjectId format — throw descriptive error
 				throw new Error(
 					`Invalid ObjectId format for field "${mongoField}": "${operatorValue}". Expected a valid 24-character hex string.`,
+					{ cause: error },
+				);
+			}
+		}
+
+		// Coerce array values for $in/$nin operators
+		if (fieldType === 'objectId' && Array.isArray(operatorValue)) {
+			try {
+				coercedValue = operatorValue.map(v => (typeof v === 'string' ? new Types.ObjectId(v) : v));
+			} catch (error) {
+				// Invalid ObjectId format in array — throw descriptive error
+				throw new Error(
+					`Invalid ObjectId format in array for field "${mongoField}". Expected valid 24-character hex strings.`,
+					{ cause: error },
 				);
 			}
 		}

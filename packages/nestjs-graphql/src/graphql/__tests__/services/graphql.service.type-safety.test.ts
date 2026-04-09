@@ -2,6 +2,7 @@ import { describe,it,expect,beforeEach } from 'vitest';
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { GraphQLService } from '../../graphql/graphql.service.js';
+import { CursorUtils } from '../../graphql/types/connection.type.js';
 import { GraphQLSchema, GraphQLObjectType, GraphQLString } from 'graphql';
 import { ICursorData, GraphQLErrorCode } from '../../graphql/types/graphql-safety.types.js';
 
@@ -51,7 +52,7 @@ describe('GraphQLService - Type Safety', () => {
 
 	describe('Cursor creation with typed data', () => {
 		it('should create properly typed cursor from ID and timestamp', () => {
-			const cursor = service.CreateCursor('item-123', 1_635_700_000);
+			const cursor = CursorUtils.EncodeCursor('item-123', 1_635_700_000);
 
 			expect(typeof cursor).toBe('string');
 			expect(cursor.length).toBeGreaterThan(0);
@@ -62,13 +63,13 @@ describe('GraphQLService - Type Safety', () => {
 
 		it('should create cursor with auto-generated timestamp', () => {
 			const beforeTime = Date.now();
-			const cursor = service.CreateCursor('item-456');
+			const cursor = CursorUtils.CreateCursor({ id: 'item-456' });
 			const afterTime = Date.now();
 
 			expect(typeof cursor).toBe('string');
 
 			// Verify it can be decoded
-			const decoded = service.DecodeCursor(cursor);
+			const decoded = CursorUtils.DecodeCursor(cursor);
 
 			expect(decoded.id).toBe('item-456');
 			expect(decoded.timestamp).toBeGreaterThanOrEqual(beforeTime);
@@ -84,7 +85,7 @@ describe('GraphQLService - Type Safety', () => {
 			};
 
 			const cursor = Buffer.from(JSON.stringify(originalData)).toString('base64');
-			const decoded = service.DecodeCursor(cursor);
+			const decoded = CursorUtils.DecodeCursor(cursor);
 
 			// Type-safe access to decoded data
 			const { id } = decoded;
@@ -95,7 +96,7 @@ describe('GraphQLService - Type Safety', () => {
 		});
 
 		it('should throw error for invalid cursor', () => {
-			expect(() => service.DecodeCursor('invalid-base64!')).toThrow(
+			expect(() => CursorUtils.DecodeCursor('invalid-base64!')).toThrow(
 				'Invalid cursor format',
 			);
 		});
@@ -140,7 +141,7 @@ describe('GraphQLService - Type Safety', () => {
 
 		it('should paginate with cursor and return typed result', () => {
 			const items = createTestItems(5);
-			const cursor = service.CreateCursor('item-2', 1_672_531_200_000);
+			const cursor = CursorUtils.EncodeCursor('item-2', 1_672_531_200_000);
 
 			const result = service.PaginateItems(items, 2, cursor);
 
@@ -159,7 +160,7 @@ describe('GraphQLService - Type Safety', () => {
 				expect(edge.cursor.length).toBeGreaterThan(0);
 
 				// Verify cursor can be decoded
-				const decoded = service.DecodeCursor(edge.cursor);
+				const decoded = CursorUtils.DecodeCursor(edge.cursor);
 
 				expect(typeof decoded.id).toBe('string');
 				expect(typeof decoded.timestamp).toBe('number');

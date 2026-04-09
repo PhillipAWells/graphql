@@ -160,14 +160,14 @@ export function ValidateComplexityConfig(config: IComplexityConfig): boolean {
 
 	// Validate multipliers
 	if (multipliers) {
-		if (multipliers.depth && multipliers.depth < 1) return false;
-		if (multipliers.list && multipliers.list < 1) return false;
+		if (multipliers.depth !== undefined && multipliers.depth < 1) return false;
+		if (multipliers.list !== undefined && multipliers.list < 1) return false;
 	}
 
 	// Validate limits
 	if (limits) {
-		if (limits.maxComplexity && limits.maxComplexity < 1) return false;
-		if (limits.maxDepth && limits.maxDepth < 1) return false;
+		if (limits.maxComplexity !== undefined && limits.maxComplexity < 1) return false;
+		if (limits.maxDepth !== undefined && limits.maxDepth < 1) return false;
 	}
 
 	return true;
