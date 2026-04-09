@@ -43,7 +43,7 @@ export const ForbiddenError = CreateGraphQLError(GRAPHQL_ERROR_CONFIGS.FORBIDDEN
 export const NotFoundError = CreateGraphQLError(GRAPHQL_ERROR_CONFIGS.NOT_FOUND);
 export const BadRequestError = CreateGraphQLError(GRAPHQL_ERROR_CONFIGS.BAD_USER_INPUT);
 export const ConflictError = CreateGraphQLError(GRAPHQL_ERROR_CONFIGS.CONFLICT);
-export const InternalServerError = CreateGraphQLError(GRAPHQL_ERROR_CONFIGS.INTERNAL_SERVER_ERROR);
+export const InternalServerError = CreateGraphQLError(GRAPHQL_ERROR_CONFIGS.INTERNAL_ERROR);
 export const RateLimitError = CreateGraphQLError(GRAPHQL_ERROR_CONFIGS.RATE_LIMIT_EXCEEDED);
 
 // Additional GraphQL-specific errors

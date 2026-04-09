@@ -93,8 +93,8 @@ export const ERROR_CONFIGS = {
 		statusCode: 409,
 		defaultMessage: 'Resource conflict',
 	},
-	INTERNAL_SERVER_ERROR: {
-		code: 'INTERNAL_SERVER_ERROR',
+	INTERNAL_ERROR: {
+		code: 'INTERNAL_ERROR',
 		statusCode: 500,
 		defaultMessage: 'Internal server error',
 	},

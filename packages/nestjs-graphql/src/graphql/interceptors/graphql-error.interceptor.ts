@@ -179,7 +179,7 @@ export class GraphQLErrorInterceptor implements NestInterceptor, ILazyModuleRefS
 
 		// Default to internal server error
 		return {
-			code: 'INTERNAL_SERVER_ERROR',
+			code: 'INTERNAL_ERROR',
 			message: process.env['NODE_ENV'] === 'production'
 				? 'An unexpected error occurred'
 				: getErrorMessage(error),
