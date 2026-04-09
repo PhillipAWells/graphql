@@ -32,18 +32,24 @@ import { JSONScalar } from './scalars/json.scalar.js';
 @Module({})
 export class GraphQLModule implements NestModule, OnModuleInit {
 	/**
-	 * Store config for use in onModuleInit
+	 * CRITICAL: Static field storing BSON configuration for middleware access
 	 *
-	 * KNOWN LIMITATION: This static field is mutated by forRoot() / forRootAsync().
-	 * If forRoot() is called multiple times (e.g., in tests), the last call wins.
-	 * This is used by the configure() method to conditionally register middleware.
+	 * RATIONALE: Global configuration must be accessible to middleware via static
+	 * methods, since NestJS middleware factory pattern does not support DI injection.
+	 * This field is written during forRoot() / forRootAsync() and read during
+	 * configure() / onModuleInit().
 	 *
-	 * Thread safety: In test environments with parallel execution, this field may
-	 * be read/written concurrently, leading to race conditions. Workaround: call
-	 * forRoot() only once per test suite, or use describe.sequential() in vitest.
+	 * CONCURRENCY LIMITATION: This static field is mutated by forRoot() / forRootAsync().
+	 * In parallel test execution, concurrent calls to forRoot() will cause race conditions
+	 * and unexpected behavior. Last call to forRoot() wins.
 	 *
-	 * A cleaner solution would thread the config through DI providers, but that
-	 * would require major refactoring of the middleware registration pattern.
+	 * WORKAROUND FOR TESTS:
+	 * - Call forRoot() once at the suite level, not per-test
+	 * - Use describe.sequential() in vitest to serialize GraphQLModule initialization
+	 * - Consider per-test setup if forRoot() with different configs is required
+	 *
+	 * FUTURE: A cleaner solution would thread the config through DI providers,
+	 * but that would require major refactoring of NestJS middleware registration.
 	 */
 	private static BsonConfig: IGraphQLConfigOptions['bson'] = undefined;
 
@@ -162,14 +168,19 @@ export class GraphQLModule implements NestModule, OnModuleInit {
    * @param options Asynchronous configuration options
    * @returns Dynamic module configuration
    *
-   * ASYMMETRY NOTE: forRoot() conditionally registers BsonSerializationService and
-   * BsonResponseInterceptor only when options.bson?.enabled === true.
+   * BSON Configuration Asymmetry:
+   * Unlike forRoot(), this async method always registers BSON providers and interceptors,
+   * even though BsonSerializationConfig is only known after the async config factory resolves.
    *
-   * forRootAsync() always registers them regardless of the async config.
-   * This is because with async factory config, the BSON enabled flag is not known
-   * at module initialization time — it's only resolved after the factory runs.
+   * This is intentional and safe because:
+   * 1. BsonResponseInterceptor checks the Accept header at request time
+   * 2. Without the Accept: application/bson header, BSON serialization is bypassed
+   * 3. Lazy registration in async mode would prevent post-module BSON configuration
    *
-   * To minimize this asymmetry and memory waste:
+   * If BSON is not needed, simply don't set the bson.enabled config option or don't
+   * send Accept: application/bson from clients. The providers will be present but inactive.
+   *
+   * To minimize memory waste:
    * - BsonSerializationService is lightweight and safe to instantiate even when unused
    * - BsonResponseInterceptor is registered but will be a no-op if the service is not used
    * - The middleware (BsonSerializationMiddleware) is still only registered conditionally
