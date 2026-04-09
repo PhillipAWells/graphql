@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import { Module, DynamicModule, Global, MiddlewareConsumer, NestModule, OnModuleInit, Optional, Provider, Type } from '@nestjs/common';
+import { Module, DynamicModule, Global, MiddlewareConsumer, NestModule, Optional, Provider, Type } from '@nestjs/common';
 import { GraphQLModule as NestGraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 // Note: AuthModule NOT imported here to avoid circular dependency
@@ -30,7 +30,7 @@ import { JSONScalar } from './scalars/json.scalar.js';
  */
 @Global()
 @Module({})
-export class GraphQLModule implements NestModule, OnModuleInit {
+export class GraphQLModule implements NestModule {
 	/**
 	 * CRITICAL: Static field storing BSON configuration for middleware access
 	 *
@@ -198,7 +198,24 @@ export class GraphQLModule implements NestModule, OnModuleInit {
    * 3. Refactoring to thread config through DI instead of static fields
    */
 	public static forRootAsync(options: IGraphQLAsyncConfig): DynamicModule {
+		// Create a wrapper function that resolves config and stores BSON config
+		const resolveAndStoreConfig = async (...args: any[]) => {
+			const config = await options.useFactory(...args);
+			// Store BSON config for middleware registration in configure()
+			GraphQLModule.BsonConfig = config.bson;
+			return config;
+		};
+
+		// Symbol for the resolved config provider
+		const GraphQLAsyncConfigToken = Symbol('GraphQLAsyncConfig');
+
 		const Providers: Provider[] = [
+			// First provider: resolve and store the async config
+			{
+				provide: GraphQLAsyncConfigToken,
+				useFactory: resolveAndStoreConfig,
+				...(options.inject ? { inject: options.inject } : {}),
+			},
 			GraphQLService,
 			RateLimitService,
 			GraphQLCacheService,
@@ -212,11 +229,30 @@ export class GraphQLModule implements NestModule, OnModuleInit {
 			GraphQLPerformanceInterceptor,
 			GraphQLPerformanceMonitoringInterceptor,
 			GraphQLPerformanceService,
-			// Always include BSON service in async mode for flexibility
-			BsonSerializationService,
 			ObjectIdScalar,
 			DateTimeScalar,
 			JSONScalar,
+			// Conditionally add BSON providers based on resolved config
+			{
+				provide: BsonSerializationService,
+				useFactory: (config: IGraphQLConfigOptions) => {
+					if (config?.bson?.enabled) {
+						return new BsonSerializationService();
+					}
+					return undefined;
+				},
+				inject: [GraphQLAsyncConfigToken],
+			},
+			{
+				provide: BsonResponseInterceptor,
+				useFactory: (config: IGraphQLConfigOptions) => {
+					if (config?.bson?.enabled) {
+						return BsonResponseInterceptor;
+					}
+					return undefined;
+				},
+				inject: [GraphQLAsyncConfigToken],
+			},
 		];
 
 		return {
@@ -224,11 +260,11 @@ export class GraphQLModule implements NestModule, OnModuleInit {
 			imports: [
 				NestGraphQLModule.forRootAsync({
 					driver: ApolloDriver,
-					useFactory: options.useFactory,
+					useFactory: resolveAndStoreConfig,
 					...(options.inject ? { inject: options.inject } : {}),
 				}),
 			],
-			providers: [...Providers, BsonResponseInterceptor],
+			providers: Providers,
 			exports: [
 				GraphQLService,
 				RateLimitService,
@@ -267,11 +303,4 @@ export class GraphQLModule implements NestModule, OnModuleInit {
 		}
 	}
 
-	/**
-	 * Lifecycle hook called after module initialization
-	 */
-	public onModuleInit(): void {
-		// BSON service is optional and only initialized if enabled
-		// Middleware is already registered in configure method
-	}
 }
