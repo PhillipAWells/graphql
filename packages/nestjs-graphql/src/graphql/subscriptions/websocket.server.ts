@@ -2,15 +2,11 @@ import { Injectable, OnApplicationBootstrap, OnModuleDestroy } from '@nestjs/com
 import { HttpAdapterHost , ModuleRef } from '@nestjs/core';
 import { GraphQLSchemaHost } from '@nestjs/graphql';
 import { WebSocketServer } from 'ws';
+import { useServer } from 'graphql-ws';
 import type { ILazyModuleRefService } from '@pawells/nestjs-shared/common';
 import { AppLogger } from '@pawells/nestjs-shared/common';
 import { WebSocketAuthService } from './websocket-auth.service.js';
 import type { IWebSocketServerConfig } from './websocket-config.interface.js';
-
-// Lazy load graphql-ws to handle module resolution issues with different bundler environments
-const GetUseServer = (): any => {
-	return require('@nestjs/graphql/node_modules/graphql-ws/dist/use/ws.cjs').useServer as any;
-};
 
 /**
  * GraphQL WebSocket server for subscription support
@@ -117,8 +113,7 @@ export class GraphQLWebSocketServer implements OnApplicationBootstrap, OnModuleD
 
 		this.WsServer = new WebSocketServer({ server: HttpServer, path: config.path });
 
-		const UseServer = GetUseServer();
-		const Cleanup = UseServer(
+		const Cleanup = useServer(
 			{
 				schema,
 				onConnect: async (ctx: any) => {
