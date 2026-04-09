@@ -1,5 +1,6 @@
 import { ApolloClient, InMemoryCache, ApolloLink, split } from '@apollo/client/core';
 import { onError } from '@apollo/client/link/error';
+import type { ErrorLink } from '@apollo/client/link/error';
 import { RetryLink } from '@apollo/client/link/retry';
 import { setContext } from '@apollo/client/link/context';
 import { HttpLink } from '@apollo/client/link/http';
@@ -12,6 +13,11 @@ import { GraphQLConnectionState as State } from './types';
 
 export type TDisposeFunction = () => void;
 
+/**
+ * @internal
+ * Stores the previous state for the connection provider.
+ * Used internally to track context changes and notify subscribers.
+ */
 interface IContextPrevious {
 	headers?: Record<string, string | undefined>;
 	[key: string]: unknown;
@@ -27,6 +33,18 @@ export interface IGraphQLClientResult {
 	getConnectionState: () => GraphQLConnectionState;
 	onStateChange: (handler: (state: GraphQLConnectionState) => void) => () => void;
 }
+
+/**
+ * WebSocket ping timeout code
+ * @internal
+ */
+const PING_TIMEOUT_CODE = 4408;
+
+/**
+ * WebSocket ping timeout duration in milliseconds
+ * @internal
+ */
+const PING_TIMEOUT_MS = 5000;
 
 /**
  * Creates a configured Apollo Client with HTTP and WebSocket transport.
@@ -83,10 +101,8 @@ export function CreateGraphQLClient(options: TGraphQLClientOptions): IGraphQLCli
 			ping: (received) => {
 				if (!received) {
 					_pingTimeout = setTimeout(() => {
-						// eslint-disable-next-line no-magic-numbers
-						_wsSocket?.close(4408, 'Request Timeout');
-					// eslint-disable-next-line no-magic-numbers
-					}, 5000);
+						_wsSocket?.close(PING_TIMEOUT_CODE, 'Request Timeout');
+					}, PING_TIMEOUT_MS);
 				}
 			},
 			pong: (received) => {
@@ -98,12 +114,12 @@ export function CreateGraphQLClient(options: TGraphQLClientOptions): IGraphQLCli
 		},
 	});
 
-	const errorLink = onError((errorResponse: any): void => {
-		if (options.logGraphQLErrors && errorResponse?.graphQLErrors) {
-			errorResponse.graphQLErrors.forEach((err: unknown) => console.error('[GraphQL error]', err));
+	const errorLink = onError((errorResponse: ErrorLink.ErrorHandlerOptions) => {
+		if (options.logGraphQLErrors && errorResponse.error) {
+			console.error('[GraphQL error]', errorResponse.error);
 		}
-		if (options.logNetworkErrors && errorResponse?.networkError) {
-			console.error('[Network error]', errorResponse.networkError);
+		if (options.logNetworkErrors && errorResponse.error) {
+			console.error('[Network error]', errorResponse.error);
 		}
 	});
 
