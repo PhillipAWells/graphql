@@ -69,10 +69,10 @@ export class GraphQLInputValidationPipe implements PipeTransform<any> {
 		this.PerformSecurityChecks(value);
 
 		// Transform plain object to class instance
-		const Object = plainToClass(metatype, value);
+		const TransformedObject = plainToClass(metatype, value);
 
 		// Validate with nested validation enabled
-		const Errors = await validate(Object, {
+		const Errors = await validate(TransformedObject, {
 			whitelist: true,
 			forbidNonWhitelisted: true,
 			transform: true,
@@ -91,7 +91,7 @@ export class GraphQLInputValidationPipe implements PipeTransform<any> {
 			});
 		}
 
-		return Object;
+		return TransformedObject;
 	}
 
 	/**
@@ -101,8 +101,28 @@ export class GraphQLInputValidationPipe implements PipeTransform<any> {
 	 * @throws BadRequestException if suspicious patterns detected
 	 */
 	private PerformSecurityChecks(value: any): void {
+		// Check for circular references before attempting JSON.stringify
+		if (this.HasCircularReferences(value)) {
+			this.Logger?.warn('Circular reference detected in input data');
+			throw new BadRequestException({
+				message: 'Invalid input structure detected',
+				code: 'CIRCULAR_REFERENCE_DETECTED',
+			});
+		}
+
 		// Check input size
-		const InputSize = Buffer.byteLength(JSON.stringify(value), 'utf8');
+		let InputSize: number;
+		try {
+			InputSize = Buffer.byteLength(JSON.stringify(value), 'utf8');
+		} catch (error) {
+			// Fallback error handling if JSON.stringify fails despite circular check
+			this.Logger?.warn(`Failed to serialize input: ${error instanceof Error ? error.message : 'Unknown error'}`);
+			throw new BadRequestException({
+				message: 'Invalid input structure detected',
+				code: 'INVALID_INPUT_STRUCTURE',
+			});
+		}
+
 		if (InputSize > this.MAX_INPUT_SIZE) {
 			this.Logger?.warn(`Input size ${InputSize} exceeds maximum of ${this.MAX_INPUT_SIZE}`);
 			throw new BadRequestException({
@@ -155,6 +175,51 @@ export class GraphQLInputValidationPipe implements PipeTransform<any> {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Detects circular references in an object graph.
+	 * Uses a WeakSet to track visited objects with O(1) lookup.
+	 *
+	 * @param obj - The object to check
+	 * @param visited - WeakSet of already visited objects
+	 * @returns boolean - True if a circular reference is detected
+	 */
+	private HasCircularReferences(obj: any, visited = new WeakSet<object>()): boolean {
+		if (typeof obj !== 'object' || obj === null) {
+			return false;
+		}
+
+		// Array types are checked as objects
+		if (Array.isArray(obj)) {
+			if (visited.has(obj)) {
+				return true;
+			}
+			visited.add(obj);
+
+			for (const Item of obj) {
+				if (this.HasCircularReferences(Item, visited)) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		// Object type check
+		if (visited.has(obj)) {
+			return true;
+		}
+		visited.add(obj);
+
+		for (const Key in obj) {
+			if (Object.prototype.hasOwnProperty.call(obj, Key)) {
+				if (this.HasCircularReferences(obj[Key], visited)) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	/**
