@@ -13,10 +13,13 @@ export class BsonSerializationService {
 	/**
 	 * Check if bson package is available
 	 */
-	public IsAvailable(): boolean {
-		// Use the cached bson instance if available
-		// If getBson() has already been called and succeeded, the module is cached
-		return this.BsonLib !== null;
+	public async IsAvailable(): Promise<boolean> {
+		try {
+			await this.GetBson();
+			return true;
+		} catch {
+			return false;
+		}
 	}
 
 	/**
