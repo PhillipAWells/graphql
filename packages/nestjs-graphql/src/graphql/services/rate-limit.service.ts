@@ -109,9 +109,16 @@ export class MemoryRateLimitStorage implements IRateLimitStorage {
 /**
  * GraphQL Rate Limit Service
  *
- * Implements sliding window rate limiting with configurable storage backends.
+ * Implements fixed window (tumbling window) rate limiting with configurable storage backends.
+ * Each window resets at a fixed boundary (not sliding); the limit counter resets every windowMs milliseconds.
  * Supports both in-memory and external storage (Redis, etc.) for distributed rate limiting.
  * Tracks requests per client identifier and enforces configurable limits.
+ *
+ * @remarks
+ * - Uses a fixed window algorithm: each client has a counter that resets at fixed time boundaries
+ * - Window resets happen synchronously when a new window boundary is reached, not on a per-request basis
+ * - For example, with windowMs=60000 (1 minute), all clients reset their counters at 0, 60000, 120000ms, etc.
+ * - This is different from sliding window which would reset on each request
  *
  * @example
  * ```typescript

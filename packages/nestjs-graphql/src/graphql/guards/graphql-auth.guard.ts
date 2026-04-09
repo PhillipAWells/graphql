@@ -7,16 +7,27 @@ import { AppLogger } from '@pawells/nestjs-shared/common';
 /**
  * GraphQL Authentication Guard
  *
- * Implements CanActivate to work with GraphQL operations.
- * Extracts JWT tokens from GraphQL context and validates them.
- * Supports both queries/mutations and subscriptions.
+ * Checks if a request has a valid Passport-authenticated user.
+ * This guard does NOT verify JWT tokens itself; it assumes prior Passport middleware or guards have already validated the token and populated request.user.
+ *
+ * Important: This guard requires Passport authentication to be set up and executed BEFORE this guard runs.
+ * If request.user is not populated (authentication not completed), this guard throws UnauthorizedException.
+ *
+ * @remarks
+ * - Does NOT perform JWT verification directly
+ * - Relies on Passport middleware/guards to populate request.user
+ * - Throws UnauthorizedException (401) if user is not authenticated
+ * - Use alongside @pawells/nestjs-auth module which provides Passport integration
  *
  * @example
  * ```typescript
+ * // AuthModule.forRoot() must be imported first to set up Passport
+ * // Then this guard can be used to enforce authentication
  * @UseGuards(GraphQLAuthGuard)
  * @Query(() => IUser, { name: 'GetUser' })
- * async getUser(): Promise<IUser> {
- *   // This resolver is protected
+ * async getUser(@CurrentUser() user: IUser): Promise<IUser> {
+ *   // This resolver is protected and requires valid authentication
+ *   return user;
  * }
  * ```
  */
