@@ -29,10 +29,10 @@ export type TCacheKeyBuilder = (...args: any[]) => string;
  * Cache invalidation strategy enum
  */
 export enum CacheInvalidationStrategy {
-	IMMEDIATE = 'immediate',
-	DELAYED = 'delayed',
-	PATTERN = 'pattern',
-	TIME_BASED = 'time_based',
+	IMMEDIATE = 'IMMEDIATE',
+	DELAYED = 'DELAYED',
+	PATTERN = 'PATTERN',
+	TIME_BASED = 'TIME_BASED',
 }
 
 /**
