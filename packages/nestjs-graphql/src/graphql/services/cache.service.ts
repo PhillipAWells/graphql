@@ -53,7 +53,11 @@ export class GraphQLCacheService implements ILazyModuleRefService, OnModuleInit 
 		misses: 0,
 	};
 
-	private readonly Logger: IContextualLogger;
+	private LoggerInstance?: IContextualLogger;
+
+	private get Logger(): IContextualLogger {
+		return this.LoggerInstance ??= this.AppLogger.createContextualLogger(GraphQLCacheService.name);
+	}
 
 	public get CacheManager(): Cache {
 		return this.Module.get<Cache>(CACHE_MANAGER, { strict: false });
@@ -67,8 +71,8 @@ export class GraphQLCacheService implements ILazyModuleRefService, OnModuleInit 
 		this.Module = moduleRef;
 	}
 
-	onModuleInit(): void {
-		this.Logger = this.AppLogger.createContextualLogger(GraphQLCacheService.name);
+	public onModuleInit(): void {
+		// Logger is lazily initialized via the Logger getter
 	}
 
 	/**

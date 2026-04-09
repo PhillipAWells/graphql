@@ -39,6 +39,7 @@ export class ResilienceService implements OnModuleDestroy, ILazyModuleRefService
 		} catch (error: unknown) {
 			throw new Error(
 				`Failed to get SUBSCRIPTION_CONFIG: ${error instanceof Error ? error.message : 'unknown error'}`,
+				{ cause: error },
 			);
 		}
 	}

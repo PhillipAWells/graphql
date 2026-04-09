@@ -19,7 +19,7 @@ import { REDIS_PUBSUB_RESPONSE_TIMEOUT, REDIS_PUBSUB_CLEANUP_INTERVAL, REDIS_PUB
 export class RedisPubSubFactory implements OnModuleDestroy {
 	private readonly Logger: AppLogger;
 
-	private PubSubInstances: RedisPubSub[] = [];
+	private readonly PubSubInstances: RedisPubSub[] = [];
 
 	private readonly PublisherClients: any[] = [];
 

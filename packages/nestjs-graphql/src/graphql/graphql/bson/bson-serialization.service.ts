@@ -9,15 +9,30 @@ import { getErrorMessage } from '@pawells/nestjs-shared/common';
 export class BsonSerializationService {
 	private BsonLib: any = null;
 	private LoadPromise: Promise<any> | null = null;
+	private IsAvailableCache: boolean | null = null;
 
 	/**
-	 * Check if bson package is available
+	 * Check if bson package is available (cached after first check)
 	 */
-	public async IsAvailable(): Promise<boolean> {
+	public IsAvailable(): boolean {
+		if (this.IsAvailableCache !== null) {
+			return this.IsAvailableCache;
+		}
+
+		// Check synchronously if library is already loaded
+		if (this.BsonLib) {
+			this.IsAvailableCache = true;
+			return true;
+		}
+
+		// Try to require bson synchronously
 		try {
-			await this.GetBson();
+			const Bson = require('bson');
+			this.BsonLib = Bson;
+			this.IsAvailableCache = true;
 			return true;
 		} catch {
+			this.IsAvailableCache = false;
 			return false;
 		}
 	}

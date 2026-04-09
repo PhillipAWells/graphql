@@ -126,13 +126,13 @@ export class GraphQLService {
 		return GraphQLErrorCode.INTERNAL_ERROR;
 	}
 
-/**
-   * Helper method for pagination logic
-   * @param items Array of items to paginate
-   * @param first Number of items to take from start
-   * @param after Cursor to start after
-   * @returns Paginated result with edges and page info
-   */
+	/**
+	 * Helper method for pagination logic
+	 * @param items Array of items to paginate
+	 * @param first Number of items to take from start
+	 * @param after Cursor to start after
+	 * @returns Paginated result with edges and page info
+	 */
 	public PaginateItems<T extends { id: string; createdAt?: Date }>(
 		items: T[],
 		first?: number,
