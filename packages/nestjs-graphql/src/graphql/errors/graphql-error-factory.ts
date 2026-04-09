@@ -167,7 +167,7 @@ export function CreateGraphQLError(config: IGraphQLErrorConfig): TGeneratedGraph
  */
 export const GRAPHQL_ERROR_CONFIGS = {
 	UNAUTHENTICATED: {
-		code: 'UNAUTHORIZED',
+		code: 'UNAUTHENTICATED',
 		statusCode: 401,
 		defaultMessage: 'Authentication required',
 		graphqlCode: 'UNAUTHENTICATED',
