@@ -155,7 +155,7 @@ describe('createGraphQLError', () => {
 	describe('GRAPHQL_ERROR_CONFIGS', () => {
 		it('should have all GraphQL error configurations', () => {
 			expect(GRAPHQL_ERROR_CONFIGS.UNAUTHENTICATED).toEqual({
-				code: 'UNAUTHORIZED',
+				code: 'UNAUTHENTICATED',
 				statusCode: 401,
 				defaultMessage: 'Authentication required',
 				graphqlCode: 'UNAUTHENTICATED',
