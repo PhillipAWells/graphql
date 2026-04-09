@@ -2781,7 +2781,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nestjs/common@npm:>=11.1.18, @nestjs/common@npm:^11.1.18":
+"@nestjs/common@npm:>=11.0.0, @nestjs/common@npm:^11.1.18":
   version: 11.1.18
   resolution: "@nestjs/common@npm:11.1.18"
   dependencies:
@@ -2818,7 +2818,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nestjs/core@npm:>=11.1.18, @nestjs/core@npm:^11.1.18":
+"@nestjs/core@npm:>=11.0.0, @nestjs/core@npm:^11.1.18":
   version: 11.1.18
   resolution: "@nestjs/core@npm:11.1.18"
   dependencies:
@@ -3480,7 +3480,7 @@ __metadata:
     rxjs: "npm:^7.8.2"
     strongly-typed-events: "npm:>=3.0.11"
   peerDependencies:
-    "@apollo/client": ">=3.0.0"
+    "@apollo/client": ">=4.0.0"
     "@graphql-codegen/typed-document-node": ">=5.0.0"
     "@graphql-codegen/typescript": ">=4.0.0"
     "@graphql-codegen/typescript-apollo-client-helpers": ">=3.0.0"
@@ -3812,8 +3812,8 @@ __metadata:
   resolution: "@pawells/nx-graphql@workspace:packages/nx-graphql"
   dependencies:
     "@graphql-codegen/cli": "npm:^6.2.1"
-    "@nestjs/common": "npm:>=11.1.18"
-    "@nestjs/core": "npm:>=11.1.18"
+    "@nestjs/common": "npm:>=11.0.0"
+    "@nestjs/core": "npm:>=11.0.0"
     "@nestjs/graphql": "npm:^13.2.4"
     "@nx/devkit": "npm:^22.6.4"
     "@types/node": "npm:^25.5.2"
