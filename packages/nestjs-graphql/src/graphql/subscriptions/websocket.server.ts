@@ -94,6 +94,7 @@ export class GraphQLWebSocketServer implements OnApplicationBootstrap, OnModuleD
 	 * @param config WebSocket server configuration
 	 */
 	// eslint-disable-next-line require-await
+	// eslint-disable-next-line require-await
 	public async Initialize(config: IWebSocketServerConfig): Promise<void> {
 		const { HttpAdapterHost: HttpAdapterHostVar } = this;
 		if (!HttpAdapterHostVar?.httpAdapter) {
@@ -125,14 +126,21 @@ export class GraphQLWebSocketServer implements OnApplicationBootstrap, OnModuleD
 					}
 
 					const Params = ctx.connectionParams ?? {};
-					const Result = await AuthServiceVar.Authenticate(Params);
 
-					if (!Result.authenticated) {
-						this.Logger.warn(`WebSocket connection rejected: ${Result.error ?? 'authentication failed'}`);
+					try {
+						const Result = await AuthServiceVar.Authenticate(Params);
+
+						if (!Result.authenticated) {
+							this.Logger.warn(`WebSocket connection rejected: ${Result.error ?? 'authentication failed'}`);
+							return false;
+						}
+
+						return true;
+					} catch (CatchError) {
+						const Message = CatchError instanceof Error ? CatchError.message : 'Unknown error during authentication';
+						this.Logger.error(`WebSocket authentication error: ${Message}`);
 						return false;
 					}
-
-					return true;
 				},
 			},
 			this.WsServer,
