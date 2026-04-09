@@ -1,4 +1,3 @@
-import { GraphQLResolveInfo } from 'graphql';
 import { getComplexity, simpleEstimator, fieldExtensionsEstimator } from 'graphql-query-complexity';
 import { AppLogger, getErrorStack } from '@pawells/nestjs-shared/common';
 import { QUERY_COMPLEXITY_THRESHOLD, QUERY_DEPTH_LIMIT, QUERY_COMPLEXITY_SCALAR_WEIGHT, QUERY_COMPLEXITY_DEFAULT_DEPTH_MULTIPLIER } from '../constants/complexity.constants.js';
@@ -85,4 +84,3 @@ export function ExceedsComplexityLimit(
 	const { maxComplexity } = config.limits ?? {};
 	return maxComplexity ? complexity > maxComplexity : false;
 }
-
