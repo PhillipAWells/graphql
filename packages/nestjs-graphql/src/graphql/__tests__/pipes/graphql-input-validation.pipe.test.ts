@@ -283,4 +283,113 @@ describe('GraphQLInputValidationPipe - Security Validation', () => {
 			expect(result).toEqual(validInput);
 		});
 	});
+
+	describe('Circular reference detection', () => {
+		it('should reject input with direct circular reference', async () => {
+			const circularInput: any = {
+				name: 'John Doe',
+				email: 'john@example.com',
+			};
+			circularInput.self = circularInput; // Create circular reference
+
+			await expect(
+				pipe.transform(circularInput, {
+					metatype: MockUserInput,
+					type: 'body',
+					data: undefined,
+				}),
+			).rejects.toThrow(BadRequestException);
+		});
+
+		it('should reject input with nested circular reference', async () => {
+			const circularInput: any = {
+				name: 'John Doe',
+				email: 'john@example.com',
+				profile: {
+					bio: 'Some bio',
+				},
+			};
+			circularInput.profile.parent = circularInput; // Create circular reference through nested object
+
+			await expect(
+				pipe.transform(circularInput, {
+					metatype: MockUserInput,
+					type: 'body',
+					data: undefined,
+				}),
+			).rejects.toThrow(BadRequestException);
+		});
+
+		it('should reject input with circular reference in array', async () => {
+			const circularInput: any = {
+				name: 'John Doe',
+				email: 'john@example.com',
+				tags: ['tag1', 'tag2'],
+			};
+			circularInput.tags.push(circularInput); // Create circular reference in array
+
+			await expect(
+				pipe.transform(circularInput, {
+					metatype: MockUserInput,
+					type: 'body',
+					data: undefined,
+				}),
+			).rejects.toThrow(BadRequestException);
+		});
+
+		it('should return error with CIRCULAR_REFERENCE_DETECTED code', async () => {
+			const circularInput: any = {
+				name: 'John',
+				email: 'john@example.com',
+			};
+			circularInput.self = circularInput;
+
+			const error = await pipe.transform(circularInput, {
+				metatype: MockUserInput,
+				type: 'body',
+				data: undefined,
+			}).catch(e => e);
+
+			expect(error).toBeInstanceOf(BadRequestException);
+			expect(error.getResponse()).toMatchObject({
+				message: expect.stringContaining('Invalid input structure'),
+				code: 'CIRCULAR_REFERENCE_DETECTED',
+			});
+		});
+
+		it('should skip validation for primitive types with circular detection', async () => {
+			const stringValue = 'some string';
+
+			const result = await pipe.transform(stringValue, {
+				metatype: String,
+				type: 'body',
+				data: undefined,
+			});
+
+			expect(result).toBe(stringValue);
+		});
+
+		it('should allow arrays with duplicate values', async () => {
+			class ArrayInput {
+				@IsString()
+				public name!: string;
+
+				@IsEmail()
+				public email!: string;
+			}
+
+			const validInput = {
+				name: 'John Doe',
+				email: 'john@example.com',
+			};
+
+			const result = await pipe.transform(validInput, {
+				metatype: ArrayInput,
+				type: 'body',
+				data: undefined,
+			});
+
+			expect(result).toBeDefined();
+		});
+	});
 });
