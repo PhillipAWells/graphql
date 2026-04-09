@@ -30,7 +30,17 @@ export class ResilienceService implements OnModuleDestroy, ILazyModuleRefService
 	private ShutdownTimeout?: NodeJS.Timeout;
 
 	public get ISubscriptionConfig(): ISubscriptionConfig {
-		return this.Module.get<ISubscriptionConfig>('SUBSCRIPTION_CONFIG', { strict: false });
+		try {
+			const Config = this.Module.get<ISubscriptionConfig>('SUBSCRIPTION_CONFIG', { strict: false });
+			if (!Config) {
+				throw new Error('SUBSCRIPTION_CONFIG not found in module');
+			}
+			return Config;
+		} catch (error: unknown) {
+			throw new Error(
+				`Failed to get SUBSCRIPTION_CONFIG: ${error instanceof Error ? error.message : 'unknown error'}`,
+			);
+		}
 	}
 
 	constructor(moduleRef: ModuleRef) {
@@ -171,8 +181,8 @@ export class ResilienceService implements OnModuleDestroy, ILazyModuleRefService
 
 		// Set shutdown timeout
 		this.ShutdownTimeout = setTimeout(() => {
-			this.Logger.error('Graceful shutdown timeout exceeded, forcing shutdown');
-			process.exit(1);
+			this.Logger.error('Graceful shutdown timeout exceeded');
+			throw new Error('Graceful shutdown timeout exceeded');
 		}, this.ISubscriptionConfig.resilience.shutdown.timeout);
 
 		try {
