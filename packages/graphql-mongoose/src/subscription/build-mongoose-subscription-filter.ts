@@ -118,6 +118,16 @@ function applyMongoFilter(doc: unknown, query: Record<string, unknown>): boolean
  * Applies a field-level filter to a document field value.
  * Supports scalar operators, array operators, and logical operators.
  *
+ * IMPORTANT LIMITATION - ObjectId Comparison Reliability:
+ * In-memory ObjectId comparison using === may not work correctly when ObjectIds are
+ * instantiated separately. MongoDB ObjectIds with the same bytes will not be equal
+ * when compared with === because each instance is a distinct object. This function
+ * uses === for ObjectId comparison, which means subscription filters on ObjectId fields
+ * may not match events correctly if the ObjectIds are reconstructed in memory.
+ *
+ * For reliable ObjectId filtering on subscriptions, use BuildMongooseFilter() against
+ * the MongoDB database directly, or serialize/deserialize ObjectIds consistently.
+ *
  * @param fieldValue - The value of the document field.
  * @param filterSpec - The filter specification (e.g., `{ $eq: 'test' }` or `{ $gte: 20, $lte: 40 }`).
  * @returns `true` if the field value matches the filter, `false` otherwise.

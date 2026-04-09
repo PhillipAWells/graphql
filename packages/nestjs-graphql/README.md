@@ -149,6 +149,107 @@ export class AppModule {}
 
 ## Module Features
 
+### Guard Registration Order
+
+When using multiple guards, register them in this order for optimal security and performance:
+
+```typescript
+import { UseGuards } from '@nestjs/common';
+import { QueryComplexityGuard, GraphQLAuthGuard, GraphQLRateLimitGuard } from '@pawells/nestjs-graphql';
+
+@UseGuards(
+  QueryComplexityGuard,     // Static analysis first (fastest, cheap)
+  GraphQLAuthGuard,         // JWT verification second
+  GraphQLRateLimitGuard,    // Rate limiting last
+)
+@Query(() => [Post], { name: 'Posts' })
+async posts(): Promise<Post[]> {
+  return this.postService.findMany();
+}
+```
+
+**This order is critical.** Incorrect order can degrade performance or bypass authentication:
+- `QueryComplexityGuard` performs static AST analysis (no I/O) — register first
+- `GraphQLAuthGuard` validates JWT signatures (moderate cost) — register second
+- `GraphQLRateLimitGuard` checks Redis for rate limits (I/O required) — register last
+
+### BSON Serialization (Optional)
+
+BSON serialization is disabled by default. Enable it only if returning MongoDB BSON types to clients:
+
+```typescript
+import { GraphQLModule } from '@pawells/nestjs-graphql';
+
+@Module({
+  imports: [
+    GraphQLModule.forRoot({
+      autoSchemaFile: 'schema.gql',
+      bson: {
+        enabled: true,
+        maxPayloadSize: 10 * 1024 * 1024, // 10MB default
+      },
+    }),
+  ],
+})
+export class AppModule {}
+```
+
+**When to use:**
+- Returning `ObjectId` fields directly in GraphQL responses
+- Handling large binary payloads from MongoDB
+- Reducing JSON serialization overhead
+
+**Client side:**
+Clients must include `Accept: application/bson` header to receive BSON responses. Without this header, responses are JSON serialized.
+
+### Performance Interceptors
+
+The module registers two performance monitoring interceptors that serve complementary purposes:
+
+#### GraphQLPerformanceInterceptor
+
+Local performance tracking and integration with profiling services (Pyroscope):
+
+```typescript
+@UseInterceptors(GraphQLPerformanceInterceptor)
+@Query(() => [Post], { name: 'Posts' })
+async posts(): Promise<Post[]> {
+  // Execution time is tracked and logged locally
+  // Slow queries are logged with a configurable threshold
+  return this.postService.findMany();
+}
+```
+
+**Behavior:**
+- Tracks resolver execution time
+- Logs queries exceeding the slow query threshold
+- Integrates with Pyroscope for continuous profiling
+- Enabled by default when `@pawells/nestjs-pyroscope` is available
+
+#### GraphQLPerformanceMonitoringInterceptor
+
+Exports metrics to external monitoring services (Prometheus, Datadog):
+
+```typescript
+@UseInterceptors(GraphQLPerformanceMonitoringInterceptor)
+@Query(() => [Post], { name: 'Expensive' })
+async expensive(): Promise<Post[]> {
+  // Metrics are exported to monitoring backends
+  return this.postService.expensive();
+}
+```
+
+**Metrics exported:**
+- Request count and latency histograms
+- Error rates per resolver
+- DataLoader batch sizes
+- Query complexity scores
+- Cache hit/miss ratios
+
+**Integration:**
+- Enabled by default when `@pawells/nestjs-prometheus` or similar is available
+- Integrates with OpenTelemetry for distributed tracing
+
 ### Cache Module
 
 The Cache Module provides Redis-backed caching with automatic storage management, TTL support, and metrics tracking.
@@ -686,6 +787,8 @@ async getCurrentUser(): Promise<string> {
 }
 ```
 
+> **IMPORTANT:** When combining multiple guards, see the [Guard Registration Order](#guard-registration-order) section above. The mandatory order is: `QueryComplexityGuard` → `GraphQLAuthGuard` → `GraphQLRateLimitGuard`. Incorrect order can bypass authentication entirely.
+
 #### GraphQLPublicGuard
 
 Marks resolvers as publicly accessible:
@@ -734,6 +837,8 @@ async expensiveQuery(): Promise<Post[]> {
 }
 ```
 
+> **IMPORTANT:** When combining multiple guards, see the [Guard Registration Order](#guard-registration-order) section above. The mandatory order is: `QueryComplexityGuard` → `GraphQLAuthGuard` → `GraphQLRateLimitGuard`. Incorrect order can bypass authentication entirely.
+
 #### GraphQLRateLimitGuard
 
 Rate limiting per user or IP:
@@ -749,6 +854,8 @@ async createPost(@Args() input: CreatePostInput): Promise<string> {
   return this.postService.create(input);
 }
 ```
+
+> **IMPORTANT:** When combining multiple guards, see the [Guard Registration Order](#guard-registration-order) section above. The mandatory order is: `QueryComplexityGuard` → `GraphQLAuthGuard` → `GraphQLRateLimitGuard`. Incorrect order can bypass authentication entirely.
 
 Configure custom limits:
 

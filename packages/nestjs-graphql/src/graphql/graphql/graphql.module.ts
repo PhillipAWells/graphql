@@ -186,6 +186,12 @@ export class GraphQLModule implements NestModule, OnModuleInit {
    * - The middleware (BsonSerializationMiddleware) is still only registered conditionally
    *   in configure() based on the static BsonConfig field
    *
+   * IMPORTANT LIMITATION:
+   * BsonSerializationMiddleware will NOT be registered when using forRootAsync.
+   * Only BsonSerializationService and BsonResponseInterceptor are registered.
+   * If you require the middleware (e.g., for pre-processing request bodies before parsing),
+   * use forRoot() instead of forRootAsync().
+   *
    * If conditional provider registration for async config becomes important, consider:
    * 1. Wrapping BSON providers with a no-op mode (check config at call time)
    * 2. Using a multi() provider pattern with a factory that checks config
