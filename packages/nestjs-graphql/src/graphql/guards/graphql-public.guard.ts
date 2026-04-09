@@ -1,4 +1,4 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { Reflector, ModuleRef } from '@nestjs/core';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import type { ILazyModuleRefService, IContextualLogger } from '@pawells/nestjs-shared/common';
@@ -73,7 +73,7 @@ export class GraphQLPublicGuard implements CanActivate, ILazyModuleRefService {
 
 		if (!user) {
 			this.Logger?.warn('Non-public resolver accessed without authentication');
-			return false;
+			throw new UnauthorizedException('Authentication required');
 		}
 
 		this.Logger?.debug(`Authenticated user accessing protected resolver: ${user.id ?? user.sub ?? 'unknown'}`);

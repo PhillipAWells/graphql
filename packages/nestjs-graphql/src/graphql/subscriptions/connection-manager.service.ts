@@ -32,7 +32,17 @@ export class ConnectionManagerService implements ILazyModuleRefService {
 	private ConnectionCounter = 0;
 
 	public get ISubscriptionConfig(): ISubscriptionConfig {
-		return this.Module.get<ISubscriptionConfig>('SUBSCRIPTION_CONFIG', { strict: false });
+		try {
+			const Config = this.Module.get<ISubscriptionConfig>('SUBSCRIPTION_CONFIG', { strict: false });
+			if (!Config) {
+				throw new Error('SUBSCRIPTION_CONFIG not found in module');
+			}
+			return Config;
+		} catch (error: unknown) {
+			throw new Error(
+				`Failed to get SUBSCRIPTION_CONFIG: ${error instanceof Error ? error.message : 'unknown error'}`,
+			);
+		}
 	}
 
 	constructor(moduleRef: ModuleRef) {

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
@@ -46,7 +46,7 @@ const HIT_RATE_PERCENTAGE = 100;
  * ```
  */
 @Injectable()
-export class GraphQLCacheService implements ILazyModuleRefService {
+export class GraphQLCacheService implements ILazyModuleRefService, OnModuleInit {
 	public readonly Module: ModuleRef;
 	private readonly CacheStats = {
 		hits: 0,
@@ -65,6 +65,9 @@ export class GraphQLCacheService implements ILazyModuleRefService {
 
 	constructor(moduleRef: ModuleRef) {
 		this.Module = moduleRef;
+	}
+
+	onModuleInit(): void {
 		this.Logger = this.AppLogger.createContextualLogger(GraphQLCacheService.name);
 	}
 
@@ -230,13 +233,10 @@ export class GraphQLCacheService implements ILazyModuleRefService {
 					return;
 				}
 			}
-			// Fallback: try store-specific methods
-			if (typeof (CacheManager as any).reset === 'function') {
-				await (CacheManager as any).reset();
-				this.Logger.warn(`Pattern invalidation for '${pattern}' fell back to clearing entire cache`);
-				return;
-			}
-			this.Logger.warn(`Pattern invalidation not supported for this cache store. Pattern: ${pattern}`);
+			// Pattern invalidation not supported
+			this.Logger.warn(
+				`Pattern-based cache invalidation not supported by store. Pattern: ${pattern}`,
+			);
 		} catch (error) {
 			this.Logger.error(`Failed to invalidate pattern ${pattern}: ${getErrorMessage(error)}`);
 		}
