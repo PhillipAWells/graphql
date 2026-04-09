@@ -1,7 +1,7 @@
 {
   "name": "@pawells/nestjs-graphql",
   "displayName": "@pawells/nestjs-graphql",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "NestJS GraphQL module with guards, decorators, subscriptions, and DataLoaders",
   "keywords": [
     "nestjs",
@@ -60,6 +60,7 @@
     "graphql": ">=16.0.0",
     "graphql-query-complexity": ">=0.12.0",
     "graphql-redis-subscriptions": ">=2.0.0",
+    "graphql-ws": ">=5.0.0",
     "helmet": ">=7.0.0",
     "ioredis": ">=5.0.0",
     "joi": ">=18.0.0",
@@ -105,6 +106,7 @@
     "graphql-query-complexity": "^1.1.0",
     "graphql-redis-subscriptions": "^2.7.0",
     "graphql-subscriptions": "^3.0.0",
+    "graphql-ws": "^5.16.0",
     "helmet": "^8.1.0",
     "ioredis": "^5.10.1",
     "joi": "^18.1.2",
