@@ -130,7 +130,7 @@ export class WebSocketAuthService implements ILazyModuleRefService {
 
 			return Payload.sub;
 		} catch (error: unknown) {
-			this.Logger?.info(`Token validation error: ${getErrorMessage(error)}`);
+			this.Logger?.warn(`Token validation error: ${getErrorMessage(error)}`);
 			return null;
 		}
 	}

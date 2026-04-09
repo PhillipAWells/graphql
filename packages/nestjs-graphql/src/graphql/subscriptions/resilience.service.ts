@@ -182,8 +182,7 @@ export class ResilienceService implements OnModuleDestroy, ILazyModuleRefService
 
 		// Set shutdown timeout
 		this.ShutdownTimeout = setTimeout(() => {
-			this.Logger.error('Graceful shutdown timeout exceeded');
-			throw new Error('Graceful shutdown timeout exceeded');
+			this.Logger.warn('Graceful shutdown timeout exceeded - proceeding with hard shutdown');
 		}, this.ISubscriptionConfig.resilience.shutdown.timeout);
 
 		try {
