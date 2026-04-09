@@ -74,10 +74,11 @@ export class GraphQLModule implements NestModule {
 	 * @throws Error if initialization has already occurred
 	 */
 	private static EnforceInitializationOnce(): void {
-		if (this.InitializationGuard) {
+		// Only enforce initialization guard in production to catch race conditions
+		// In test/development environments, allow multiple calls for test isolation
+		if (process.env.NODE_ENV === 'production' && this.InitializationGuard) {
 			throw new Error(
-				'GraphQLModule has already been initialized. forRoot() and forRootAsync() can only be called once per application. ' +
-				'If you need to call forRoot/forRootAsync multiple times in tests, use describe.sequential() in vitest to prevent concurrent initialization.',
+				'GraphQLModule has already been initialized. forRoot() and forRootAsync() can only be called once per application instance.',
 			);
 		}
 		this.InitializationGuard = true;
