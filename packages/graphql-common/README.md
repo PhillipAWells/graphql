@@ -23,6 +23,7 @@ Peer dependencies that must be present in your project:
 
 - `@apollo/client >=3.0.0`
 - `graphql >=16.0.0`
+- `rxjs >=7.0.0`
 
 Runtime dependencies bundled with this package: `async-mutex`, `graphql-subscriptions`, `graphql-type-json`.
 
