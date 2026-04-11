@@ -240,7 +240,7 @@ export class RateLimitService implements OnModuleInit, OnModuleDestroy, ILazyMod
 				current: Current,
 			};
 		} catch (error) {
-			this.Logger.error(`Storage rate limit check failed for ${clientId}:`, getErrorMessage(error));
+			this.Logger.error(`Storage rate limit check failed for ${clientId.replace(/[\n\r]/g, ' ')}:`, getErrorMessage(error));
 			// Fall back to in-memory on storage error
 			return this.CheckLimitInMemory(clientId, config);
 		}
@@ -288,7 +288,7 @@ export class RateLimitService implements OnModuleInit, OnModuleDestroy, ILazyMod
 	 */
 	public SetOperationConfig(operation: string, config: IRateLimitConfig): void {
 		this.OperationConfigs.set(operation, config);
-		this.Logger.info(`Set custom rate limit for operation '${operation}': ${config.maxRequests} requests per ${config.windowMs}ms`);
+		this.Logger.info(`Set custom rate limit for operation '${operation.replace(/[\n\r]/g, ' ')}': ${config.maxRequests} requests per ${config.windowMs}ms`);
 	}
 
 	/**
@@ -313,12 +313,12 @@ export class RateLimitService implements OnModuleInit, OnModuleDestroy, ILazyMod
 			try {
 				await this.Storage.Reset(clientId);
 			} catch (error) {
-				this.Logger.error(`Failed to reset rate limit in storage for ${clientId}:`, getErrorMessage(error));
+				this.Logger.error(`Failed to reset rate limit in storage for ${clientId.replace(/[\n\r]/g, ' ')}:`, getErrorMessage(error));
 			}
 		} else {
 			this.Store.delete(clientId);
 		}
-		this.Logger.info(`Reset rate limit for client: ${clientId}`);
+		this.Logger.info(`Reset rate limit for client: ${clientId.replace(/[\n\r]/g, ' ')}`);
 	}
 
 	/**
@@ -346,7 +346,7 @@ export class RateLimitService implements OnModuleInit, OnModuleDestroy, ILazyMod
 					};
 				}
 			} catch (error) {
-				this.Logger.error(`Storage status check failed for ${clientId}:`, getErrorMessage(error));
+				this.Logger.error(`Storage status check failed for ${clientId.replace(/[\n\r]/g, ' ')}:`, getErrorMessage(error));
 				// Fall back to in-memory store only on storage error
 			}
 		}
