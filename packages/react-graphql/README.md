@@ -112,6 +112,30 @@ function ConnectionControl() {
 }
 ```
 
+### useGraphQLContext
+
+Low-level hook that returns the full `GraphQLContext` value containing both `connectionState` and `reconnect`. Use this when you need both values in the same component and want to avoid two separate hook calls. Throws if called outside a `GraphQLProvider`.
+
+```tsx
+import { useGraphQLContext, GraphQLConnectionState } from '@pawells/react-graphql';
+
+function ConnectionBanner() {
+  const { connectionState, reconnect } = useGraphQLContext();
+
+  if (connectionState === GraphQLConnectionState.Error) {
+    return (
+      <div className="banner error">
+        Connection error. <button onClick={reconnect}>Retry</button>
+      </div>
+    );
+  }
+
+  return null;
+}
+```
+
+`useConnectionState()` and `useGraphQLReconnect()` are thin wrappers around `useGraphQLContext()` — prefer those for single-value access.
+
 ## Connection States
 
 - **Connecting** — Initial connection attempt or explicit reconnection
