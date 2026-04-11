@@ -1,5 +1,6 @@
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
+import { RedisPubSub } from 'graphql-redis-subscriptions';
 import { ProfileMethod } from '@pawells/nestjs-pyroscope';
 import type { ILazyModuleRefService, IContextualLogger } from '@pawells/nestjs-shared/common';
 import { AppLogger, getErrorMessage, getErrorStack } from '@pawells/nestjs-shared/common';
@@ -19,7 +20,7 @@ export class SubscriptionService implements OnModuleDestroy, ILazyModuleRefServi
 		return this.AppLogger.createContextualLogger(SubscriptionService.name);
 	}
 
-	private get PubSub(): any | undefined {
+	private get PubSub(): RedisPubSub | undefined {
 		try {
 			return this.Module.get('GRAPHQL_PUBSUB', { strict: false });
 		} catch {
