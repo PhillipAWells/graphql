@@ -1,4 +1,4 @@
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 import { AppLogger, getErrorStack } from '@pawells/nestjs-shared/common';
 
 /**
@@ -47,14 +47,14 @@ export function CacheEvict(options: ICacheEvictOptions) {
 	const Logger = new AppLogger(undefined, 'CacheEvictDecorator');
 
 	return function(
-		_target: any,
+		_target: unknown,
 		propertyKey: string,
 		descriptor: PropertyDescriptor,
 	) {
 		const OriginalMethod = descriptor.value;
 
-		descriptor.value = async function(...args: any[]) {
-			const CacheManager = (this as any)[CACHE_MANAGER] ?? (this as any).cacheManager;
+		descriptor.value = async function(...args: unknown[]) {
+			const CacheManager = (this as { [CACHE_MANAGER]?: Cache })[CACHE_MANAGER] ?? (this as { cacheManager?: Cache }).cacheManager;
 			if (!CacheManager) {
 				Logger.warn(`Cache manager not found for ${propertyKey}, executing without cache eviction`);
 				return OriginalMethod.apply(this, args);
@@ -66,7 +66,8 @@ export function CacheEvict(options: ICacheEvictOptions) {
 
 				// Evict cache keys matching pattern
 				try {
-					const { store } = (CacheManager as any);
+					type ICacheManagerWithStore = { store?: { keys?: (pattern: string) => Promise<string[]> } };
+					const { store } = (CacheManager as ICacheManagerWithStore);
 					if (store && typeof store.keys === 'function') {
 						const Keys = await store.keys(options.pattern);
 						if (Keys && Keys.length > 0) {
