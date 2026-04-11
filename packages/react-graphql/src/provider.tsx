@@ -39,8 +39,8 @@ export function GraphQLProvider({ options, children, fallback }: IGraphQLProvide
 
 		return (): void => {
 			try {
-				unsubscribeRef.current?.();
 				result.dispose();
+				unsubscribeRef.current?.();
 				clientRef.current = null;
 			} catch (error) {
 				console.error('Error disposing GraphQL client:', error);
@@ -68,7 +68,7 @@ export function GraphQLProvider({ options, children, fallback }: IGraphQLProvide
 
 	return (
 		<GraphQLContext.Provider value={{ connectionState, reconnect }}>
-			<ApolloProvider client={clientRef.current.client as ApolloClient}>
+			<ApolloProvider client={clientRef.current.client}>
 				{children}
 			</ApolloProvider>
 		</GraphQLContext.Provider>
