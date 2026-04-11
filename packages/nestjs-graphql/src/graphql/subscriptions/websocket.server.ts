@@ -2,7 +2,7 @@ import { Injectable, OnApplicationBootstrap, OnModuleDestroy } from '@nestjs/com
 import { HttpAdapterHost , ModuleRef } from '@nestjs/core';
 import { GraphQLSchemaHost } from '@nestjs/graphql';
 import { WebSocketServer } from 'ws';
-import { useServer } from 'graphql-ws/lib/use/ws';
+import { useServer } from 'graphql-ws/use/ws';
 import type { ILazyModuleRefService } from '@pawells/nestjs-shared/common';
 import { AppLogger } from '@pawells/nestjs-shared/common';
 import { WebSocketAuthService } from './websocket-auth.service.js';
