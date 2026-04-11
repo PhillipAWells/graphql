@@ -38,6 +38,7 @@
   },
   "dependencies": {
     "@graphql-codegen/plugin-helpers": ">=6.2.1",
+    "code-block-writer": ">=13.0.3",
     "graphql-ws": ">=6.0.8",
     "strongly-typed-events": ">=3.0.11"
   },
