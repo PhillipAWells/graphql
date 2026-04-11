@@ -22,7 +22,7 @@ import type { IContextualLogger } from '@pawells/nestjs-shared/common';
  * ```
  */
 @Injectable()
-export class GraphQLInputValidationPipe implements PipeTransform<any> {
+export class GraphQLInputValidationPipe implements PipeTransform<unknown> {
 	// eslint-disable-next-line @typescript-eslint/prefer-readonly
 	private ModuleRef?: ModuleRef;
 
@@ -37,9 +37,8 @@ export class GraphQLInputValidationPipe implements PipeTransform<any> {
 	constructor(moduleRef?: ModuleRef) {
 		this.ModuleRef = moduleRef;
 	}
-	 
+
 	// Maximum allowed JSON-serialized input size in characters (approx. 100KB)
-	// eslint-disable-next-line no-magic-numbers
 	private readonly MAX_INPUT_SIZE = 100_000;
 
 	// XSS-specific patterns only — SQL/NoSQL injection protection is handled by
@@ -55,9 +54,9 @@ export class GraphQLInputValidationPipe implements PipeTransform<any> {
 	 *
 	 * @param value - The input value to validate
 	 * @param metadata - Metadata about the argument
-	 * @returns any - The validated and transformed value
+	 * @returns The validated and transformed value
 	 */
-	public async transform(value: any, metadata: ArgumentMetadata): Promise<any> {
+	public async transform(value: unknown, metadata: ArgumentMetadata): Promise<unknown> {
 		const { metatype } = metadata;
 
 		// Skip validation for primitive types and null/undefined
@@ -100,7 +99,7 @@ export class GraphQLInputValidationPipe implements PipeTransform<any> {
 	 * @param value - The input value to check
 	 * @throws BadRequestException if suspicious patterns detected
 	 */
-	private PerformSecurityChecks(value: any): void {
+	private PerformSecurityChecks(value: unknown): void {
 		// Check for circular references before attempting JSON.stringify
 		if (this.HasCircularReferences(value)) {
 			this.Logger?.warn('Circular reference detected in input data');
@@ -139,7 +138,7 @@ export class GraphQLInputValidationPipe implements PipeTransform<any> {
 	 * Recursively checks object properties for XSS patterns.
 	 * SQL/NoSQL injection is prevented at the database layer via parameterized queries.
 	 */
-	private CheckForXssPatterns(obj: any, path = ''): void {
+	private CheckForXssPatterns(obj: unknown, path = ''): void {
 		if (typeof obj !== 'object' || obj === null) {
 			if (typeof obj === 'string') {
 				for (const Pattern of this.XSS_PATTERNS) {
@@ -157,7 +156,7 @@ export class GraphQLInputValidationPipe implements PipeTransform<any> {
 
 		for (const Key in obj) {
 			if (Object.prototype.hasOwnProperty.call(obj, Key)) {
-				const Value = obj[Key];
+				const Value = (obj as Record<string, unknown>)[Key];
 				const CurrentPath = path ? `${path}.${Key}` : Key;
 
 				if (typeof Value === 'string') {
@@ -185,7 +184,7 @@ export class GraphQLInputValidationPipe implements PipeTransform<any> {
 	 * @param visited - WeakSet of already visited objects
 	 * @returns boolean - True if a circular reference is detected
 	 */
-	private HasCircularReferences(obj: any, visited = new WeakSet<object>()): boolean {
+	private HasCircularReferences(obj: unknown, visited = new WeakSet<object>()): boolean {
 		if (typeof obj !== 'object' || obj === null) {
 			return false;
 		}
@@ -213,7 +212,7 @@ export class GraphQLInputValidationPipe implements PipeTransform<any> {
 
 		for (const Key in obj) {
 			if (Object.prototype.hasOwnProperty.call(obj, Key)) {
-				if (this.HasCircularReferences(obj[Key], visited)) {
+				if (this.HasCircularReferences((obj as Record<string, unknown>)[Key], visited)) {
 					return true;
 				}
 			}
@@ -228,8 +227,8 @@ export class GraphQLInputValidationPipe implements PipeTransform<any> {
 	 * @param metatype - The type to check
 	 * @returns boolean - True if validation should be performed
 	 */
-	private ShouldValidate(metatype: any): boolean {
-		const PrimitiveTypes = [String, Boolean, Number, Array, Object, Date];
+	private ShouldValidate(metatype: unknown): boolean {
+		const PrimitiveTypes: unknown[] = [String, Boolean, Number, Array, Object, Date];
 		return !PrimitiveTypes.includes(metatype);
 	}
 
@@ -238,26 +237,26 @@ export class GraphQLInputValidationPipe implements PipeTransform<any> {
 	 *
 	 * @param errors - The validation errors
 	 * @param parentPath - The parent path for nested errors
-	 * @returns any[] - Detailed error objects
+	 * @returns Detailed error objects
 	 */
-	private FormatDetailedErrors(errors: ValidationError[], parentPath = ''): any[] {
-		const FormattedErrors: any[] = [];
+	private FormatDetailedErrors(errors: ValidationError[], parentPath = ''): Array<Record<string, unknown>> {
+		const FormattedErrors: Array<Record<string, unknown>> = [];
 
-		for (const Error of errors) {
-			const FieldPath = parentPath ? `${parentPath}.${Error.property}` : Error.property;
+		for (const ValidationErr of errors) {
+			const FieldPath = parentPath ? `${parentPath}.${ValidationErr.property}` : ValidationErr.property;
 
 			// Add constraints for this field
-			if (Error.constraints) {
+			if (ValidationErr.constraints) {
 				FormattedErrors.push({
 					field: FieldPath,
-					value: Error.value,
-					constraints: Error.constraints,
+					value: ValidationErr.value,
+					constraints: ValidationErr.constraints,
 				});
 			}
 
 			// Handle nested validation errors
-			if (Error.children && Error.children.length > 0) {
-				const NestedErrors = this.FormatDetailedErrors(Error.children, FieldPath);
+			if (ValidationErr.children && ValidationErr.children.length > 0) {
+				const NestedErrors = this.FormatDetailedErrors(ValidationErr.children, FieldPath);
 				FormattedErrors.push(...NestedErrors);
 			}
 		}

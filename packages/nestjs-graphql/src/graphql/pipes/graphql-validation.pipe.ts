@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
-import { ValidationError } from 'class-validator';
+import { ValidationError, ValidatorOptions } from 'class-validator';
 import { AppLogger, BaseValidationPipe } from '@pawells/nestjs-shared/common';
 import type { IContextualLogger } from '@pawells/nestjs-shared/common';
 
@@ -42,7 +42,7 @@ export class GraphQLValidationPipe extends BaseValidationPipe {
 	 *
 	 * @returns Validation options for class-validator
 	 */
-	protected override GetValidationOptions(): any {
+	protected override GetValidationOptions(): ValidatorOptions & { transform?: boolean } {
 		return {
 			whitelist: true,
 			forbidNonWhitelisted: true,
@@ -64,9 +64,9 @@ export class GraphQLValidationPipe extends BaseValidationPipe {
 	 * Formats validation errors for GraphQL responses
 	 *
 	 * @param errors - The validation errors
-	 * @returns any - Structured error response
+	 * @returns Structured error response
 	 */
-	protected override FormatValidationErrors(errors: ValidationError[]): any {
+	protected override FormatValidationErrors(errors: ValidationError[]): unknown {
 		return {
 			message: 'Validation failed',
 			errors: errors.map(error => ({
