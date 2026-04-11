@@ -70,7 +70,7 @@ export class GraphQLRateLimitGuard implements CanActivate, ILazyModuleRefService
 
 			if (!Result.allowed) {
 				this.Logger?.warn(
-					`Rate limit exceeded for client ${ClientId}. Reset in ${Result.resetTime - Date.now()}ms`,
+					`Rate limit exceeded for client ${ClientId.replace(/[\n\r]/g, ' ')}. Reset in ${Result.resetTime - Date.now()}ms`,
 				);
 
 				throw new HttpException(
@@ -97,7 +97,7 @@ export class GraphQLRateLimitGuard implements CanActivate, ILazyModuleRefService
 				throw error;
 			}
 
-			this.Logger?.error(`Rate limit check failed for client ${ClientId}: ${getErrorMessage(error)}`);
+			this.Logger?.error(`Rate limit check failed for client ${ClientId.replace(/[\n\r]/g, ' ')}: ${getErrorMessage(error)}`);
 			throw new HttpException('Rate limit service unavailable', HttpStatus.SERVICE_UNAVAILABLE);
 		}
 	}
