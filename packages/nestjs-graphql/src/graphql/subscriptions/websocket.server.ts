@@ -94,7 +94,6 @@ export class GraphQLWebSocketServer implements OnApplicationBootstrap, OnModuleD
 	 * @param config WebSocket server configuration
 	 */
 	// eslint-disable-next-line require-await
-	// eslint-disable-next-line require-await
 	public async Initialize(config: IWebSocketServerConfig): Promise<void> {
 		const { HttpAdapterHost: HttpAdapterHostVar } = this;
 		if (!HttpAdapterHostVar?.httpAdapter) {

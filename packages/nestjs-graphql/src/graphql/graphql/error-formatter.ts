@@ -228,7 +228,7 @@ export class GraphQLErrorFormatter {
 	 */
 	private static GetUserId(context: unknown): string | number | undefined {
 		if (typeof context === 'object' && context !== null && 'user' in context) {
-			const user = (context as any).user;
+			const { user } = (context as any);
 			if (typeof user === 'object' && user !== null && 'id' in user) {
 				return user.id;
 			}

@@ -228,7 +228,7 @@ describe('GraphQLModule', () => {
 			// Verify that the module has the expected structure with single config resolution
 			expect(module.providers).toBeDefined();
 			// Check that BsonSerializationService provider exists and uses GraphQLAsyncConfigToken
-			const bsonProvider = module.providers?.find(
+			const _bsonProvider = module.providers?.find(
 				(p: any) => p.provide === 'BsonSerializationService' || p?.useFactory?.toString().includes('BsonSerializationService'),
 			);
 			// The provider structure should have inject array that references the config token
@@ -264,8 +264,8 @@ describe('GraphQLModule', () => {
 
 			// Create a mock MiddlewareConsumer
 			const mockConsumer = {
-				apply: (middleware: any) => ({
-					forRoutes: (routes: string | string[]) => mockConsumer,
+				apply: (_middleware: any) => ({
+					forRoutes: (_routes: string | string[]) => mockConsumer,
 				}),
 			};
 

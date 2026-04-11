@@ -69,7 +69,7 @@ describe('DataLoaderFactory', () => {
 
 		describe('Error handling - too few results', () => {
 			it('should pad with error objects when batch function returns fewer results', async () => {
-				const batchLoadFn = vi.fn(async (keys: readonly string[]) => {
+				const batchLoadFn = vi.fn(async (_keys: readonly string[]) => {
 					// Intentionally return fewer results than keys
 					return ['value-key1'];
 				});
@@ -89,7 +89,7 @@ describe('DataLoaderFactory', () => {
 			});
 
 			it('should log warning when batch function returns too few results', async () => {
-				const batchLoadFn = vi.fn(async (keys: readonly string[]) => {
+				const batchLoadFn = vi.fn(async (_keys: readonly string[]) => {
 					return ['value-key1']; // Only 1 result for 3 keys
 				});
 
@@ -118,7 +118,7 @@ describe('DataLoaderFactory', () => {
 
 		describe('Error handling - too many results', () => {
 			it('should handle extra results properly by truncating to exact key count', async () => {
-				const batchLoadFn = vi.fn(async (keys: readonly string[]) => {
+				const batchLoadFn = vi.fn(async (_keys: readonly string[]) => {
 					// Return more results than keys - 5 for 3
 					return [
 						'value-key1',
@@ -145,7 +145,7 @@ describe('DataLoaderFactory', () => {
 			});
 
 			it('should log warning when batch function returns too many results', async () => {
-				const batchLoadFn = vi.fn(async (keys: readonly string[]) => {
+				const batchLoadFn = vi.fn(async (_keys: readonly string[]) => {
 					// Return 5 results for 3 keys
 					return [
 						'value-key1',
@@ -170,7 +170,7 @@ describe('DataLoaderFactory', () => {
 			});
 
 			it('should replace excess results with error objects internally', async () => {
-				const batchLoadFn = vi.fn(async (keys: readonly string[]) => {
+				const batchLoadFn = vi.fn(async (_keys: readonly string[]) => {
 					// Return 5 results for 3 keys
 					return [
 						'value1',
