@@ -38,8 +38,8 @@ export function GraphQLProvider({ options, children, fallback }: IGraphQLProvide
 
 		return (): void => {
 			try {
-				result.dispose();
 				unsubscribeRef.current?.();
+				result.dispose();
 				clientRef.current = null;
 			} catch (error) {
 				console.error('Error disposing GraphQL client:', error);
@@ -53,6 +53,8 @@ export function GraphQLProvider({ options, children, fallback }: IGraphQLProvide
 			if (clientRef.current) {
 				clientRef.current.dispose();
 			}
+			clientRef.current = null;
+			unsubscribeRef.current = null;
 			const result = CreateGraphQLClient(options);
 			clientRef.current = result;
 			unsubscribeRef.current = result.onStateChange(setConnectionState);
