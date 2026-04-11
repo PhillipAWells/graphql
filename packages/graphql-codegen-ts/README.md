@@ -21,12 +21,13 @@ npm install --save-dev @pawells/graphql-codegen-ts
 
 Peer dependencies that must be present in your project:
 
-- `@apollo/client >=3.0.0`
+- `@apollo/client >=4.0.0`
 - `@graphql-codegen/typed-document-node >=5.0.0`
 - `@graphql-codegen/typescript >=4.0.0`
 - `@graphql-codegen/typescript-apollo-client-helpers >=3.0.0`
 - `@graphql-codegen/typescript-operations >=4.0.0`
 - `graphql >=16.0.0`
+- `rxjs >=7.0.0`
 
 This plugin requires **four co-plugins** to be configured in your `codegen.ts`: `typescript`, `typescript-operations`, `typed-document-node`, and `typescript-apollo-client-helpers`. If any are missing, codegen will throw an error listing all required plugins.
 
@@ -209,7 +210,7 @@ main().catch(console.error);
 
 ### IsBrowser Option
 
-The `IsBrowser` option in `IGraphQLClientOptions` is accepted for forward compatibility but is currently unused. It was intended for runtime environment detection to conditionally enable browser-specific features (such as automatic cookie handling or localStorage integration).
+The `IsBrowser` option in `IGraphQLClientOptions` is deprecated and currently unused. It was intended for runtime environment detection to conditionally enable browser-specific features (such as automatic cookie handling or localStorage integration).
 
 ```typescript
 new GraphQLClient({
