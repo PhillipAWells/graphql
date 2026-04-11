@@ -115,7 +115,12 @@ export class GraphQLRolesGuard implements CanActivate, ILazyModuleRefService {
 
 		if (user.scope || user.scopes) {
 			const Scopes = user.scope ?? user.scopes;
-			return Array.isArray(Scopes) ? Scopes : [Scopes];
+			if (Scopes) {
+				if (Array.isArray(Scopes)) {
+					return Scopes;
+				}
+				return [Scopes];
+			}
 		}
 
 		// Default to empty array if no roles found

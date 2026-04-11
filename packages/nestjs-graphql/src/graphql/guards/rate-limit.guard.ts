@@ -108,7 +108,7 @@ export class GraphQLRateLimitGuard implements CanActivate, ILazyModuleRefService
 	 * @param request - The HTTP request object
 	 * @returns string - Client identifier
 	 */
-	private GetClientIdentifier(request: { user?: { Id?: string; sub?: string }; ip?: string; headers?: Record<string, string | string[] | undefined> }): string {
+	private GetClientIdentifier(request: { user?: { id?: string; sub?: string }; ip?: string; headers?: Record<string, string | string[] | undefined> }): string {
 		// Prefer user ID if authenticated
 		if (request.user?.id) {
 			return `user:${request.user.id}`;
