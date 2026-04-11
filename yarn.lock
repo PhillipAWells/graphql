@@ -3487,6 +3487,7 @@ __metadata:
   dependencies:
     "@graphql-codegen/plugin-helpers": "npm:>=6.2.1"
     "@types/node": "npm:^25.6.0"
+    code-block-writer: "npm:>=13.0.3"
     graphql: "npm:^16.13.2"
     react: "npm:^19.2.5"
   peerDependencies:
@@ -3507,6 +3508,7 @@ __metadata:
     "@graphql-codegen/plugin-helpers": "npm:>=6.2.1"
     "@pawells/graphql-common": "npm:^2.0.0"
     "@types/node": "npm:^25.6.0"
+    code-block-writer: "npm:>=13.0.3"
     graphql: "npm:^16.13.2"
     graphql-ws: "npm:>=6.0.8"
     rxjs: "npm:^7.8.2"
@@ -6139,6 +6141,13 @@ __metadata:
   version: 1.1.2
   resolution: "cluster-key-slot@npm:1.1.2"
   checksum: 10c0/d7d39ca28a8786e9e801eeb8c770e3c3236a566625d7299a47bb71113fb2298ce1039596acb82590e598c52dbc9b1f088c8f587803e697cb58e1867a95ff94d3
+  languageName: node
+  linkType: hard
+
+"code-block-writer@npm:>=13.0.3":
+  version: 13.0.3
+  resolution: "code-block-writer@npm:13.0.3"
+  checksum: 10c0/87db97b37583f71cfd7eced8bf3f0a0a0ca53af912751a734372b36c08cd27f3e8a4878ec05591c0cd9ae11bea8add1423e132d660edd86aab952656dd41fd66
   languageName: node
   linkType: hard
 
