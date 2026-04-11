@@ -341,15 +341,41 @@ const value = await cacheService.Get('key');
 // Set value with TTL (milliseconds)
 await cacheService.Set('key', value, 60000); // 1 minute
 
-// Delete specific key
+// Delete specific key or array of keys
 await cacheService.Del('key');
+await cacheService.Del(['key1', 'key2']);
 
 // Clear all cache
 await cacheService.Clear();
 
+// Check whether a key exists without returning its value
+const exists = await cacheService.Exists('key');
+
+// Get or set using cache-aside pattern — calls factory only on cache miss
+const user = await cacheService.GetOrSet(
+  `user:${id}`,
+  () => this.db.user.findUnique({ where: { id } }),
+  300000, // TTL in milliseconds (optional)
+);
+
+// Invalidate all keys matching a glob pattern (requires Redis)
+// Returns the number of keys deleted
+const removed = await cacheService.InvalidatePattern('user:*');
+
 // Get cache statistics
 const stats = cacheService.GetStats();
+
+// Reset all cache statistics counters back to zero
+cacheService.ResetStats();
 ```
+
+**`Exists(key: string): Promise<boolean>`** — Returns `true` if the key is present in the cache, `false` otherwise. On Redis errors the method returns `false` rather than throwing.
+
+**`GetOrSet<T>(key, factory, ttl?): Promise<T>`** — Implements the cache-aside pattern. If the key is present the cached value is returned immediately. On a miss, `factory()` is awaited, the result is stored under `key` with the optional `ttl` (milliseconds), and the value is returned. Throws if `factory()` throws.
+
+**`InvalidatePattern(pattern: string): Promise<number>`** — Deletes every key matching `pattern` using a Redis `SCAN`-based key lookup. The pattern follows Redis glob syntax (e.g. `user:*`, `session:?`, `cache:[abc]`). Returns the number of keys deleted. Returns `0` if no keys match or if the backing store does not support pattern-based key enumeration. Does not throw on errors — logs them and returns `0`.
+
+**`ResetStats(): void`** — Resets all statistics counters (`hits`, `misses`, `sets`, `deletes`, `clears`, `errors`, `hitRate`, `evictions`, etc.) back to zero and clears the in-memory operation timing buffers.
 
 ### GraphQL Configuration
 
@@ -668,10 +694,10 @@ import { GraphQLWebSocketServer } from '@pawells/nestjs-graphql';
   ],
   providers: [GraphQLWebSocketServer],
 })
-export class AppModule implements OnModuleInit {
+export class AppModule implements OnApplicationBootstrap {
   constructor(private wsServer: GraphQLWebSocketServer) {}
 
-  onModuleInit() {
+  onApplicationBootstrap() {
     this.wsServer.configure({
       path: '/graphql/subscriptions',
       maxPayloadSize: 102400,  // 100KB
@@ -682,6 +708,8 @@ export class AppModule implements OnModuleInit {
   }
 }
 ```
+
+> **Note:** `GraphQLWebSocketServer` uses `onApplicationBootstrap` — not `onModuleInit`. The WebSocket server must be configured after all modules have fully initialized and the Apollo schema has been built. Calling `configure()` during `onModuleInit` risks running before the schema is ready, which causes the server to silently skip initialization.
 
 ### Error Handling
 
