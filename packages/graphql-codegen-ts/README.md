@@ -206,6 +206,33 @@ async function main() {
 main().catch(console.error);
 ```
 
+## Deprecated Exports
+
+### `GraphQLClientOptions`
+
+The `GraphQLClientOptions` type alias is deprecated. It is still exported for backward compatibility but will be removed in a future major version.
+
+```typescript
+// Deprecated — do not use in new code
+import type { GraphQLClientOptions } from '@pawells/graphql-codegen-ts';
+
+// Use this instead
+import type { IGraphQLClientOptions } from '@pawells/graphql-codegen-ts';
+```
+
+`GraphQLClientOptions` is identical to `IGraphQLClientOptions`. Replace any existing usages with `IGraphQLClientOptions` directly.
+
+### `TGraphQLClientOptions`
+
+`TGraphQLClientOptions` is a type alias for `IGraphQLClientOptions` exported under the T-prefixed naming convention used elsewhere in the monorepo. It is not deprecated and can be used interchangeably with `IGraphQLClientOptions`.
+
+The `ApolloWrapper` constructor signature shown elsewhere in this README accepts `GraphQLClientOptions` — this is the deprecated alias. Prefer `IGraphQLClientOptions` in new code:
+
+```typescript
+// Preferred
+const client = new ApolloWrapper({} as IGraphQLClientOptions);
+```
+
 ## Known Limitations
 
 ### IsBrowser Option
