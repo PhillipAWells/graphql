@@ -143,8 +143,8 @@ describe('GraphQL Module - BSON Configuration Branch', () => {
 		expect(module).toBeDefined();
 		expect(module.providers).toBeDefined();
 		// The module should include providers for BSON services
-		const providerTokens = module.providers?.map((p: any) => p.provide || p).filter(Boolean);
-		expect(providerTokens?.length || 0).toBeGreaterThan(0);
+		const providerTokens = module.providers?.map((p: any) => p.provide ?? p).filter(Boolean);
+		expect((providerTokens?.length) ?? 0).toBeGreaterThan(0);
 	});
 
 	// Test when bson.enabled = false
@@ -160,8 +160,8 @@ describe('GraphQL Module - BSON Configuration Branch', () => {
 
 		expect(module).toBeDefined();
 		expect(module.providers).toBeDefined();
-		const providerTokens = module.providers?.map((p: any) => p.provide || p).filter(Boolean);
-		expect(providerTokens?.length || 0).toBeGreaterThan(0);
+		const providerTokens = module.providers?.map((p: any) => p.provide ?? p).filter(Boolean);
+		expect((providerTokens?.length) ?? 0).toBeGreaterThan(0);
 	});
 
 	// Test when bson is not provided (undefined)

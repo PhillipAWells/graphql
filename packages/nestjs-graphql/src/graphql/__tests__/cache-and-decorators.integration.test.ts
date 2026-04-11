@@ -419,7 +419,7 @@ describe('Cache Service and Decorators - Integration Tests', () => {
 		});
 
 		it('should apply Cacheable decorator with custom key generator', () => {
-			const keyGenerator = (args: any[], context: any) => `custom:${args[0]}`;
+			const keyGenerator = (args: any[], _context: any) => `custom:${args[0]}`;
 			const decorator = Cacheable({ keyGenerator });
 
 			expect(decorator).toBeDefined();

@@ -47,7 +47,7 @@ describe('GraphQL Performance Service - Branch Coverage', () => {
 
 	describe('Slow Query Detection - Timing Threshold Branches', () => {
 		it('should log warning for query exceeding slow threshold', async () => {
-			const slowThreshold = 1000; // 1 second
+			const _slowThreshold = 1000; // 1 second
 
 			await service.Measure('slowQuery', async () => {
 				await new Promise(resolve => setTimeout(resolve, 1100));
@@ -422,7 +422,7 @@ describe('GraphQL Performance Service - Branch Coverage', () => {
 				await service.Measure(`op${i}`, () => 'result');
 			}
 
-			const elapsed = Date.now() - start;
+			const _elapsed = Date.now() - start;
 			const stats = service.GetStats();
 
 			// Should have positive ops/sec

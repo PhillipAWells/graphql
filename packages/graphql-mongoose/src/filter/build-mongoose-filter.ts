@@ -1,5 +1,5 @@
 import { FilterQuery } from 'mongoose';
-import { TFilterSchema } from './filter-schema.interface';
+import { TFilterSchema, IFieldDescriptor } from './filter-schema.interface';
 import { BuildScalarFieldFilter } from './build-scalar-filter';
 
 /**
@@ -158,11 +158,12 @@ export function BuildMongooseFilter<TDoc>(
 		}
 
 		// Build the scalar field filter for this field
-		const descriptor = fieldDescriptor as any;
+		const descriptor = fieldDescriptor as IFieldDescriptor;
 		const scalarFieldFilter = BuildScalarFieldFilter(
 			inputValue as Record<string, unknown> | undefined,
 			descriptor.MongoField,
 			descriptor.Type,
+			schema,
 		);
 
 		// Accumulate results (merge into mongoFilter)

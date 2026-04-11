@@ -74,6 +74,7 @@ export function BuildScalarFieldFilter(
 	fieldInput: Record<string, unknown> | undefined,
 	mongoField: string,
 	fieldType: string,
+	schema?: Record<string, unknown>,
 ): Record<string, unknown> {
 	if (fieldInput === undefined || fieldInput === null) {
 		return {};
@@ -113,9 +114,17 @@ export function BuildScalarFieldFilter(
 			}
 
 			if (operatorKey === 'ElemMatch') {
-				// For ElemMatch, the value is already a filter object that should be
-				// applied to each element. Pass it through as-is.
-				mongoFieldFilter.$elemMatch = operatorValue;
+				// For ElemMatch, recursively validate the operand through schema-driven validation
+				// if schema is available. This prevents injection of arbitrary MongoDB operators.
+				if (schema !== undefined && typeof operatorValue === 'object' && operatorValue !== null) {
+					// Lazy load BuildMongooseFilter to avoid circular dependency
+					// eslint-disable-next-line @typescript-eslint/no-var-requires
+					const { BuildMongooseFilter: buildMongooseFilterFn } = require('./build-mongoose-filter');
+					const validatedFilter = buildMongooseFilterFn(operatorValue, schema);
+					mongoFieldFilter.$elemMatch = validatedFilter;
+				} else {
+					mongoFieldFilter.$elemMatch = operatorValue;
+				}
 				continue;
 			}
 		}

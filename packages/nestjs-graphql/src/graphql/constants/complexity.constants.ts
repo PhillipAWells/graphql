@@ -15,5 +15,10 @@ export const QUERY_COMPLEXITY_CACHE_CLEANUP_INTERVAL_MS = 600_000; // 10 minutes
 export const QUERY_COMPLEXITY_CACHE_MAX_SIZE = 1_000;
 
 // Cache eviction thresholds (in milliseconds)
-export const QUERY_COMPLEXITY_CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
-export const QUERY_COMPLEXITY_CACHE_IDLE_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes
+const MINUTES_30 = 30;
+const MINUTES_5 = 5;
+const SECONDS_PER_MINUTE = 60;
+const MS_PER_SECOND = 1000;
+
+export const QUERY_COMPLEXITY_CACHE_TTL_MS = MINUTES_30 * SECONDS_PER_MINUTE * MS_PER_SECOND; // 30 minutes
+export const QUERY_COMPLEXITY_CACHE_IDLE_THRESHOLD_MS = MINUTES_5 * SECONDS_PER_MINUTE * MS_PER_SECOND; // 5 minutes
