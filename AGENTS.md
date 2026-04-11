@@ -98,7 +98,7 @@ packages/nestjs-graphql/src/
 │   │   └── graphql-input-validation.pipe.ts  # Input validation with XSS detection
 │   │
 │   ├── services/
-│   │   ├── rate-limit.service.ts       # Redis-backed token bucket rate limiting
+│   │   ├── rate-limit.service.ts       # Redis-backed fixed-window rate limiting with configurable storage backends
 │   │   ├── cache.service.ts            # GraphQL resolver response caching
 │   │   └── performance.service.ts      # Performance tracking and slow query logging
 │   │
@@ -151,7 +151,7 @@ packages/nestjs-graphql/src/
     └── Consumer pattern: Import in root AppModule
 ```
 
-**Security defaults:** Playground and introspection are disabled by default. WebSocket auth is fail-closed. Query complexity limits are enforced. Rate limiting uses a token-bucket algorithm per user.
+**Security defaults:** Playground and introspection are disabled by default. WebSocket auth is fail-closed. Query complexity limits are enforced. Rate limiting uses a fixed-window (tumbling window) algorithm per user, resetting counters at fixed time boundaries (allows up to 2× the limit at window boundaries due to the nature of fixed-window algorithms; for 100 req/min limit, this means up to 200 requests within a 2-minute span if sent at the exact boundary). For stricter burst protection, use a sliding-window or token-bucket implementation instead.
 
 **Configuration:** `CacheModule` reads `REDIS_HOST`, `REDIS_PORT`, `REDIS_DB`, `REDIS_PASSWORD`, `REDIS_KEY_PREFIX`, `REDIS_TTL` (validated via Joi; defaults: localhost:6379, TTL 1 hour). `GraphQLModule` is configured via `IGraphQLConfigOptions` (Apollo Server options, context factory, CORS, error formatter, optional BSON config).
 
@@ -161,7 +161,7 @@ packages/nestjs-graphql/src/
 
 - **Dynamic module pattern** — All modules expose `forRoot(options)` for synchronous config and `forRootAsync(options)` for factory-based async config. Both return a `DynamicModule`. All modules are `@Global()`.
 - **Cache decorators** — `@Cacheable`, `@CacheEvict`, and `@CacheInvalidate` are stackable, support sync/async methods, and work on any injectable. All require `CacheModule.forRoot()` to be imported or they silently no-op.
-- **Query complexity** — `QueryComplexityCalculator` walks the query AST and sums field costs. `QueryComplexityGuard` rejects queries exceeding the configured limit. Register complexity guard before auth guard (static analysis is cheaper than JWT verification).
+- **Guard Registration Order (SECURITY-CRITICAL)** — Guards execute in registration order: `QueryComplexityGuard` → `GraphQLAuthGuard` → `GraphQLRateLimitGuard`. This order is mandatory for security and performance: (1) QueryComplexityGuard first (static AST analysis, cheapest), (2) GraphQLAuthGuard next (JWT verification before authorization), (3) GraphQLRateLimitGuard last (per-user limits after auth). Violating this order (e.g., `@UseGuards(RateLimitGuard, AuthGuard, ComplexityGuard)`) can bypass authentication or authorization checks.
 - **Error pipeline** — Resolvers throw typed error classes (e.g., `NotFoundError`, `ForbiddenError`) or use `GraphQLErrorFactory`. `GraphQLErrorInterceptor` catches them; `GraphQLErrorFormatter` normalises them into `{ message, extensions: { code, statusCode, timestamp } }`.
 - **Lazy loading via `ILazyModuleRefService`** — Services that would create circular dependencies at init time defer resolution using `ModuleRef.get(Token, { strict: false })`.
 - **WebSocket auth is fail-closed** — `WebSocketAuthService` requires `JwtService` from `@pawells/nestjs-auth`. Without it, all WebSocket connections are rejected. To use public subscriptions, explicitly configure a public auth strategy in `WebSocketAuthService`.
@@ -214,9 +214,9 @@ If `AuthModule` (which provides `JwtService`) is not imported alongside `GraphQL
 
 If `CacheModule.forRoot()` is not imported, cache decorators do nothing and methods execute on every call with no warning. **Fix:** ensure `CacheModule.forRoot()` is imported before `GraphQLModule.forRoot()` in your root module.
 
-### 4. Guard Registration Order Matters
+### 4. Guard Registration Order Matters (SECURITY-CRITICAL)
 
-Guards execute in the order they are registered. `QueryComplexityGuard` (static AST analysis, cheap) must be registered before `GraphQLAuthGuard` (JWT verification) and `GraphQLRateLimitGuard` (Redis lookup). **Fix:** `@UseGuards(QueryComplexityGuard, GraphQLAuthGuard, GraphQLRateLimitGuard)`.
+Guards execute in the order they are registered. **MANDATORY order:** `QueryComplexityGuard` → `GraphQLAuthGuard` → `GraphQLRateLimitGuard`. (1) QueryComplexityGuard first (static AST analysis, cheap), (2) GraphQLAuthGuard next (JWT verification, guards authentication), (3) GraphQLRateLimitGuard last (per-user rate limiting). Incorrect order can bypass authentication entirely. **Fix:** Always use `@UseGuards(QueryComplexityGuard, GraphQLAuthGuard, GraphQLRateLimitGuard)` in this exact order. Never reorder these guards.
 
 ### 5. BSON Serialization Is Opt-In
 

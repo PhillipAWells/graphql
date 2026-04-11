@@ -99,7 +99,7 @@ export class GraphQLRolesGuard implements CanActivate, ILazyModuleRefService {
 	 * @param user - The user object from authentication
 	 * @returns string[] - Array of user roles
 	 */
-	private GetUserRoles(user: any): string[] {
+	private GetUserRoles(user: { id?: string; sub?: string; roles?: string | string[]; role?: string | string[]; authorities?: string[]; scope?: string | string[]; scopes?: string | string[] }): string[] {
 		// Handle different user object structures
 		if (user.roles && Array.isArray(user.roles)) {
 			return user.roles;
@@ -115,7 +115,12 @@ export class GraphQLRolesGuard implements CanActivate, ILazyModuleRefService {
 
 		if (user.scope || user.scopes) {
 			const Scopes = user.scope ?? user.scopes;
-			return Array.isArray(Scopes) ? Scopes : [Scopes];
+			if (Scopes) {
+				if (Array.isArray(Scopes)) {
+					return Scopes;
+				}
+				return [Scopes];
+			}
 		}
 
 		// Default to empty array if no roles found

@@ -6,6 +6,7 @@ import { Traced } from '@pawells/nestjs-open-telemetry';
 import { AppLogger } from '@pawells/nestjs-shared/common';
 import type { IContextualLogger } from '@pawells/nestjs-shared/common';
 import { GraphQLErrorCode } from './error-codes.js';
+import { CursorUtils } from './types/connection.type.js';
 
 /**
  * Service for GraphQL module management and utilities
@@ -41,6 +42,7 @@ export class GraphQLService {
     */
 	@Traced({ name: 'graphql.validateSchema' })
 	public ValidateSchema(schema: GraphQLSchema): void {
+		// Validate schema is provided
 		if (!schema) {
 			throw new Error('GraphQL schema is required');
 		}
@@ -108,15 +110,26 @@ export class GraphQLService {
 			? error.message.toLowerCase()
 			: String(ErrorRecord['message'] ?? '').toLowerCase();
 
-		// Default error codes mapping
-		if (ErrorMessage.includes('validation')) {
-			return GraphQLErrorCode.VALIDATION_ERROR;
+		// Check specific authorization-related errors first, before validation
+		if (ErrorMessage.includes('authorization')) {
+			return GraphQLErrorCode.FORBIDDEN;
 		}
+		if (ErrorMessage.includes('forbidden')) {
+			return GraphQLErrorCode.FORBIDDEN;
+		}
+		if (ErrorMessage.includes('unauthorized')) {
+			return GraphQLErrorCode.UNAUTHENTICATED;
+		}
+		if (ErrorMessage.includes('not allowed')) {
+			return GraphQLErrorCode.FORBIDDEN;
+		}
+		// Then check authentication
 		if (ErrorMessage.includes('authentication')) {
 			return GraphQLErrorCode.UNAUTHENTICATED;
 		}
-		if (ErrorMessage.includes('authorization')) {
-			return GraphQLErrorCode.FORBIDDEN;
+		// Then check validation and other general errors
+		if (ErrorMessage.includes('validation')) {
+			return GraphQLErrorCode.VALIDATION_ERROR;
 		}
 		if (ErrorMessage.includes('not found')) {
 			return GraphQLErrorCode.NOT_FOUND;
@@ -126,40 +139,12 @@ export class GraphQLService {
 	}
 
 	/**
-   * Helper method to create cursor from entity ID and timestamp
-   * @param id Entity ID
-   * @param timestamp Timestamp
-   * @returns Base64 encoded cursor
-   */
-	public CreateCursor(id: string, timestamp?: number): string {
-		const CursorData = {
-			id,
-			timestamp: timestamp ?? Date.now(),
-		};
-		return Buffer.from(JSON.stringify(CursorData)).toString('base64');
-	}
-
-	/**
-   * Helper method to decode cursor
-   * @param cursor Base64 encoded cursor
-   * @returns Decoded cursor data
-   */
-	public DecodeCursor(cursor: string): { id: string; timestamp: number } {
-		try {
-			const Decoded = Buffer.from(cursor, 'base64').toString('utf-8');
-			return JSON.parse(Decoded);
-		} catch {
-			throw new Error('Invalid cursor format');
-		}
-	}
-
-	/**
-   * Helper method for pagination logic
-   * @param items Array of items to paginate
-   * @param first Number of items to take from start
-   * @param after Cursor to start after
-   * @returns Paginated result with edges and page info
-   */
+	 * Helper method for pagination logic
+	 * @param items Array of items to paginate
+	 * @param first Number of items to take from start
+	 * @param after Cursor to start after
+	 * @returns Paginated result with edges and page info
+	 */
 	public PaginateItems<T extends { id: string; createdAt?: Date }>(
 		items: T[],
 		first?: number,
@@ -176,7 +161,7 @@ export class GraphQLService {
 		let StartIndex = 0;
 
 		if (after) {
-			const AfterData = this.DecodeCursor(after);
+			const AfterData = CursorUtils.DecodeCursor(after);
 			const AfterIndex = items.findIndex(item => item.id === AfterData.id);
 			if (AfterIndex !== -1) {
 				StartIndex = AfterIndex + 1;
@@ -187,7 +172,7 @@ export class GraphQLService {
 		const PaginatedItems = items.slice(StartIndex, EndIndex);
 
 		const Edges = PaginatedItems.map(item => ({
-			cursor: this.CreateCursor(item.id, item.createdAt ? item.createdAt.getTime() : undefined),
+			cursor: CursorUtils.CreateCursor(item as { id: string; createdAt?: Date }),
 			node: item,
 		}));
 

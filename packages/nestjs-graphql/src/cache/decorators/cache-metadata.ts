@@ -18,12 +18,12 @@ export interface IBaseCacheableOptions {
 	/**
 	 * Custom cache key generator function
 	 */
-	keyGenerator?: (...args: any[]) => string;
+	keyGenerator?: (...args: unknown[]) => string;
 
 	/**
 	 * Cache condition function - return false to skip caching
 	 */
-	condition?: (...args: any[]) => boolean;
+	condition?: (...args: unknown[]) => boolean;
 }
 
 /**
@@ -38,7 +38,7 @@ export interface IBaseCacheInvalidateOptions {
 	/**
 	 * Custom key generator function
 	 */
-	keyGenerator?: (...args: any[]) => string | string[];
+	keyGenerator?: (...args: unknown[]) => string | string[];
 }
 
 /**

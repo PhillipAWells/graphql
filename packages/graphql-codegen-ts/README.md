@@ -21,16 +21,17 @@ npm install --save-dev @pawells/graphql-codegen-ts
 
 Peer dependencies that must be present in your project:
 
-- `@apollo/client >=3.0.0`
+- `@apollo/client >=4.0.0`
 - `@graphql-codegen/typed-document-node >=5.0.0`
 - `@graphql-codegen/typescript >=4.0.0`
 - `@graphql-codegen/typescript-apollo-client-helpers >=3.0.0`
 - `@graphql-codegen/typescript-operations >=4.0.0`
 - `graphql >=16.0.0`
+- `rxjs >=7.0.0`
 
 This plugin requires **four co-plugins** to be configured in your `codegen.ts`: `typescript`, `typescript-operations`, `typed-document-node`, and `typescript-apollo-client-helpers`. If any are missing, codegen will throw an error listing all required plugins.
 
-This plugin targets Apollo Client **3.x** and is not compatible with Apollo Client 4.x.
+This plugin targets Apollo Client **4.x**.
 
 ## Quick Start
 
@@ -204,6 +205,50 @@ async function main() {
 
 main().catch(console.error);
 ```
+
+## Deprecated Exports
+
+### `GraphQLClientOptions`
+
+The `GraphQLClientOptions` type alias is deprecated. It is still exported for backward compatibility but will be removed in a future major version.
+
+```typescript
+// Deprecated — do not use in new code
+import type { GraphQLClientOptions } from '@pawells/graphql-codegen-ts';
+
+// Use this instead
+import type { IGraphQLClientOptions } from '@pawells/graphql-codegen-ts';
+```
+
+`GraphQLClientOptions` is identical to `IGraphQLClientOptions`. Replace any existing usages with `IGraphQLClientOptions` directly.
+
+### `TGraphQLClientOptions`
+
+`TGraphQLClientOptions` is a type alias for `IGraphQLClientOptions` exported under the T-prefixed naming convention used elsewhere in the monorepo. It is not deprecated and can be used interchangeably with `IGraphQLClientOptions`.
+
+The `ApolloWrapper` constructor signature shown elsewhere in this README accepts `GraphQLClientOptions` — this is the deprecated alias. Prefer `IGraphQLClientOptions` in new code:
+
+```typescript
+// Preferred
+const client = new ApolloWrapper({} as IGraphQLClientOptions);
+```
+
+## Known Limitations
+
+### IsBrowser Option
+
+The `IsBrowser` option in `IGraphQLClientOptions` is deprecated and currently unused. It was intended for runtime environment detection to conditionally enable browser-specific features (such as automatic cookie handling or localStorage integration).
+
+```typescript
+new GraphQLClient({
+  Name: 'my-client',
+  HTTP_URI: 'http://localhost:4000/graphql',
+  WS_URI: 'ws://localhost:4000/graphql',
+  IsBrowser: true, // Currently ignored, but accepted
+});
+```
+
+**Status:** Reserved for future use. This option will be implemented in a future release to enable environment-specific behavior. For now, it has no effect and can be safely omitted.
 
 ## Related Packages
 

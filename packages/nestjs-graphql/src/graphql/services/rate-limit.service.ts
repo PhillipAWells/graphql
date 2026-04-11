@@ -39,10 +39,11 @@ export interface IRateLimitConfig {
  * Storage backend interface for rate limiting
  */
 export interface IRateLimitStorage {
-	increment(key: string, windowMs: number): Promise<number>;
-	get(key: string): Promise<number>;
-	reset(key: string): Promise<void>;
-	cleanup(): Promise<void>;
+	// Methods use PascalCase to match class property naming convention per AGENTS.md
+	Increment(key: string, windowMs: number): Promise<number>;
+	Get(key: string): Promise<number>;
+	Reset(key: string): Promise<void>;
+	Cleanup(): Promise<void>;
 }
 
 /**
@@ -56,12 +57,20 @@ interface IRateLimitEntry {
 /**
  * In-memory storage implementation
  */
+/**
+ * In-memory storage implementation for rate limiting.
+ * 
+ * This is a concrete implementation detail of the rate limiting system.
+ * For production use, consider using Redis-backed storage instead.
+ * 
+ * @internal - Use {@link IRateLimitStorage} interface instead
+ */
 @Injectable()
 export class MemoryRateLimitStorage implements IRateLimitStorage {
 	private readonly Storage = new Map<string, { count: number; resetTime: number }>();
 
-	// eslint-disable-next-line require-await, @typescript-eslint/naming-convention
-	public async increment(key: string, windowMs: number): Promise<number> {
+	// eslint-disable-next-line require-await
+	public async Increment(key: string, windowMs: number): Promise<number> {
 		const Now = Date.now();
 		const Entry = this.Storage.get(key);
 
@@ -78,8 +87,8 @@ export class MemoryRateLimitStorage implements IRateLimitStorage {
 		}
 	}
 
-	// eslint-disable-next-line require-await, @typescript-eslint/naming-convention
-	public async get(key: string): Promise<number> {
+	// eslint-disable-next-line require-await
+	public async Get(key: string): Promise<number> {
 		const Entry = this.Storage.get(key);
 		const Now = Date.now();
 
@@ -90,13 +99,13 @@ export class MemoryRateLimitStorage implements IRateLimitStorage {
 		return Entry.count;
 	}
 
-	// eslint-disable-next-line require-await, @typescript-eslint/naming-convention
-	public async reset(key: string): Promise<void> {
+	// eslint-disable-next-line require-await
+	public async Reset(key: string): Promise<void> {
 		this.Storage.delete(key);
 	}
 
-	// eslint-disable-next-line require-await, @typescript-eslint/naming-convention
-	public async cleanup(): Promise<void> {
+	// eslint-disable-next-line require-await
+	public async Cleanup(): Promise<void> {
 		const Now = Date.now();
 		for (const [Key, Entry] of this.Storage.entries()) {
 			if (Now > Entry.resetTime) {
@@ -109,9 +118,23 @@ export class MemoryRateLimitStorage implements IRateLimitStorage {
 /**
  * GraphQL Rate Limit Service
  *
- * Implements sliding window rate limiting with configurable storage backends.
+ * Implements fixed window (tumbling window) rate limiting with configurable storage backends.
+ * Each window resets at a fixed boundary (not sliding); the limit counter resets every windowMs milliseconds.
  * Supports both in-memory and external storage (Redis, etc.) for distributed rate limiting.
  * Tracks requests per client identifier and enforces configurable limits.
+ *
+ * @remarks
+ * - Uses a fixed window algorithm: each client has a counter that resets at fixed time boundaries
+ * - Window resets happen synchronously when a new window boundary is reached, not on a per-request basis
+ * - For example, with windowMs=60000 (1 minute), all clients reset their counters at 0, 60000, 120000ms, etc.
+ * - This is different from sliding window which would reset on each request
+ *
+ * @burst-vulnerability
+ * Fixed-window rate limiting permits burst attacks at window boundaries (2× the limit within a narrow timespan).
+ * Example: with limit=100 req/min, an attacker can send 100 requests at the end of window 1 (59:50 mark) and
+ * 100 requests at the start of window 2 (00:10 mark), for a total of 200 requests in 20 seconds (4× rate).
+ * This is acceptable for soft rate limiting (UX throttling) but a security risk if used as a hard DOS control.
+ * For stricter burst protection, use sliding-window or token-bucket algorithms instead.
  *
  * @example
  * ```typescript
@@ -205,7 +228,7 @@ export class RateLimitService implements OnModuleInit, OnModuleDestroy, ILazyMod
 	 */
 	private async CheckLimitWithStorage(clientId: string, config: IRateLimitConfig, storage: IRateLimitStorage): Promise<IRateLimitResult> {
 		try {
-			const Current = await storage.increment(clientId, config.windowMs);
+			const Current = await storage.Increment(clientId, config.windowMs);
 			const Remaining = Math.max(0, config.maxRequests - Current);
 			const Allowed = Current <= config.maxRequests;
 
@@ -217,7 +240,7 @@ export class RateLimitService implements OnModuleInit, OnModuleDestroy, ILazyMod
 				current: Current,
 			};
 		} catch (error) {
-			this.Logger.error(`Storage rate limit check failed for ${clientId}:`, getErrorMessage(error));
+			this.Logger.error(`Storage rate limit check failed for ${clientId.replace(/[\n\r]/g, ' ')}:`, getErrorMessage(error));
 			// Fall back to in-memory on storage error
 			return this.CheckLimitInMemory(clientId, config);
 		}
@@ -225,6 +248,11 @@ export class RateLimitService implements OnModuleInit, OnModuleDestroy, ILazyMod
 
 	/**
 	 * Check rate limit using in-memory storage (legacy implementation)
+	 *
+	 * THREAD-SAFETY NOTE: This method is safe in Node.js because:
+	 * 1. Node.js is single-threaded (event loop runs one callback at a time)
+	 * 2. All operations between get() and set() are synchronous (no await)
+	 * 3. Therefore, no other code can interleave between read and write
 	 */
 	private CheckLimitInMemory(clientId: string, config: IRateLimitConfig): IRateLimitResult {
 		const Now = Date.now();
@@ -265,7 +293,7 @@ export class RateLimitService implements OnModuleInit, OnModuleDestroy, ILazyMod
 	 */
 	public SetOperationConfig(operation: string, config: IRateLimitConfig): void {
 		this.OperationConfigs.set(operation, config);
-		this.Logger.info(`Set custom rate limit for operation '${operation}': ${config.maxRequests} requests per ${config.windowMs}ms`);
+		this.Logger.info(`Set custom rate limit for operation '${operation.replace(/[\n\r]/g, ' ')}': ${config.maxRequests} requests per ${config.windowMs}ms`);
 	}
 
 	/**
@@ -288,14 +316,14 @@ export class RateLimitService implements OnModuleInit, OnModuleDestroy, ILazyMod
 		// Otherwise reset in-memory store (fallback)
 		if (this.Storage) {
 			try {
-				await this.Storage.reset(clientId);
+				await this.Storage.Reset(clientId);
 			} catch (error) {
-				this.Logger.error(`Failed to reset rate limit in storage for ${clientId}:`, getErrorMessage(error));
+				this.Logger.error(`Failed to reset rate limit in storage for ${clientId.replace(/[\n\r]/g, ' ')}:`, getErrorMessage(error));
 			}
 		} else {
 			this.Store.delete(clientId);
 		}
-		this.Logger.info(`Reset rate limit for client: ${clientId}`);
+		this.Logger.info(`Reset rate limit for client: ${clientId.replace(/[\n\r]/g, ' ')}`);
 	}
 
 	/**
@@ -311,7 +339,7 @@ export class RateLimitService implements OnModuleInit, OnModuleDestroy, ILazyMod
 		// Check storage backend first if available (source of truth)
 		if (this.Storage) {
 			try {
-				const Count = await this.Storage.get(clientId);
+				const Count = await this.Storage.Get(clientId);
 				if (Count > 0) {
 					const Remaining = Math.max(0, Config.maxRequests - Count);
 					return {
@@ -323,7 +351,7 @@ export class RateLimitService implements OnModuleInit, OnModuleDestroy, ILazyMod
 					};
 				}
 			} catch (error) {
-				this.Logger.error(`Storage status check failed for ${clientId}:`, getErrorMessage(error));
+				this.Logger.error(`Storage status check failed for ${clientId.replace(/[\n\r]/g, ' ')}:`, getErrorMessage(error));
 				// Fall back to in-memory store only on storage error
 			}
 		}
@@ -354,7 +382,7 @@ export class RateLimitService implements OnModuleInit, OnModuleDestroy, ILazyMod
 		const { Storage } = this;
 		if (Storage) {
 			try {
-				await Storage.cleanup();
+				await Storage.Cleanup();
 			} catch (error) {
 				this.Logger.error('Storage cleanup failed:', getErrorMessage(error));
 			}

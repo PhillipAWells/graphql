@@ -78,7 +78,21 @@ export interface IRedisConnectionOptions {
  * });
  * ```
  */
-export function ValidateRedisConfig(config: Record<string, any>): Record<string, any> {
+interface IValidatedRedisConfig {
+	REDIS_HOST: string;
+	REDIS_PORT: number;
+	REDIS_PASSWORD: string;
+	REDIS_DB: number;
+	REDIS_MAX_RETRIES: number;
+	REDIS_CONNECT_TIMEOUT: number;
+	REDIS_COMMAND_TIMEOUT: number;
+	REDIS_FAMILY: number;
+	REDIS_KEEP_ALIVE: number;
+	REDIS_RETRY_DELAY: number;
+	REDIS_KEY_PREFIX: string;
+}
+
+export function ValidateRedisConfig(config: Record<string, unknown>): IValidatedRedisConfig {
 	// Allow undefined values - they will use defaults
 	const Schema = Joi.object({
 		REDIS_HOST: Joi.string().hostname().default('localhost'),
@@ -98,7 +112,7 @@ export function ValidateRedisConfig(config: Record<string, any>): Record<string,
 	if (error) {
 		throw new Error(`Redis configuration validation failed: ${error.message}`);
 	}
-	return value;
+	return value as IValidatedRedisConfig;
 }
 
 /**
@@ -107,7 +121,7 @@ export function ValidateRedisConfig(config: Record<string, any>): Record<string,
  */
 export function GetRedisConfig(): IRedisConfig {
 	// Validate environment variables - Joi will handle optional fields properly
-	const EnvVars: Record<string, any> = {
+	const EnvVars: Record<string, unknown> = {
 		REDIS_HOST: process.env['REDIS_HOST'],
 		REDIS_PORT: process.env['REDIS_PORT'],
 		REDIS_PASSWORD: process.env['REDIS_PASSWORD'],
@@ -121,26 +135,26 @@ export function GetRedisConfig(): IRedisConfig {
 		REDIS_KEY_PREFIX: process.env['REDIS_KEY_PREFIX'],
 	};
 
-	ValidateRedisConfig(EnvVars);
+	const Validated = ValidateRedisConfig(EnvVars);
 
 	return {
-		host: process.env['REDIS_HOST'] ?? 'localhost',
-		port: parseInt(process.env['REDIS_PORT'] ?? `${REDIS_DEFAULT_PORT}`, 10),
-		password: process.env['REDIS_PASSWORD'] ?? undefined,
-		db: parseInt(process.env['REDIS_DB'] ?? `${REDIS_DEFAULT_DB}`, 10),
-		keyPrefix: process.env['REDIS_KEY_PREFIX'] ?? REDIS_DEFAULT_KEY_PREFIX,
+		host: Validated.REDIS_HOST,
+		port: Validated.REDIS_PORT,
+		password: Validated.REDIS_PASSWORD || undefined,
+		db: Validated.REDIS_DB,
+		keyPrefix: Validated.REDIS_KEY_PREFIX,
 		enableReadyCheck: process.env['REDIS_ENABLE_READY_CHECK'] !== 'false',
-		maxRetriesPerRequest: parseInt(process.env['REDIS_MAX_RETRIES'] ?? `${REDIS_DEFAULT_MAX_RETRIES}`, 10),
+		maxRetriesPerRequest: Validated.REDIS_MAX_RETRIES,
 		lazyConnect: process.env['REDIS_LAZY_CONNECT'] === 'true',
 		reconnectOnError: (err: Error) => {
 			const TargetErrors = ['READONLY', 'ECONNREFUSED', 'ETIMEDOUT', 'ENOTFOUND'];
 			return TargetErrors.some(errorType => err.message.includes(errorType));
 		},
-		connectTimeout: parseInt(process.env['REDIS_CONNECT_TIMEOUT'] ?? `${REDIS_DEFAULT_CONNECT_TIMEOUT}`, 10),
-		commandTimeout: parseInt(process.env['REDIS_COMMAND_TIMEOUT'] ?? `${REDIS_DEFAULT_COMMAND_TIMEOUT}`, 10),
-		family: parseInt(process.env['REDIS_FAMILY'] ?? `${REDIS_DEFAULT_FAMILY}`, 10),
-		keepAlive: parseInt(process.env['REDIS_KEEP_ALIVE'] ?? `${REDIS_DEFAULT_KEEP_ALIVE}`, 10),
-	} as IRedisConfig;
+		connectTimeout: Validated.REDIS_CONNECT_TIMEOUT,
+		commandTimeout: Validated.REDIS_COMMAND_TIMEOUT,
+		family: Validated.REDIS_FAMILY,
+		keepAlive: Validated.REDIS_KEEP_ALIVE,
+	};
 }
 
 /**

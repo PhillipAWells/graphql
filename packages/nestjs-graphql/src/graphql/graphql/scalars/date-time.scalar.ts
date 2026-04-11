@@ -14,9 +14,9 @@ export class DateTimeScalar {
    * @param value Value from client
    * @returns Date instance
    */
-	public parseValue(value: any): Date {
-		if (typeof value !== 'string') {
-			throw new Error('DateTime must be a string');
+	public parseValue(value: unknown): Date {
+		if (typeof value !== 'string' && !(value instanceof Date)) {
+			throw new Error('DateTime must be a string or Date instance');
 		}
 
 		const DateValue = new Date(value);

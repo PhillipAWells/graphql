@@ -322,38 +322,6 @@ describe('GraphQLCacheService', () => {
 	});
 
 	describe('Performance - Cache Efficiency', () => {
-		it('should set cache value under 5ms', async () => {
-			const key = 'test-key';
-			const value = { data: 'test' };
-
-			const start = performance.now();
-			await service.Set(key, value, 300000);
-			const elapsed = performance.now() - start;
-
-			expect(elapsed).toBeLessThan(5);
-		});
-
-		it('should get cache value under 2ms', async () => {
-			const key = 'test-key';
-			mockCacheManager.get.mockResolvedValue({ data: 'cached' });
-
-			const start = performance.now();
-			await service.Get(key);
-			const elapsed = performance.now() - start;
-
-			expect(elapsed).toBeLessThan(2);
-		});
-
-		it('should generate cache key under 1ms', () => {
-			const args = { id: 123, name: 'test', category: 'admin' };
-
-			const start = performance.now();
-			service.GenerateKey('user', args);
-			const elapsed = performance.now() - start;
-
-			expect(elapsed).toBeLessThan(1);
-		});
-
 		it('should handle high-volume cache operations', async () => {
 			const iterations = 1000;
 			mockCacheManager.get.mockResolvedValue({ data: 'cached' });

@@ -167,7 +167,7 @@ export function CreateGraphQLError(config: IGraphQLErrorConfig): TGeneratedGraph
  */
 export const GRAPHQL_ERROR_CONFIGS = {
 	UNAUTHENTICATED: {
-		code: 'UNAUTHORIZED',
+		code: 'UNAUTHENTICATED',
 		statusCode: 401,
 		defaultMessage: 'Authentication required',
 		graphqlCode: 'UNAUTHENTICATED',
@@ -202,11 +202,11 @@ export const GRAPHQL_ERROR_CONFIGS = {
 		defaultMessage: 'Validation failed',
 		graphqlCode: 'BAD_USER_INPUT',
 	},
-	INTERNAL_SERVER_ERROR: {
-		code: 'INTERNAL_SERVER_ERROR',
+	INTERNAL_ERROR: {
+		code: 'INTERNAL_ERROR',
 		statusCode: 500,
 		defaultMessage: 'Internal server error',
-		graphqlCode: 'INTERNAL_SERVER_ERROR',
+		graphqlCode: 'INTERNAL_ERROR',
 	},
 	RATE_LIMIT_EXCEEDED: {
 		code: 'RATE_LIMIT_EXCEEDED',

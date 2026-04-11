@@ -50,7 +50,8 @@ async function BuildNestJSGraphQLSchema(resolvers: unknown[]): Promise<string> {
 	try {
 		// Build the GraphQL schema
 		const GqlSchemaFactory = App.get(GraphQLSchemaFactory);
-		const Schema = await GqlSchemaFactory.create(resolvers as unknown as Function[]);
+		// Cast to Function[] after type validation above; NestJS GraphQL builder requires Function[] constructor type
+		const Schema = await GqlSchemaFactory.create(resolvers as Function[]);
 		return printSchema(Schema);
 	} finally {
 		// Clean up the app

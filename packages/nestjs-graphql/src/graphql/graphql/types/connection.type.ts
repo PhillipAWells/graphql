@@ -7,7 +7,7 @@ import { PageInfo } from './page-info.type.js';
  * @param T The node type
  * @returns Edge type class
  */
-export function Edge<T>(classRef: Type<T>): any {
+export function Edge<T>(classRef: Type<T>): Type<{ Cursor: string; Node: T }> {
 	@ObjectType(`${classRef.name}Edge`)
 	class EdgeClass {
 		/**
@@ -23,7 +23,7 @@ export function Edge<T>(classRef: Type<T>): any {
 		public Node!: T;
 	}
 
-	return EdgeClass;
+	return EdgeClass as Type<{ Cursor: string; Node: T }>;
 }
 
 /**
@@ -31,7 +31,7 @@ export function Edge<T>(classRef: Type<T>): any {
  * @param T The node type
  * @returns Connection type class
  */
-export function Connection<T>(classRef: Type<T>): any {
+export function Connection<T>(classRef: Type<T>): Type<{ Edges: Array<{ Cursor: string; Node: T }>; PageInfo: PageInfo; TotalCount: number }> {
 	const EdgeClass = Edge(classRef);
 
 	@ObjectType(`${classRef.name}Connection`)
@@ -55,7 +55,7 @@ export function Connection<T>(classRef: Type<T>): any {
 		public TotalCount!: number;
 	}
 
-	return ConnectionClass;
+	return ConnectionClass as Type<{ Edges: Array<{ Cursor: string; Node: T }>; PageInfo: PageInfo; TotalCount: number }>;
 }
 
 /**

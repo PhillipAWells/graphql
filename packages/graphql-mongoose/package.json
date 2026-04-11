@@ -1,0 +1,65 @@
+{
+  "name": "@pawells/graphql-mongoose",
+  "displayName": "@pawells/graphql-mongoose",
+  "version": "2.1.1",
+  "description": "GraphQL-to-Mongoose filter builder — translates GraphQL filter inputs to Mongoose FilterQuery",
+  "keywords": [
+    "graphql",
+    "mongoose",
+    "mongodb",
+    "filter",
+    "query",
+    "typescript",
+    "builder"
+  ],
+  "type": "module",
+  "main": "./build/index.js",
+  "types": "./build/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./build/index.d.ts",
+      "require": "./build/index.js",
+      "import": "./build/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "pipeline": "yarn typecheck && yarn test && yarn build"
+  },
+  "peerDependencies": {
+    "@pawells/graphql-common": ">=2.0.0",
+    "graphql": ">=16.0.0",
+    "mongoose": ">=8.0.0"
+  },
+  "devDependencies": {
+    "@pawells/graphql-common": "^2.1.0",
+    "@types/node": "^25.6.0",
+    "graphql": "^16.13.2",
+    "mongoose": "^9.4.1",
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.4"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "packageManager": "yarn@4.12.0",
+  "author": "Aaron Wells <69355326+PhillipAWells@users.noreply.github.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PhillipAWells/graphql"
+  },
+  "files": [
+    "build/",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

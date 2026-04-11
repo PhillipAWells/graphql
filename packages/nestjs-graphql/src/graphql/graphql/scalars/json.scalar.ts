@@ -7,7 +7,7 @@ import { Kind, ValueNode } from 'graphql';
  */
 @Scalar('JSON')
 export class JSONScalar implements CustomScalar<unknown, unknown> {
-	public Description = 'JSON custom scalar type for arbitrary data';
+	public readonly Description = 'JSON custom scalar type for arbitrary data';
 
 	public parseValue(value: unknown): unknown {
 		return value;

@@ -43,14 +43,12 @@ export function CreateGraphQLError(config: IGraphQLErrorConfig): typeof GraphqlE
 		 * @param message - Custom error message (optional)
 		 * @param context - Additional context information (optional)
 		 */
-		constructor(message = defaultMessage, context?: Record<string, any>) {
-			const Options: any = {
+		constructor(message = defaultMessage, context?: Record<string, unknown>) {
+			const Options: { code: string; statusCode: number; context: Record<string, unknown> | undefined } = {
 				code,
 				statusCode,
+				context: context ?? undefined,
 			};
-			if (context !== undefined) {
-				Options.context = context;
-			}
 			super(message, Options);
 		}
 	}
@@ -93,8 +91,8 @@ export const ERROR_CONFIGS = {
 		statusCode: 409,
 		defaultMessage: 'Resource conflict',
 	},
-	INTERNAL_SERVER_ERROR: {
-		code: 'INTERNAL_SERVER_ERROR',
+	INTERNAL_ERROR: {
+		code: 'INTERNAL_ERROR',
 		statusCode: 500,
 		defaultMessage: 'Internal server error',
 	},

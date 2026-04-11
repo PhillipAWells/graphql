@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { ApolloProvider } from '@apollo/client/react';
-import type { ApolloClient } from '@apollo/client/core';
 import { CreateGraphQLClient } from './client';
 import type { TGraphQLClientOptions } from './types';
 import { GraphQLConnectionState } from './types';
@@ -54,6 +53,8 @@ export function GraphQLProvider({ options, children, fallback }: IGraphQLProvide
 			if (clientRef.current) {
 				clientRef.current.dispose();
 			}
+			clientRef.current = null;
+			unsubscribeRef.current = null;
 			const result = CreateGraphQLClient(options);
 			clientRef.current = result;
 			unsubscribeRef.current = result.onStateChange(setConnectionState);
@@ -68,7 +69,7 @@ export function GraphQLProvider({ options, children, fallback }: IGraphQLProvide
 
 	return (
 		<GraphQLContext.Provider value={{ connectionState, reconnect }}>
-			<ApolloProvider client={clientRef.current.client as ApolloClient}>
+			<ApolloProvider client={clientRef.current.client}>
 				{children}
 			</ApolloProvider>
 		</GraphQLContext.Provider>

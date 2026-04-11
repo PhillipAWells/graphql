@@ -1,7 +1,7 @@
 {
   "name": "@pawells/react-graphql",
   "displayName": "@pawells/react-graphql",
-  "version": "2.0.1",
+  "version": "2.1.1",
   "description": "React runtime companion providing Apollo Client setup, connection state management, and GraphQLProvider",
   "keywords": [
     "react",
@@ -57,12 +57,12 @@
     }
   },
   "devDependencies": {
-    "@apollo/client": "^4.1.6",
+    "@apollo/client": "^4.1.7",
     "@types/react": "^19.2.14",
     "graphql": "^16.13.2",
     "graphql-ws": "^6.0.8",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
     "rxjs": "^7.8.2"
   },
   "engines": {

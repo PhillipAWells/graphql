@@ -1,6 +1,7 @@
 import { describe,it,expect,beforeEach } from 'vitest';
 
 import { GraphQLService } from '../../graphql/graphql.service.js';
+import { CursorUtils } from '../../graphql/types/connection.type.js';
 import { GraphQLSchema, GraphQLObjectType, GraphQLString } from 'graphql';
 import { GraphQLErrorCode } from '../../graphql/types/graphql-safety.types.js';
 
@@ -144,23 +145,23 @@ describe('GraphQL Service - Advanced Schema & Error Handling', () => {
 
 	describe('createCursor() & decodeCursor() - Cursor Management', () => {
 		it('should create cursor from id and timestamp', () => {
-			const cursor = service.CreateCursor('user-123', 1234567890);
+			const cursor = CursorUtils.EncodeCursor('user-123', 1234567890);
 
 			expect(cursor).toBeDefined();
 			expect(typeof cursor).toBe('string');
 		});
 
 		it('should create cursor with current timestamp if not provided', () => {
-			const cursor = service.CreateCursor('user-123');
+			const cursor = CursorUtils.CreateCursor({ id: 'user-123' });
 
-			const decoded = service.DecodeCursor(cursor);
+			const decoded = CursorUtils.DecodeCursor(cursor);
 			expect(decoded.id).toBe('user-123');
 			expect(decoded.timestamp).toBeDefined();
 		});
 
 		it('should decode cursor back to original data', () => {
-			const cursor = service.CreateCursor('user-456', 9876543210);
-			const decoded = service.DecodeCursor(cursor);
+			const cursor = CursorUtils.EncodeCursor('user-456', 9876543210);
+			const decoded = CursorUtils.DecodeCursor(cursor);
 
 			expect(decoded.id).toBe('user-456');
 			expect(decoded.timestamp).toBe(9876543210);
@@ -168,7 +169,7 @@ describe('GraphQL Service - Advanced Schema & Error Handling', () => {
 
 		it('should throw error for invalid cursor format', () => {
 			expect(() => {
-				service.DecodeCursor('invalid-cursor-data');
+				CursorUtils.DecodeCursor('invalid-cursor-data');
 			}).toThrow('Invalid cursor format');
 		});
 
@@ -176,7 +177,7 @@ describe('GraphQL Service - Advanced Schema & Error Handling', () => {
 			const invalidCursor = Buffer.from('not json data').toString('base64');
 
 			expect(() => {
-				service.DecodeCursor(invalidCursor);
+				CursorUtils.DecodeCursor(invalidCursor);
 			}).toThrow('Invalid cursor format');
 		});
 	});
@@ -201,7 +202,7 @@ describe('GraphQL Service - Advanced Schema & Error Handling', () => {
 		});
 
 		it('should paginate items with after cursor', () => {
-			const cursor = service.CreateCursor('2', items[1]!.createdAt!.getTime());
+			const cursor = CursorUtils.EncodeCursor('2', items[1]!.createdAt!.getTime());
 			const result = service.PaginateItems(items, 2, cursor);
 
 			expect(result.edges.length).toBe(2);
@@ -236,15 +237,15 @@ describe('GraphQL Service - Advanced Schema & Error Handling', () => {
 			expect(result.pageInfo.startCursor).toBeDefined();
 			expect(result.pageInfo.endCursor).toBeDefined();
 
-			const startDecoded = service.DecodeCursor(result.pageInfo.startCursor!);
-			const endDecoded = service.DecodeCursor(result.pageInfo.endCursor!);
+			const startDecoded = CursorUtils.DecodeCursor(result.pageInfo.startCursor!);
+			const endDecoded = CursorUtils.DecodeCursor(result.pageInfo.endCursor!);
 
 			expect(startDecoded.id).toBe('1');
 			expect(endDecoded.id).toBe('3');
 		});
 
 		it('should handle invalid after cursor gracefully', () => {
-			const invalidCursor = service.CreateCursor('non-existent-id');
+			const invalidCursor = CursorUtils.CreateCursor({ id: 'non-existent-id' });
 			const result = service.PaginateItems(items, 3, invalidCursor);
 
 			// Should start from beginning when cursor ID not found

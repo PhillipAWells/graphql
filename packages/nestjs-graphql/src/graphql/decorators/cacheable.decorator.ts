@@ -58,10 +58,16 @@ export interface ICacheableOptions extends IBaseCacheableOptions {
 /**
  * Cacheable decorator for GraphQL resolvers
  *
- * Caches the result of a resolver based on its arguments and context.
- * Uses the GraphqlCacheInterceptor to handle caching logic.
+ * **NOTE: This is a metadata-only decorator for GraphQL resolvers. For non-GraphQL method caching,
+ * use the {@link Cacheable} decorator from the cache module instead.**
  *
- * @param options - Caching options
+ * This decorator marks a GraphQL resolver as cacheable. The actual caching is handled by the
+ * GraphQL response interceptor, which reads this metadata and applies caching logic based on
+ * the resolver's arguments and context.
+ *
+ * Use this decorator on individual GraphQL field resolvers to enable per-resolver caching.
+ *
+ * @param options - Caching options for GraphQL resolvers
  *
  * @example
  * ```typescript
@@ -80,6 +86,8 @@ export interface ICacheableOptions extends IBaseCacheableOptions {
  *   return this.postService.findByUser(userId);
  * }
  * ```
+ *
+ * @see {@link https://www.npmjs.com/package/@pawells/nestjs-graphql#cache-decorators} for method-level caching
  */
 export const Cacheable = (options: ICacheableOptions = {}): ReturnType<typeof SetMetadata> => SetMetadata(CACHE_METADATA_KEYS.CACHEABLE, options);
 

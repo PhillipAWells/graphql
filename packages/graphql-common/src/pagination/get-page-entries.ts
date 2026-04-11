@@ -1,4 +1,4 @@
-export function GetPageEntries<T>(entries: T[], page: number, length: number): T[] {
+export function getPageEntries<T>(entries: T[], page: number, length: number): T[] {
 	if (page < 1 || length < 1) {
 		return [];
 	}

@@ -60,7 +60,7 @@ export class GraphQLPerformanceMonitoringInterceptor implements NestInterceptor,
 	 * @param next - Call handler
 	 * @returns Observable with performance monitoring
 	 */
-	public intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+	public intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
 		const GqlContext = GqlExecutionContext.create(context);
 		const Info = GqlContext.getInfo();
 		const Operation = `${Info.operation.operation} ${Info.fieldName}`;

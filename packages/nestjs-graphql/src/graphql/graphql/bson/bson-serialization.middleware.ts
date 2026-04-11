@@ -5,6 +5,13 @@ import type { ILazyModuleRefService } from '@pawells/nestjs-shared/common';
 import { getErrorMessage } from '@pawells/nestjs-shared/common';
 import { BsonSerializationService } from './bson-serialization.service.js';
 
+declare module 'express' {
+	// eslint-disable-next-line @typescript-eslint/naming-convention
+	interface Request {
+		_bsonRequest?: boolean;
+	}
+}
+
 // Status code for client errors
 const HTTP_STATUS_BAD_REQUEST = 400;
 
@@ -61,7 +68,7 @@ export class BsonSerializationMiddleware implements NestMiddleware, ILazyModuleR
 				(body) => {
 					RemoveListeners();
 					req.body = body;
-					(req as any)._bsonRequest = true;
+					req._bsonRequest = true;
 					next();
 				},
 				(error: unknown) => {

@@ -11,7 +11,10 @@ const MS_PER_SECOND = 1000;
  * GraphQL Rate Limit Guard
  *
  * Implements rate limiting for GraphQL operations to prevent abuse.
- * Uses a sliding window algorithm to track requests per user/IP.
+ * Uses a fixed-window (tumbling window) algorithm: the request counter resets at
+ * fixed time boundaries, not on each request. At exact window boundaries, up to
+ * 2x the configured limit may pass through within a two-window span. For stricter
+ * burst protection, use a sliding-window or token-bucket implementation instead.
  *
  * @example
  * ```typescript
@@ -42,7 +45,7 @@ export class GraphQLRateLimitGuard implements CanActivate, ILazyModuleRefService
 		}
 	}
 
-	public get RateLimitService(): RateLimitService {
+	private get RateLimitService(): RateLimitService {
 		return this.Module.get(RateLimitService, { strict: false });
 	}
 
@@ -70,7 +73,7 @@ export class GraphQLRateLimitGuard implements CanActivate, ILazyModuleRefService
 
 			if (!Result.allowed) {
 				this.Logger?.warn(
-					`Rate limit exceeded for client ${ClientId}. Reset in ${Result.resetTime - Date.now()}ms`,
+					`Rate limit exceeded for client ${ClientId.replace(/[\n\r]/g, ' ')}. Reset in ${Result.resetTime - Date.now()}ms`,
 				);
 
 				throw new HttpException(
@@ -97,7 +100,7 @@ export class GraphQLRateLimitGuard implements CanActivate, ILazyModuleRefService
 				throw error;
 			}
 
-			this.Logger?.error(`Rate limit check failed for client ${ClientId}: ${getErrorMessage(error)}`);
+			this.Logger?.error(`Rate limit check failed for client ${ClientId.replace(/[\n\r]/g, ' ')}: ${getErrorMessage(error)}`);
 			throw new HttpException('Rate limit service unavailable', HttpStatus.SERVICE_UNAVAILABLE);
 		}
 	}
@@ -108,7 +111,7 @@ export class GraphQLRateLimitGuard implements CanActivate, ILazyModuleRefService
 	 * @param request - The HTTP request object
 	 * @returns string - Client identifier
 	 */
-	private GetClientIdentifier(request: any): string {
+	private GetClientIdentifier(request: { user?: { id?: string; sub?: string }; ip?: string; headers?: Record<string, string | string[] | undefined> }): string {
 		// Prefer user ID if authenticated
 		if (request.user?.id) {
 			return `user:${request.user.id}`;

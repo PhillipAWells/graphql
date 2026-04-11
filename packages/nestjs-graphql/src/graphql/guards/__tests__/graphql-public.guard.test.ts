@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Reflector } from '@nestjs/core';
 import { GqlExecutionContext } from '@nestjs/graphql';
+import { UnauthorizedException } from '@nestjs/common';
 import { AppLogger } from '@pawells/nestjs-shared/common';
 import { GraphQLPublicGuard } from '../graphql-public.guard.js';
 
@@ -58,15 +59,15 @@ describe('GraphQLPublicGuard', () => {
 			]);
 		});
 
-		it('should deny access to non-public resolvers without authentication', () => {
+		it('should throw UnauthorizedException for non-public resolvers without authentication', () => {
 			MockReflector.getAllAndOverride.mockReturnValue(false);
 			vi.spyOn(GqlExecutionContext, 'create').mockReturnValue({
 				getContext: () => ({ user: undefined }),
 			} as any);
 
-			const Result = Guard.canActivate(MockExecutionContext as any);
-
-			expect(Result).toBe(false);
+			expect(() => {
+				Guard.canActivate(MockExecutionContext as any);
+			}).toThrow(UnauthorizedException);
 		});
 
 		it('should allow access to non-public resolvers with authentication', () => {
@@ -113,26 +114,26 @@ describe('GraphQLPublicGuard', () => {
 			expect(Result).toBe(true);
 		});
 
-		it('should handle null user context', () => {
+		it('should throw UnauthorizedException when user is null', () => {
 			MockReflector.getAllAndOverride.mockReturnValue(false);
 			vi.spyOn(GqlExecutionContext, 'create').mockReturnValue({
 				getContext: () => ({ user: null }),
 			} as any);
 
-			const Result = Guard.canActivate(MockExecutionContext as any);
-
-			expect(Result).toBe(false);
+			expect(() => {
+				Guard.canActivate(MockExecutionContext as any);
+			}).toThrow(UnauthorizedException);
 		});
 
-		it('should handle undefined user context', () => {
+		it('should throw UnauthorizedException when user is undefined', () => {
 			MockReflector.getAllAndOverride.mockReturnValue(false);
 			vi.spyOn(GqlExecutionContext, 'create').mockReturnValue({
 				getContext: () => ({}),
 			} as any);
 
-			const Result = Guard.canActivate(MockExecutionContext as any);
-
-			expect(Result).toBe(false);
+			expect(() => {
+				Guard.canActivate(MockExecutionContext as any);
+			}).toThrow(UnauthorizedException);
 		});
 
 		it('should handle logger errors gracefully', () => {

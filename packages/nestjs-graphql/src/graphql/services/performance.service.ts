@@ -23,7 +23,7 @@ export interface IPerformanceMetrics {
 	endTime: Date;
 	success: boolean;
 	error: string | undefined;
-	metadata: Record<string, any> | undefined;
+	metadata: Record<string, unknown> | undefined;
 }
 
 /**
