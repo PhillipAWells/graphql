@@ -38,10 +38,10 @@ export const CursorUtils = {
 	/**
 	 * Create a cursor from a node with an ID property.
 	 * Convenience wrapper around encodeCursor.
-	 * @param node - Object with Id property.
+	 * @param node - Object with id property.
 	 * @returns Base64-encoded cursor string.
 	 */
-	createCursor(node: { Id: string }): string {
-		return CursorUtils.encodeCursor(node.Id);
+	createCursor(node: { id: string }): string {
+		return CursorUtils.encodeCursor(node.id);
 	},
 };

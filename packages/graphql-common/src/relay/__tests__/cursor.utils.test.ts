@@ -39,8 +39,8 @@ describe('CursorUtils', () => {
 		expect(decoded.Timestamp).toBe(timestamp);
 	});
 
-	it('should create cursor from node with Id property', () => {
-		const node = { Id: 'node-id-456' };
+	it('should create cursor from node with id property', () => {
+		const node = { id: 'node-id-456' };
 		const cursor = CursorUtils.createCursor(node);
 
 		expect(cursor).toBeTruthy();
