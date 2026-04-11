@@ -30,12 +30,6 @@ export { DateFilterInput } from './date-filter-input';
 export { ObjectIdFilterInput } from './object-id-filter-input';
 
 /**
- * Base marker interface for all filter input types. Enables type-safe composition with logical operators.
- * All filter input classes implicitly satisfy this interface.
- */
-export { IFilterInputBase } from './filter-input-base.interface';
-
-/**
  * Type representing a complete filter condition combining field-level filters with logical operators (And/Or).
  * IFilterCondition<T> = T & ILogicalFilter<T>, allowing both field filters and logical composition.
  * Enables arbitrarily complex nested filter structures for building expressive query conditions.
