@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import type { IGraphQLUser } from '../graphql/types/graphql-safety.types.js';
 
 /**
  * GraphQL Context Interface
@@ -20,8 +21,10 @@ export interface IGraphQLContext {
 
 	/**
 	 * Authenticated user information
+	 * Type-safe user interfaces should be defined in application code.
+	 * For type-safe access, use IGraphQLContextExtended from graphql-safety.types.ts
 	 */
-	user?: any;
+	user?: IGraphQLUser;
 
 	/**
 	 * Request ID for tracing
@@ -36,7 +39,7 @@ export interface IGraphQLContext {
 	/**
 	 * Custom context data
 	 */
-	[key: string]: any;
+	[key: string]: unknown;
 }
 
 /**
@@ -62,7 +65,7 @@ export interface IWebSocketContext extends IGraphQLContext {
 		/**
 		 * Connection parameters
 		 */
-		params?: Record<string, any>;
+		params?: Record<string, unknown>;
 	};
 
 	/**
@@ -82,7 +85,7 @@ export interface IWebSocketContext extends IGraphQLContext {
 		/**
 		 * Subscription variables
 		 */
-		variables?: Record<string, any>;
+		variables?: Record<string, unknown>;
 	};
 }
 

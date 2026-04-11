@@ -81,11 +81,10 @@ export interface IGraphQLConfigOptions extends Omit<ApolloDriverConfig, 'driver'
 
 	/**
 	   * Custom context function or object.
-	   * Uses `any` because Apollo Server's context can be a function returning a context object,
-	   * a plain context object, or a factory. Consumers should type-cast or provide their own
-	   * IGraphQLContext interface to this field when initializing GraphQLModule for type safety.
+	   * Accepts either a context object or a factory function that returns context data.
+	   * Consumers should type-cast or provide their own IGraphQLContext interface to this field when initializing GraphQLModule for type safety.
 	   */
-	context?: any;
+	context?: Record<string, unknown> | ((req: unknown, res: unknown) => Promise<Record<string, unknown>> | Record<string, unknown>);
 
 	/**
    * CORS configuration
@@ -138,7 +137,7 @@ export interface IGraphQLAsyncConfig {
 	/**
    * Factory function that returns configuration options
    */
-	useFactory: (...args: any[]) => Promise<IGraphQLConfigOptions> | IGraphQLConfigOptions;
+	useFactory: (...args: unknown[]) => Promise<IGraphQLConfigOptions> | IGraphQLConfigOptions;
 
 	/**
    * Dependencies to inject into the factory function

@@ -61,7 +61,10 @@ export class GraphQLContextFactory {
 		// User is attached to the request by authentication middleware
 		// and is optional - only present if the request was authenticated
 		if ('user' in req) {
-			Context.user = (req as unknown as Record<string, unknown>).user;
+			const UserData = (req as unknown as { user?: unknown }).user;
+			if (UserData && typeof UserData === 'object' && 'id' in UserData) {
+				Context.user = UserData as unknown as { id: string; [key: string]: unknown };
+			}
 		}
 
 		// Apply context enhancers

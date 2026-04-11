@@ -15,7 +15,7 @@ export class ObjectIdScalar {
    * @param value Value from client
    * @returns ObjectId instance
    */
-	public parseValue(value: any): ObjectId {
+	public parseValue(value: unknown): ObjectId {
 		if (typeof value !== 'string') {
 			throw new Error('ObjectId must be a string');
 		}
@@ -32,7 +32,7 @@ export class ObjectIdScalar {
    * @param value ObjectId instance
    * @returns String representation
    */
-	public serialize(value: ObjectId): any {
+	public serialize(value: ObjectId): string {
 		if (!(value instanceof ObjectId)) {
 			throw new Error('Value must be an ObjectId instance');
 		}
