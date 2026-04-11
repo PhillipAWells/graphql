@@ -34,7 +34,7 @@ export enum GraphQLErrorCode {
 export interface IGraphQLErrorExtensions {
 	code: GraphQLErrorCode;
 	timestamp: string;
-	details?: any;
+	details?: unknown;
 	validationErrors?: IValidationError[];
 }
 
