@@ -5,6 +5,9 @@ import { plainToClass } from 'class-transformer';
 import { AppLogger } from '@pawells/nestjs-shared/common';
 import type { IContextualLogger } from '@pawells/nestjs-shared/common';
 
+// Maximum allowed JSON-serialized input size in characters (approx. 100KB)
+const MAX_GRAPHQL_INPUT_SIZE = 100_000;
+
 /**
  * GraphQL Input Validation Pipe
  *
@@ -38,8 +41,7 @@ export class GraphQLInputValidationPipe implements PipeTransform<unknown> {
 		this.ModuleRef = moduleRef;
 	}
 
-	// Maximum allowed JSON-serialized input size in characters (approx. 100KB)
-	private readonly MAX_INPUT_SIZE = 100_000;
+	private readonly MAX_INPUT_SIZE = MAX_GRAPHQL_INPUT_SIZE;
 
 	// XSS-specific patterns only — SQL/NoSQL injection protection is handled by
 	// parameterized queries at the database layer, not by input string matching.

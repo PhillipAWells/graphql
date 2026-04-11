@@ -6,6 +6,7 @@ import { getErrorMessage } from '@pawells/nestjs-shared/common';
 import { BsonSerializationService } from './bson-serialization.service.js';
 
 declare module 'express' {
+	// eslint-disable-next-line @typescript-eslint/naming-convention
 	interface Request {
 		_bsonRequest?: boolean;
 	}
