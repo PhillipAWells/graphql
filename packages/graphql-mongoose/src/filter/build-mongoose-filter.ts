@@ -1,4 +1,3 @@
-import { FilterQuery } from 'mongoose';
 import { TFilterSchema, IFieldDescriptor } from './filter-schema.interface';
 import { BuildScalarFieldFilter } from './build-scalar-filter';
 
@@ -112,9 +111,9 @@ import { BuildScalarFieldFilter } from './build-scalar-filter';
 export function BuildMongooseFilter<TDoc>(
 	input: Record<string, unknown> | undefined | null,
 	schema: TFilterSchema<unknown>,
-): FilterQuery<TDoc> {
+): Record<string, unknown> {
 	if (input === undefined || input === null) {
-		return {} as FilterQuery<TDoc>;
+		return {};
 	}
 
 	const mongoFilter: Record<string, unknown> = {};
@@ -169,5 +168,5 @@ export function BuildMongooseFilter<TDoc>(
 		Object.assign(mongoFilter, scalarFieldFilter);
 	}
 
-	return mongoFilter as FilterQuery<TDoc>;
+	return mongoFilter;
 }
