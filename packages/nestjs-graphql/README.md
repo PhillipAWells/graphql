@@ -265,11 +265,11 @@ export class UserService {
   constructor(private cacheService: CacheService) {}
 
   async getUser(id: string) {
-    const cached = await this.cacheService.get(`user:${id}`);
+    const cached = await this.cacheService.Get(`user:${id}`);
     if (cached) return cached;
 
     const user = await this.db.user.findUnique({ where: { id } });
-    await this.cacheService.set(`user:${id}`, user, 300); // 5 minutes
+    await this.cacheService.Set(`user:${id}`, user, 300000); // 5 minutes
 
     return user;
   }
@@ -336,19 +336,19 @@ async deleteAllPosts(): Promise<void> {
 
 ```typescript
 // Get value from cache
-const value = await cacheService.get('key');
+const value = await cacheService.Get('key');
 
 // Set value with TTL (milliseconds)
-await cacheService.set('key', value, 60000); // 1 minute
+await cacheService.Set('key', value, 60000); // 1 minute
 
 // Delete specific key
-await cacheService.del('key');
+await cacheService.Del('key');
 
 // Clear all cache
-await cacheService.clear();
+await cacheService.Clear();
 
 // Get cache statistics
-const stats = await cacheService.getStats();
+const stats = cacheService.GetStats();
 ```
 
 ### GraphQL Configuration
@@ -532,7 +532,7 @@ export class UserLoader {
 
   // Use in request scope
   loadUser(userId: string) {
-    return this.dataloaderRegistry.getOrCreate(
+    return this.dataloaderRegistry.GetOrCreate(
       'users',
       {
         batchLoadFn: async (userIds: readonly string[]) => {
@@ -868,7 +868,7 @@ export class AppService implements OnModuleInit {
 
   onModuleInit() {
     // 50 requests per minute for mutations
-    this.rateLimitService.setOperationConfig('mutation', {
+    this.rateLimitService.SetOperationConfig('mutation', {
       maxRequests: 50,
       windowMs: 60000, // 1 minute
     });
@@ -983,8 +983,8 @@ export class MetricsService {
   ) {}
 
   async getMetrics() {
-    const cacheStats = await this.cacheService.getStats();
-    const rateLimitStats = this.rateLimitService.getStats();
+    const cacheStats = this.cacheService.GetStats();
+    const rateLimitStats = this.rateLimitService.GetStats();
 
     return {
       cache: cacheStats,

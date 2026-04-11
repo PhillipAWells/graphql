@@ -11,7 +11,10 @@ const MS_PER_SECOND = 1000;
  * GraphQL Rate Limit Guard
  *
  * Implements rate limiting for GraphQL operations to prevent abuse.
- * Uses a sliding window algorithm to track requests per user/IP.
+ * Uses a fixed-window (tumbling window) algorithm: the request counter resets at
+ * fixed time boundaries, not on each request. At exact window boundaries, up to
+ * 2x the configured limit may pass through within a two-window span. For stricter
+ * burst protection, use a sliding-window or token-bucket implementation instead.
  *
  * @example
  * ```typescript
