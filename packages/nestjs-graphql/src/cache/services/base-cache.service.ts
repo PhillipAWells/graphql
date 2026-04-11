@@ -386,8 +386,8 @@ export abstract class BaseCacheService implements ILazyModuleRefService, OnModul
 		this.Logger?.info('Clearing all cache entries');
 		try {
 			// cache-manager v7 uses clear() method exclusively
-			type ICacheManagerWithClear = { clear(): Promise<void> };
-			await (this.CacheManager as unknown as ICacheManagerWithClear).clear();
+			type TCacheManagerWithClear = { clear(): Promise<void> };
+			await (this.CacheManager as unknown as TCacheManagerWithClear).clear();
 			this.Stats.clears++;
 			this.Logger?.info('Cache cleared successfully');
 		} catch (error) {
@@ -469,8 +469,8 @@ export abstract class BaseCacheService implements ILazyModuleRefService, OnModul
 		this.Logger?.info(`Invalidating cache pattern: ${pattern}`);
 		try {
 			// For Redis store, we need to access the underlying client
-			type ICacheWithStore = { store?: { keys?(pattern: string): Promise<string[]> } };
-			const { store } = (this.CacheManager as unknown as ICacheWithStore);
+			type TCacheWithStore = { store?: { keys?(pattern: string): Promise<string[]> } };
+			const { store } = (this.CacheManager as unknown as TCacheWithStore);
 			if (store && typeof store.keys === 'function') {
 				const Keys = await store.keys(pattern);
 				if (Keys && Keys.length > 0) {
@@ -784,8 +784,8 @@ export abstract class BaseCacheService implements ILazyModuleRefService, OnModul
 
 			// Log cache size information if available
 			try {
-				type ICacheWithStoreClient = { store?: { client?: { dbsize?(): Promise<number> } } };
-				const { store } = (this.CacheManager as unknown as ICacheWithStoreClient);
+				type TCacheWithStoreClient = { store?: { client?: { dbsize?(): Promise<number> } } };
+				const { store } = (this.CacheManager as unknown as TCacheWithStoreClient);
 				if (store && typeof store.client?.dbsize === 'function') {
 					const DbSize = await store.client.dbsize();
 					this.Stats.totalKeys = DbSize;

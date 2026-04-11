@@ -50,6 +50,15 @@ export class ResilienceService implements OnModuleDestroy, ILazyModuleRefService
 	}
 
 	/**
+	 * Escapes user-controlled data for safe logging (prevents log injection)
+	 * @param value Value to escape
+	 * @returns Escaped value safe for logging
+	 */
+	private EscapeForLog(value: string): string {
+		return value.replace(/[\n\r]/g, ' ');
+	}
+
+	/**
    * Starts keepalive for a connection
    * @param connectionId Connection identifier
    * @param callback Keepalive callback function
@@ -63,12 +72,12 @@ export class ResilienceService implements OnModuleDestroy, ILazyModuleRefService
 			try {
 				callback();
 			} catch (error: unknown) {
-				this.Logger.error(`Keepalive error for connection ${connectionId}: ${getErrorMessage(error)}`);
+				this.Logger.error(`Keepalive error for connection ${this.EscapeForLog(connectionId)}: ${getErrorMessage(error)}`);
 			}
 		}, this.ISubscriptionConfig.resilience.keepalive.interval);
 
 		this.KeepaliveTimers.set(connectionId, Timer);
-		this.Logger.debug(`Started keepalive for connection: ${connectionId}`);
+		this.Logger.debug(`Started keepalive for connection: ${this.EscapeForLog(connectionId)}`);
 	}
 
 	/**
@@ -80,7 +89,7 @@ export class ResilienceService implements OnModuleDestroy, ILazyModuleRefService
 		if (Timer) {
 			clearInterval(Timer);
 			this.KeepaliveTimers.delete(connectionId);
-			this.Logger.debug(`Stopped keepalive for connection: ${connectionId}`);
+			this.Logger.debug(`Stopped keepalive for connection: ${this.EscapeForLog(connectionId)}`);
 		}
 	}
 
@@ -100,7 +109,7 @@ export class ResilienceService implements OnModuleDestroy, ILazyModuleRefService
 		}
 
 		if (attempt > this.ISubscriptionConfig.resilience.reconnection.attempts) {
-			this.Logger.warn(`Max reconnection attempts reached for connection: ${connectionId}`);
+			this.Logger.warn(`Max reconnection attempts reached for connection: ${this.EscapeForLog(connectionId)}`);
 			return;
 		}
 
@@ -116,18 +125,18 @@ export class ResilienceService implements OnModuleDestroy, ILazyModuleRefService
 		const Timer = setTimeout(async () => {
 			try {
 				await callback();
-				this.Logger.info(`Reconnection successful for connection: ${connectionId}`);
+				this.Logger.info(`Reconnection successful for connection: ${this.EscapeForLog(connectionId)}`);
 				// Clear timer on successful reconnection
 				this.ReconnectionTimers.delete(connectionId);
 			} catch (error: unknown) {
-				this.Logger.warn(`Reconnection attempt ${attempt} failed for ${connectionId}: ${getErrorMessage(error)}`);
+				this.Logger.warn(`Reconnection attempt ${attempt} failed for ${this.EscapeForLog(connectionId)}: ${getErrorMessage(error)}`);
 				// Schedule next attempt
 				this.ScheduleReconnection(connectionId, callback, attempt + 1);
 			}
 		}, Delay);
 
 		this.ReconnectionTimers.set(connectionId, Timer);
-		this.Logger.debug(`Scheduled reconnection attempt ${attempt} for connection: ${connectionId} in ${Delay}ms`);
+		this.Logger.debug(`Scheduled reconnection attempt ${attempt} for connection: ${this.EscapeForLog(connectionId)} in ${Delay}ms`);
 	}
 
 	/**
@@ -139,7 +148,7 @@ export class ResilienceService implements OnModuleDestroy, ILazyModuleRefService
 		if (Timer) {
 			clearTimeout(Timer);
 			this.ReconnectionTimers.delete(connectionId);
-			this.Logger.debug(`Cancelled reconnection for connection: ${connectionId}`);
+			this.Logger.debug(`Cancelled reconnection for connection: ${this.EscapeForLog(connectionId)}`);
 		}
 	}
 
@@ -154,7 +163,7 @@ export class ResilienceService implements OnModuleDestroy, ILazyModuleRefService
 		error: Error,
 		recoveryCallback: () => Promise<void>,
 	): Promise<void> {
-		this.Logger.error(`Connection error for ${connectionId}: ${getErrorMessage(error)}`, getErrorStack(error));
+		this.Logger.error(`Connection error for ${this.EscapeForLog(connectionId)}: ${getErrorMessage(error)}`, getErrorStack(error));
 
 		if (!this.ISubscriptionConfig.resilience.errorRecovery.enabled) {
 			return;
@@ -171,15 +180,15 @@ export class ResilienceService implements OnModuleDestroy, ILazyModuleRefService
 			try {
 				await new Promise(resolve => setTimeout(resolve, this.ISubscriptionConfig.resilience.errorRecovery.retryDelay));
 				await recoveryCallback();
-				this.Logger.info(`Error recovery successful for connection: ${connectionId}`);
+				this.Logger.info(`Error recovery successful for connection: ${this.EscapeForLog(connectionId)}`);
 				return;
 			} catch (recoveryError: unknown) {
-				this.Logger.warn(`Error recovery attempt ${Attempt} failed for ${connectionId}: ${getErrorMessage(recoveryError)}`);
+				this.Logger.warn(`Error recovery attempt ${Attempt} failed for ${this.EscapeForLog(connectionId)}: ${getErrorMessage(recoveryError)}`);
 				Attempt++;
 			}
 		}
 
-		this.Logger.error(`Error recovery failed for connection: ${connectionId} after ${maxRetries} attempts`);
+		this.Logger.error(`Error recovery failed for connection: ${this.EscapeForLog(connectionId)} after ${maxRetries} attempts`);
 	}
 
 	/**

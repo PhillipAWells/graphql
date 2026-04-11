@@ -66,8 +66,8 @@ export function CacheEvict(options: ICacheEvictOptions) {
 
 				// Evict cache keys matching pattern
 				try {
-					type ICacheManagerWithStore = { store?: { keys?: (pattern: string) => Promise<string[]> } };
-					const { store } = (CacheManager as ICacheManagerWithStore);
+					type TCacheManagerWithStore = { store?: { keys?: (pattern: string) => Promise<string[]> } };
+					const { store } = (CacheManager as TCacheManagerWithStore);
 					if (store && typeof store.keys === 'function') {
 						const Keys = await store.keys(options.pattern);
 						if (Keys && Keys.length > 0) {
