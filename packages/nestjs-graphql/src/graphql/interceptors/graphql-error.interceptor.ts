@@ -45,7 +45,7 @@ export class GraphQLErrorInterceptor implements NestInterceptor, ILazyModuleRefS
 	 * @param next - The call handler
 	 * @returns Observable - The intercepted operation
 	 */
-	public intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+	public intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
 		// Extract GraphQL context
 		const GqlContext = GqlExecutionContext.create(context);
 		const Info = GqlContext.getInfo();
@@ -81,7 +81,7 @@ export class GraphQLErrorInterceptor implements NestInterceptor, ILazyModuleRefS
 	 * @returns GraphQLError - The formatted GraphQL error
 	 */
 	private FormatError(
-		error: any,
+		error: unknown,
 		operationType: string,
 		operationName: string,
 		fieldName: string,
@@ -113,7 +113,7 @@ export class GraphQLErrorInterceptor implements NestInterceptor, ILazyModuleRefS
 		// Create new GraphQLError with formatted message
 		return new GraphQLError(message, {
 			extensions: Extensions,
-			originalError: error,
+			originalError: error instanceof Error ? error : undefined,
 		});
 	}
 
@@ -124,7 +124,7 @@ export class GraphQLErrorInterceptor implements NestInterceptor, ILazyModuleRefS
 	 * @param error - The original error
 	 * @returns object - Error categorization result
 	 */
-	private CategorizeError(error: any): { code: string; message: string; statusCode: number } {
+	private CategorizeError(error: unknown): { code: string; message: string; statusCode: number } {
 		const Classification = ErrorClassifier.Classify(error);
 
 		// In production, use generic message for internal errors; in development, expose actual error

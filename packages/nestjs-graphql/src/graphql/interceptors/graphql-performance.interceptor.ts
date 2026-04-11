@@ -59,7 +59,7 @@ export class GraphQLPerformanceInterceptor implements NestInterceptor, ILazyModu
 	 * @returns Observable - The intercepted operation
 	 */
 	@ProfileMethod({ tags: { operation: 'graphql_intercept' } })
-	public intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+	public intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
 		const StartTime = Date.now();
 
 		// Extract GraphQL context
