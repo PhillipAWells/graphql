@@ -57,7 +57,7 @@ describe('GraphQLInputValidationPipe - Security Validation', () => {
 			});
 
 			expect(result).toBeDefined();
-			expect(result.name).toBe('John Doe');
+			expect((result as Record<string, unknown>).name).toBe('John Doe');
 		});
 	});
 
@@ -215,7 +215,8 @@ describe('GraphQLInputValidationPipe - Security Validation', () => {
 			}).catch(e => e);
 
 			expect(error).toBeInstanceOf(BadRequestException);
-			expect(error.getResponse()).toMatchObject({
+			const response = (error as { getResponse(): unknown }).getResponse();
+			expect(response).toMatchObject({
 				message: expect.stringContaining('Invalid characters or patterns'),
 				code: 'XSS_DETECTED',
 			});
@@ -233,7 +234,8 @@ describe('GraphQLInputValidationPipe - Security Validation', () => {
 			}).catch(e => e);
 
 			expect(error).toBeInstanceOf(BadRequestException);
-			expect(error.getResponse()).toMatchObject({
+			const response = (error as { getResponse(): unknown }).getResponse();
+			expect(response).toMatchObject({
 				message: expect.stringContaining('exceeds maximum'),
 				code: 'INPUT_SIZE_EXCEEDED',
 			});
@@ -351,7 +353,7 @@ describe('GraphQLInputValidationPipe - Security Validation', () => {
 			}).catch(e => e);
 
 			expect(error).toBeInstanceOf(BadRequestException);
-			expect(error.getResponse()).toMatchObject({
+			expect((error as { getResponse(): unknown }).getResponse()).toMatchObject({
 				message: expect.stringContaining('Invalid input structure'),
 				code: 'CIRCULAR_REFERENCE_DETECTED',
 			});

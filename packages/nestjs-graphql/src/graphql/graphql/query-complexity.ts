@@ -1,4 +1,5 @@
 import { getComplexity, simpleEstimator, fieldExtensionsEstimator } from 'graphql-query-complexity';
+import { GraphQLSchema, DocumentNode } from 'graphql';
 import { AppLogger, getErrorStack } from '@pawells/nestjs-shared/common';
 import { QUERY_COMPLEXITY_THRESHOLD, QUERY_DEPTH_LIMIT, QUERY_COMPLEXITY_SCALAR_WEIGHT, QUERY_COMPLEXITY_DEFAULT_DEPTH_MULTIPLIER } from '../constants/complexity.constants.js';
 
@@ -42,9 +43,9 @@ export const DEFAULT_COMPLEXITY_CONFIG: IComplexityConfig = {
  * @returns Calculated complexity score
  */
 export function CalculateQueryComplexity(
-	schema: any,
-	query: any,
-	variables: Record<string, any> | undefined,
+	schema: GraphQLSchema,
+	query: DocumentNode,
+	variables: Record<string, unknown> | undefined,
 	operationName: string | undefined,
 	config: IComplexityConfig = DEFAULT_COMPLEXITY_CONFIG,
 ): number {

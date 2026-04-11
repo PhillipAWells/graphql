@@ -10,7 +10,7 @@ import { DataLoaderRegistry } from './dataloader-registry.js';
  */
 export interface IComment {
 	id: string;
-	[key: string]: any;
+	[key: string]: unknown;
 }
 
 /**

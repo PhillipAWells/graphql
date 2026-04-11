@@ -16,6 +16,19 @@ interface ICacheStats {
 	store: string;
 }
 
+/**
+ * Extended cache manager interface for additional operations
+ */
+interface ICacheManagerExtended {
+	clear(): Promise<void>;
+	reset?(): Promise<void>;
+	store?: {
+		keys(pattern: string): Promise<string[]>;
+		client?: { dbsize(): Promise<number> };
+		getClient?: () => { scan(cursor: string, ...args: unknown[]): Promise<[string, string[]]>; del(...keys: string[]): Promise<number> };
+	};
+}
+
 const DEFAULT_CACHE_TTL = 300000; // 5 minutes
 const HIT_RATE_PERCENTAGE = 100;
 
@@ -193,11 +206,12 @@ export class GraphQLCacheService implements ILazyModuleRefService, OnModuleInit 
 	 */
 	public async Clear(): Promise<void> {
 		try {
-			if (typeof (this.CacheManager as any).clear === 'function') {
-				await (this.CacheManager as any).clear();
+			const CacheManagerExt = this.CacheManager as unknown as ICacheManagerExtended;
+			if (typeof CacheManagerExt.clear === 'function') {
+				await CacheManagerExt.clear();
 				this.Logger.debug('Cache cleared successfully');
-			} else if (typeof (this.CacheManager as any).reset === 'function') {
-				await (this.CacheManager as any).reset();
+			} else if (typeof CacheManagerExt.reset === 'function') {
+				await CacheManagerExt.reset();
 				this.Logger.debug('Cache cleared successfully');
 			} else {
 				this.Logger.warn('Cache clear not supported by current store, skipping');
@@ -216,10 +230,10 @@ export class GraphQLCacheService implements ILazyModuleRefService, OnModuleInit 
 	 */
 	public async InvalidatePattern(pattern: string): Promise<void> {
 		try {
-			const CacheManager = this.CacheManager as any;
+			const CacheManagerExt = this.CacheManager as unknown as ICacheManagerExtended;
 			// Check if store is Redis-like with scan capabilities
-			if (CacheManager?.store?.getClient && typeof CacheManager.store.getClient === 'function') {
-				const Client = CacheManager.store.getClient();
+			if (CacheManagerExt?.store?.getClient && typeof CacheManagerExt.store.getClient === 'function') {
+				const Client = CacheManagerExt.store.getClient();
 				if (Client && typeof Client.scan === 'function') {
 					// Use Redis SCAN to find and delete matching keys
 					const REDIS_SCAN_COUNT = 100;

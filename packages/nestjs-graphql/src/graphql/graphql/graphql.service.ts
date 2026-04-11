@@ -42,6 +42,7 @@ export class GraphQLService {
     */
 	@Traced({ name: 'graphql.validateSchema' })
 	public ValidateSchema(schema: GraphQLSchema): void {
+		// Validate schema is provided
 		if (!schema) {
 			throw new Error('GraphQL schema is required');
 		}

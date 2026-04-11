@@ -16,6 +16,7 @@ import {
 } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { GqlExecutionContext } from '@nestjs/graphql';
+import { DocumentNode } from 'graphql';
 import type { ILazyModuleRefService, IContextualLogger } from '@pawells/nestjs-shared/common';
 import { AppLogger } from '@pawells/nestjs-shared/common';
 import type {
@@ -100,7 +101,7 @@ export class QueryComplexityGuard implements CanActivate, OnModuleDestroy, ILazy
 	 * @param variables Query variables used in the query
 	 * @returns SHA-256 hex string
 	 */
-	private HashQuery(query: any, variables?: Record<string, unknown>): string {
+	private HashQuery(query: DocumentNode, variables?: Record<string, unknown>): string {
 		return createHash('sha256')
 			.update(JSON.stringify({ query, variables }))
 			.digest('hex');
@@ -113,7 +114,7 @@ export class QueryComplexityGuard implements CanActivate, OnModuleDestroy, ILazy
 	 * @param variables Query variables used in the query
 	 * @returns Cached complexity or undefined
 	 */
-	private GetComplexityFromCache(query: any, variables?: Record<string, unknown>): number | undefined {
+	private GetComplexityFromCache(query: DocumentNode, variables?: Record<string, unknown>): number | undefined {
 		const Key = this.HashQuery(query, variables);
 		const Entry = this.ComplexityCache.get(Key);
 
@@ -136,14 +137,14 @@ export class QueryComplexityGuard implements CanActivate, OnModuleDestroy, ILazy
 	 * @param complexity Calculated complexity
 	 * @param variables Query variables used in the query
 	 */
-	private SetComplexityCache(query: any, complexity: number, variables?: Record<string, unknown>): void {
+	private SetComplexityCache(query: DocumentNode, complexity: number, variables?: Record<string, unknown>): void {
 		const Key = this.HashQuery(query, variables);
 		const Now = Date.now();
 
 		// Clean up cache if it exceeds max size (LRU eviction)
 		if (this.ComplexityCache.size >= QUERY_COMPLEXITY_CACHE_MAX_SIZE) {
 			let LruKey: string | undefined;
-			let LruTime = Date.now();
+			let LruTime = Infinity;
 
 			// Find the least recently used entry
 			for (const [CacheKey, Entry] of this.ComplexityCache.entries()) {
