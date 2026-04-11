@@ -2,10 +2,10 @@ import { TFilterSchema, IFieldDescriptor } from './filter-schema.interface';
 import { BuildScalarFieldFilter } from './build-scalar-filter';
 
 /**
- * Builds a MongoDB FilterQuery from a GraphQL filter input.
+ * Builds a MongoDB query object from a GraphQL filter input.
  *
  * Translates GraphQL filter inputs (with nested scalar operators and logical operators)
- * into a Mongoose FilterQuery by:
+ * into a `Record<string, unknown>` MongoDB query by:
  * 1. Allowlisting fields against the provided schema
  * 2. Delegating scalar field translation to `BuildScalarFieldFilter`
  * 3. Recursively processing logical operators (`And`, `Or`)
@@ -17,16 +17,20 @@ import { BuildScalarFieldFilter } from './build-scalar-filter';
  *
  * Supports arbitrary nesting depth for logical operators (e.g., `Or: [{ And: [...] }, ...]`).
  *
- * @template TDoc - The MongoDB document type for type safety.
+ * Note: Returns `Record<string, unknown>` rather than `FilterQuery<TDoc>` because
+ * `FilterQuery<T>` was removed in mongoose v9. The `TDoc` type parameter is retained
+ * for call-site clarity.
+ *
+ * @template TDoc - The MongoDB document type (retained for call-site clarity).
  *
  * @param input - The GraphQL filter input object (e.g., `{ Age: { Eq: 30 }, Or: [...] }`).
- *                If undefined or null, returns an empty FilterQuery.
+ *                If undefined or null, returns an empty query object.
  * @param schema - The filter schema defining allowed fields and their Mongoose mappings.
  *                 Acts as an allowlist and type registry. Logical operators are not validated
  *                 against the schema (they are special reserved keys).
  *
- * @returns A Mongoose FilterQuery ready for use with MongoDB operations.
- *          Returns an empty FilterQuery `{}` if input is null/undefined or contains no valid fields.
+ * @returns A MongoDB query object ready for use with `.find()`, `.findOne()`, or `.countDocuments()`.
+ *          Returns `{}` if input is null/undefined or contains no valid fields.
  *
  * @example
  * ```typescript

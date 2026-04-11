@@ -6,7 +6,7 @@
 [![Node](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](https://nodejs.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/PhillipAWells/graphql/blob/main/LICENSE)
 
-GraphQL-to-Mongoose filter builder — translates GraphQL filter inputs to strongly typed Mongoose `FilterQuery` objects. Accepts structured input from any GraphQL client and produces a ready-to-use MongoDB query with field remapping, type coercion, and allowlist enforcement built in.
+GraphQL-to-Mongoose filter builder — translates GraphQL filter inputs to MongoDB query objects. Accepts structured input from any GraphQL client and produces a ready-to-use `Record<string, unknown>` query with field remapping, type coercion, and allowlist enforcement built in.
 
 ## Installation
 
@@ -20,7 +20,7 @@ yarn add @pawells/graphql-mongoose mongoose @pawells/graphql-common
 
 **Peer dependencies** that must be present in your project:
 
-- `mongoose >=8.0.0`
+- `mongoose >=8.0.0` (v9 supported; note that `FilterQuery<T>` was removed in mongoose v9 — the package uses `Record<string, unknown>` instead)
 - `graphql >=16.0.0`
 - `@pawells/graphql-common >=2.0.0`
 
@@ -28,7 +28,6 @@ yarn add @pawells/graphql-mongoose mongoose @pawells/graphql-common
 
 ```typescript
 import { BuildMongooseFilter, TFilterSchema } from '@pawells/graphql-mongoose';
-import { FilterQuery } from 'mongoose';
 
 interface IUser {
 	_id: string;
@@ -46,7 +45,7 @@ const userFilterSchema: TFilterSchema<IUserFilterInput> = {
 	Age: { MongoField: 'age', Type: 'number' },
 };
 
-const mongoFilter: FilterQuery<IUser> = BuildMongooseFilter<IUser>(
+const mongoFilter = BuildMongooseFilter<IUser>(
 	{ Name: { Eq: 'Alice' }, Age: { Gte: 18 } },
 	userFilterSchema,
 );
@@ -57,13 +56,13 @@ const users = await UserModel.find(mongoFilter);
 
 ## API Reference
 
-### `BuildMongooseFilter<TDoc>(filter, schema): FilterQuery<TDoc>`
+### `BuildMongooseFilter<TDoc>(filter, schema): Record<string, unknown>`
 
-Translates a GraphQL filter input object into a Mongoose `FilterQuery`. Returns `{}` when `filter` is `null` or `undefined`.
+Translates a GraphQL filter input object into a MongoDB query object. Returns `{}` when `filter` is `null` or `undefined`.
 
 - `filter` — The GraphQL filter input object, or `null`/`undefined`.
 - `schema` — A `TFilterSchema` that declares which fields are allowed and how they map to MongoDB.
-- Returns a `FilterQuery<TDoc>` ready to pass to `.find()`, `.findOne()`, or `.countDocuments()`.
+- Returns a `Record<string, unknown>` ready to pass to `.find()`, `.findOne()`, or `.countDocuments()`.
 
 Unknown fields in `filter` that are absent from `schema` are silently dropped. Logical operators (`And`, `Or`) are reserved keys and are not validated against the schema.
 
@@ -71,7 +70,7 @@ Unknown fields in `filter` that are absent from `schema` are silently dropped. L
 
 Creates an in-memory predicate function from a GraphQL filter input. Used for server-side subscription filtering so subscribers only receive payloads that match their criteria. Returns a function that always accepts all documents when `filter` is `null` or `undefined`.
 
-- `filter` — The GraphQL filter input object, or `null`/`undefined`.
+- `filter` — The GraphQL filter input object as `Record<string, unknown>`, or `null`/`undefined`.
 - `schema` — A `TFilterSchema` defining field mappings and types.
 - Returns `(doc: TDoc) => boolean`.
 
@@ -107,7 +106,6 @@ The following example shows a complete NestJS resolver. The filter input type is
 ```typescript
 import { Resolver, Query, Args } from '@nestjs/graphql';
 import { BuildMongooseFilter, TFilterSchema } from '@pawells/graphql-mongoose';
-import { FilterQuery } from 'mongoose';
 
 // Your Mongoose document type
 interface IUser {
@@ -139,7 +137,7 @@ export class UserResolver {
 	async users(
 		@Args('filter', { nullable: true }) filter?: IUserFilterInput,
 	): Promise<IUser[]> {
-		const mongoFilter: FilterQuery<IUser> = BuildMongooseFilter<IUser>(
+		const mongoFilter = BuildMongooseFilter<IUser>(
 			filter as Record<string, unknown> | undefined,
 			UserFilterSchema,
 		);
@@ -294,7 +292,7 @@ BuildMongooseFilter({ Name: { Eq: null } } as any, schema);
 // → { name: { $eq: null } }
 ```
 
-If `filter` itself is `null` or `undefined`, an empty `FilterQuery` (`{}`) is returned, which matches all documents.
+If `filter` itself is `null` or `undefined`, an empty query object (`{}`) is returned, which matches all documents.
 
 ## Security: Allowlist Enforcement
 
@@ -335,7 +333,7 @@ Coverage threshold: 80% lines, functions, branches, and statements.
 
 ## TypeScript Integration
 
-Both `BuildMongooseFilter` and `BuildMongooseSubscriptionFilter` are generic over `TDoc`, the Mongoose document type. Passing `TDoc` provides compile-time checking that the returned `FilterQuery<TDoc>` is compatible with your model:
+Both `BuildMongooseFilter` and `BuildMongooseSubscriptionFilter` are generic over `TDoc`, the Mongoose document type. The `TDoc` type parameter is retained for call-site clarity and downstream compatibility, though the return type is `Record<string, unknown>` (mongoose v9 removed `FilterQuery<T>`):
 
 ```typescript
 interface IUser {
@@ -344,7 +342,7 @@ interface IUser {
 	age: number;
 }
 
-// FilterQuery<IUser> — TypeScript enforces field names in downstream usage
+// Returns Record<string, unknown> — pass directly to Mongoose query methods
 const filter = BuildMongooseFilter<IUser>(input, schema);
 await UserModel.find(filter); // compatible
 ```
