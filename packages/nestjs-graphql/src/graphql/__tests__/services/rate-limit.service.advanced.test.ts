@@ -22,11 +22,11 @@ describe('RateLimitService - Advanced Integration', () => {
 		};
 
 		const moduleRefConfig = {
-			Get: (token: any) => {
+			get: vi.fn((token: any) => {
 				if (token === AppLogger) return mockAppLogger;
 				if (token === 'RATE_LIMIT_STORAGE' && storage) return storage;
 				throw new Error(`Unknown token: ${String(token)}`);
-			},
+			}),
 		} as any;
 
 		return new RateLimitService(moduleRefConfig);
