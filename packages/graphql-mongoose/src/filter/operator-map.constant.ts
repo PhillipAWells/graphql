@@ -2,7 +2,7 @@
  * Maps GraphQL scalar filter operators to MongoDB query operators.
  *
  * Each GraphQL operator (e.g., `Eq`, `Ne`) is translated to its MongoDB equivalent
- * (e.g., `$eq`, `$ne`) for use in MongoDB FilterQuery.
+ * (e.g., `$eq`, `$ne`) for use in MongoDB query objects.
  *
  * @example
  * ```typescript
