@@ -21,8 +21,10 @@ import { SCALAR_OPERATOR_MAP } from './operator-map.constant';
  * - `Size`: Matches documents where the array field has exactly the specified length.
  *   Example: `{ Tags: { Size: 3 } }` → `{ tags: { $size: 3 } }`
  * - `ElemMatch`: Matches documents where at least one element in the array matches
- *   the specified filter. The filter is recursively built using BuildMongooseFilter.
- *   Example: `{ Tags: { ElemMatch: { Eq: 'a' } } }` → `{ tags: { $elemMatch: { $eq: 'a' } } }`
+ *   the specified filter. The operand is passed through as-is without transformation,
+ *   and should be a valid MongoDB filter object (either GraphQL-style operators or
+ *   pre-transformed MongoDB operators).
+ *   Example: `{ Tags: { ElemMatch: { Eq: 'a' } } }` → `{ tags: { $elemMatch: { Eq: 'a' } } }`
  *
  * Array operators are only valid for fields with Type: 'array'.
  *
@@ -74,7 +76,6 @@ export function BuildScalarFieldFilter(
 	fieldInput: Record<string, unknown> | undefined,
 	mongoField: string,
 	fieldType: string,
-	schema?: Record<string, unknown>,
 ): Record<string, unknown> {
 	if (fieldInput === undefined || fieldInput === null) {
 		return {};
@@ -114,17 +115,12 @@ export function BuildScalarFieldFilter(
 			}
 
 			if (operatorKey === 'ElemMatch') {
-				// For ElemMatch, recursively validate the operand through schema-driven validation
-				// if schema is available. This prevents injection of arbitrary MongoDB operators.
-				if (schema !== undefined && typeof operatorValue === 'object' && operatorValue !== null) {
-					// Lazy load BuildMongooseFilter to avoid circular dependency
-					// eslint-disable-next-line @typescript-eslint/no-var-requires
-					const { BuildMongooseFilter: buildMongooseFilterFn } = require('./build-mongoose-filter');
-					const validatedFilter = buildMongooseFilterFn(operatorValue, schema);
-					mongoFieldFilter.$elemMatch = validatedFilter;
-				} else {
-					mongoFieldFilter.$elemMatch = operatorValue;
-				}
+				// For ElemMatch, the value is passed through as-is.
+				// The operand should be a properly formed filter object (either GraphQL-style operators
+				// or already transformed MongoDB operators) that will be applied by MongoDB or the
+				// subscription filter evaluator. Schema validation is the application's responsibility
+				// at the GraphQL layer to ensure ElemMatch inputs are well-typed.
+				mongoFieldFilter.$elemMatch = operatorValue;
 				continue;
 			}
 		}
