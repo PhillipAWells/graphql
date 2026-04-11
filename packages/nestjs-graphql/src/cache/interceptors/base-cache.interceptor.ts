@@ -86,7 +86,7 @@ export abstract class BaseCacheInterceptor implements NestInterceptor, ILazyModu
 		name: 'BaseCacheInterceptor.intercept',
 		tags: { interceptor: 'cache', operation: 'http_cache' },
 	})
-	public intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+	public intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
 		const ContextHandler = this.GetCacheContextHandler();
 
 		// Check if this request should be cached
@@ -139,7 +139,7 @@ export abstract class BaseCacheInterceptor implements NestInterceptor, ILazyModu
 	/**
 	 * Generate ETag from response data
 	 */
-	protected GenerateETag(data: any): string {
+	protected GenerateETag(data: unknown): string {
 		const Content = JSON.stringify(data);
 		return `"${Buffer.from(Content).toString('base64').substring(0, CACHE_ETAG_BASE64_SUBSTRING_LENGTH)}"`;
 	}
@@ -147,15 +147,15 @@ export abstract class BaseCacheInterceptor implements NestInterceptor, ILazyModu
 	/**
 	 * Sort object keys for consistent cache keys
 	 */
-	protected SortObject(obj: any): any {
+	protected SortObject(obj: unknown): unknown {
 		if (!obj || typeof obj !== 'object') return obj;
 		if (Array.isArray(obj)) return obj.map(this.SortObject.bind(this));
 
-		const Sorted: any = {};
-		Object.keys(obj)
+		const Sorted: Record<string, unknown> = {};
+		Object.keys(obj as Record<string, unknown>)
 			.sort()
 			.forEach((key) => {
-				Sorted[key] = this.SortObject(obj[key]);
+				Sorted[key] = this.SortObject((obj as Record<string, unknown>)[key]);
 			});
 
 		return Sorted;

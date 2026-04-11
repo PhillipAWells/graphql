@@ -1,4 +1,4 @@
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 import { ProfileMethod } from '@pawells/nestjs-pyroscope';
 import { AppLogger, getErrorStack } from '@pawells/nestjs-shared/common';
 
@@ -10,7 +10,7 @@ export interface ICacheableOptions {
 	 * Cache key — either a constant string or a function to generate keys dynamically
 	 * Default: `${ClassName}:${methodName}`
 	 */
-	key?: string | ((...args: any[]) => string);
+	key?: string | ((...args: unknown[]) => string);
 
 	/**
 	 * Time-to-live for the cached value in milliseconds
@@ -21,7 +21,7 @@ export interface ICacheableOptions {
 	 * Optional condition function to determine if caching should occur
 	 * Called with method arguments; caching skipped if returns false
 	 */
-	condition?: (...args: any[]) => boolean;
+	condition?: (...args: unknown[]) => boolean;
 }
 
 /**
@@ -62,26 +62,29 @@ export function Cacheable(options: ICacheableOptions = {}) {
 	const Logger = new AppLogger(undefined, 'CacheableDecorator');
 
 	return function(
-		target: any,
+		target: unknown,
 		propertyKey: string,
 		descriptor: PropertyDescriptor,
 	) {
 		const OriginalMethod = descriptor.value;
-		const CacheKeyFn = typeof options.key === 'function' ? options.key : () => options.key ?? `${target.constructor.name}:${propertyKey}`;
+		const TargetName = (target as unknown as { constructor: { name: string } }).constructor.name;
 
-		descriptor.value = async function(...args: any[]) {
+		descriptor.value = async function(...args: unknown[]) {
 			// Check condition if provided
 			if (options.condition && !options.condition(...args)) {
 				return OriginalMethod.apply(this, args);
 			}
 
-			const CacheManager = (this as any)[CACHE_MANAGER] ?? (this as any).cacheManager;
+			const CacheManager = (this as { [CACHE_MANAGER]?: Cache })[CACHE_MANAGER] ?? (this as { cacheManager?: Cache }).cacheManager;
 			if (!CacheManager) {
 				Logger.warn(`Cache manager not found for ${propertyKey}, executing without cache`);
 				return OriginalMethod.apply(this, args);
 			}
 
-			const CacheKey = CacheKeyFn(...args);
+			// Compute the cache key
+			const CacheKey = typeof options.key === 'function'
+				? options.key(...args)
+				: (options.key ?? `${TargetName}:${propertyKey}`);
 
 			try {
 				// Try to get from cache
@@ -106,9 +109,9 @@ export function Cacheable(options: ICacheableOptions = {}) {
 
 		// Apply profiling to the wrapped method
 		ProfileMethod({
-			name: `${target.constructor.name}.${propertyKey}.cacheable`,
+			name: `${TargetName}.${propertyKey}.cacheable`,
 			tags: { decorator: 'cacheable', operation: 'cache_decorator' },
-		})(target, propertyKey, descriptor);
+		})(target as unknown as Object, propertyKey, descriptor);
 
 		return descriptor;
 	};

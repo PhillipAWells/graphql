@@ -23,7 +23,7 @@ export interface ICacheConfig {
 /**
  * Cache key builder function type
  */
-export type TCacheKeyBuilder = (...args: any[]) => string;
+export type TCacheKeyBuilder = (...args: unknown[]) => string;
 
 /**
  * Cache invalidation strategy enum
