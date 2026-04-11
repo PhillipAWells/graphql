@@ -45,7 +45,7 @@ export class GraphQLLoggingInterceptor implements NestInterceptor, ILazyModuleRe
 	 * @param next - The call handler
 	 * @returns Observable - The intercepted operation
 	 */
-	public intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+	public intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
 		const StartTime = Date.now();
 
 		// Extract GraphQL context
@@ -101,14 +101,14 @@ export class GraphQLLoggingInterceptor implements NestInterceptor, ILazyModuleRe
 	 * Sanitizes operation arguments to avoid logging sensitive data
 	 *
 	 * @param args - The operation arguments
-	 * @returns any - Sanitized arguments
+	 * @returns unknown - Sanitized arguments
 	 */
-	private SanitizeArgs(args: any): any {
+	private SanitizeArgs(args: unknown): unknown {
 		if (!args || typeof args !== 'object') {
 			return args;
 		}
 
-		const Sanitized = { ...args };
+		const Sanitized = { ...(args as Record<string, unknown>) };
 
 		// Remove sensitive fields
 		const SensitiveFields = ['password', 'token', 'secret', 'key', 'authorization'];
@@ -127,7 +127,7 @@ export class GraphQLLoggingInterceptor implements NestInterceptor, ILazyModuleRe
 	 * @param result - The operation result
 	 * @returns string - Result summary
 	 */
-	private SummarizeResult(result: any): string {
+	private SummarizeResult(result: unknown): string {
 		if (!result) {
 			return 'null';
 		}
@@ -137,7 +137,7 @@ export class GraphQLLoggingInterceptor implements NestInterceptor, ILazyModuleRe
 		}
 
 		if (typeof result === 'object') {
-			const Keys = Object.keys(result);
+			const Keys = Object.keys(result as Record<string, unknown>);
 			return `Object{${Keys.slice(0, RESULT_SUMMARY_MAX_KEYS).join(', ')}${Keys.length > RESULT_SUMMARY_MAX_KEYS ? '...' : ''}}`;
 		}
 

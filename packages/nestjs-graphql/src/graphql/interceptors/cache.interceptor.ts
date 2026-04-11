@@ -110,7 +110,7 @@ export class GraphQLCacheInterceptor extends BaseCacheInterceptor {
 	/**
 	 * Override intercept to add GraphQL-specific cache invalidation
 	 */
-	public override intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+	public override intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
 		const GqlContext = GqlExecutionContext.create(context);
 		const Args = GqlContext.getArgs();
 		const GqlContextData = GqlContext.getContext();
@@ -136,9 +136,9 @@ export class GraphQLCacheInterceptor extends BaseCacheInterceptor {
 	 */
 	private async HandleCacheInvalidation(
 		context: ExecutionContext,
-		args: Record<string, any>,
-		gqlContext: any,
-		result: any,
+		args: Record<string, unknown>,
+		gqlContext: unknown,
+		result: unknown,
 		when: 'before' | 'after',
 	): Promise<void> {
 		const InvalidateOptions = this.Reflector.getAllAndOverride<ICacheInvalidateOptions>(
