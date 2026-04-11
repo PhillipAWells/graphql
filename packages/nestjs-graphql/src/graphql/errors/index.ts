@@ -35,6 +35,9 @@ export { CreateGraphQLError as createGraphQLError, GRAPHQL_ERROR_CONFIGS, type I
 // Legacy GraphqlError for backward compatibility
 export { GraphqlError } from './graphql-error.js';
 
+// Error classification utility
+export { ErrorClassifier, type IErrorClassification } from './error-classifier.js';
+
 // Factory-generated GraphQL error classes
 import { CreateGraphQLError, GRAPHQL_ERROR_CONFIGS } from './graphql-error-factory.js';
 
@@ -43,13 +46,23 @@ export const ForbiddenError = CreateGraphQLError(GRAPHQL_ERROR_CONFIGS.FORBIDDEN
 export const NotFoundError = CreateGraphQLError(GRAPHQL_ERROR_CONFIGS.NOT_FOUND);
 export const BadRequestError = CreateGraphQLError(GRAPHQL_ERROR_CONFIGS.BAD_USER_INPUT);
 export const ConflictError = CreateGraphQLError(GRAPHQL_ERROR_CONFIGS.CONFLICT);
-export const InternalServerError = CreateGraphQLError(GRAPHQL_ERROR_CONFIGS.INTERNAL_SERVER_ERROR);
+export const InternalServerError = CreateGraphQLError(GRAPHQL_ERROR_CONFIGS.INTERNAL_ERROR);
 export const RateLimitError = CreateGraphQLError(GRAPHQL_ERROR_CONFIGS.RATE_LIMIT_EXCEEDED);
 
 // Additional GraphQL-specific errors
 export const ValidationError = CreateGraphQLError(GRAPHQL_ERROR_CONFIGS.VALIDATION_ERROR);
 
-// Backward compatibility aliases (deprecated - use the factory-generated classes above)
+/**
+ * Backward compatibility aliases (deprecated)
+ *
+ * @deprecated Use the factory-generated error classes instead:
+ * - {@link NotFoundError} instead of LegacyNotFoundError
+ * - {@link ValidationError} instead of LegacyValidationError
+ * - {@link UnauthorizedError} instead of LegacyUnauthorizedError
+ * - {@link ForbiddenError} instead of LegacyForbiddenError
+ * - {@link ConflictError} instead of LegacyConflictError
+ * - {@link RateLimitError} instead of LegacyRateLimitError
+ */
 export { NotFoundError as LegacyNotFoundError } from './not-found.error.js';
 export { ValidationError as LegacyValidationError } from './validation.error.js';
 export { UnauthorizedError as LegacyUnauthorizedError } from './unauthorized.error.js';

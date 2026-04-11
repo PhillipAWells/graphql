@@ -23,16 +23,16 @@ export interface ICacheConfig {
 /**
  * Cache key builder function type
  */
-export type TCacheKeyBuilder = (...args: any[]) => string;
+export type TCacheKeyBuilder = (...args: unknown[]) => string;
 
 /**
  * Cache invalidation strategy enum
  */
 export enum CacheInvalidationStrategy {
-	IMMEDIATE = 'immediate',
-	DELAYED = 'delayed',
-	PATTERN = 'pattern',
-	TIME_BASED = 'time_based',
+	IMMEDIATE = 'IMMEDIATE',
+	DELAYED = 'DELAYED',
+	PATTERN = 'PATTERN',
+	TIME_BASED = 'TIME_BASED',
 }
 
 /**

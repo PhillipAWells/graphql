@@ -23,6 +23,7 @@ Peer dependencies that must be present in your project:
 
 - `@apollo/client >=3.0.0`
 - `graphql >=16.0.0`
+- `rxjs >=7.0.0`
 
 Runtime dependencies bundled with this package: `async-mutex`, `graphql-subscriptions`, `graphql-type-json`.
 
@@ -121,6 +122,100 @@ import { Sort, SortDirection } from '@pawells/graphql-common';
 const sort: Sort<User> = {
   name: SortDirection.Ascending,
   createdAt: SortDirection.Descending,
+};
+```
+
+### Filters
+
+Filter input types for building type-safe, composable query conditions. All filter inputs support logical operators (And/Or) for complex filter composition. Framework-agnostic design: ORM adapters (e.g., `@pawells/graphql-mongoose`) implement translation to native database queries.
+
+**Filter Input Classes**
+
+| Export | Operators | Description |
+|---|---|---|
+| `StringFilterInput` | Eq, Ne, In, Nin, Regex, RegexOptions, Exists, Lt, Lte, Gt, Gte | Filter string fields with equality, regex patterns, set membership, and lexicographic range comparisons |
+| `NumberFilterInput` | Eq, Ne, In, Nin, Exists, Lt, Lte, Gt, Gte | Filter numeric fields with equality, set membership, and range comparisons |
+| `BooleanFilterInput` | Eq, Ne, Exists | Filter boolean fields with equality and existence checks |
+| `DateFilterInput` | Eq, Ne, Exists, Lt, Lte, Gt, Gte | Filter date/datetime fields with equality and temporal range comparisons |
+| `ObjectIdFilterInput` | Eq, Ne, In, Nin, Exists | Filter MongoDB ObjectId fields (values are hex strings, coerced by ORM adapters) |
+| `ArrayFilterInput<T>` | All, ElemMatch, Size, Exists | Filter array fields with element matching, length, and existence checks (generic type T determines element filter type) |
+
+**Logical Operators**
+
+All filter inputs support logical composition via `IFilterCondition<T>`:
+
+| Operator | Type | Description |
+|---|---|---|
+| `And` | `IFilterCondition<T>[]` | All conditions must match |
+| `Or` | `IFilterCondition<T>[]` | At least one condition must match |
+
+**Type Composition**
+
+- `IFilterCondition<T>` — Combines field-level filters (T) with logical operators (And/Or). Enables recursive composition for arbitrarily complex nested filter structures.
+- `ILogicalFilter<T>` — Defines And/Or operators that accept arrays of nested `IFilterCondition<T>` values.
+- `IFilterInputBase` — Marker interface satisfied by all filter input types, enabling type-safe generic composition.
+
+**Implementation Notes**
+
+Filter input types are plain TypeScript interfaces/DTOs without `@InputType()` decorators. They are framework-agnostic and intended for use with ORM adapters (such as `@pawells/graphql-mongoose`) that translate these filters to native database queries. These types are **not** automatically registered as GraphQL input types; framework integration handles GraphQL schema registration.
+
+**Example: Complex Filter Composition**
+
+```ts
+import {
+  StringFilterInput,
+  NumberFilterInput,
+  ArrayFilterInput,
+  IFilterCondition,
+} from '@pawells/graphql-common';
+
+// Simple equality filter
+const simpleFilter: IFilterCondition<StringFilterInput> = {
+  Eq: 'John',
+};
+
+// Logical AND composition
+const andFilter: IFilterCondition<StringFilterInput> = {
+  And: [
+    { Eq: 'John' },
+    { Ne: 'Jane' },
+  ],
+};
+
+// Logical OR composition
+const orFilter: IFilterCondition<NumberFilterInput> = {
+  Or: [
+    { Gte: 18 },
+    { Lte: 13 },
+  ],
+};
+
+// Nested composition (complex query)
+interface UserFilters {
+  name: IFilterCondition<StringFilterInput>;
+  age: IFilterCondition<NumberFilterInput>;
+  tags: IFilterCondition<ArrayFilterInput<StringFilterInput>>;
+}
+
+const complexFilter: UserFilters = {
+  name: {
+    And: [
+      { Regex: '^J' },
+      { Ne: 'John' },
+    ],
+  },
+  age: {
+    And: [
+      { Gte: 18 },
+      { Lte: 65 },
+    ],
+  },
+  tags: {
+    Or: [
+      { ElemMatch: { Eq: 'admin' } },
+      { ElemMatch: { Eq: 'moderator' } },
+    ],
+  },
 };
 ```
 

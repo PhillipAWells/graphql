@@ -32,7 +32,18 @@ export class ConnectionManagerService implements ILazyModuleRefService {
 	private ConnectionCounter = 0;
 
 	public get ISubscriptionConfig(): ISubscriptionConfig {
-		return this.Module.get<ISubscriptionConfig>('SUBSCRIPTION_CONFIG', { strict: false });
+		try {
+			const Config = this.Module.get<ISubscriptionConfig>('SUBSCRIPTION_CONFIG', { strict: false });
+			if (!Config) {
+				throw new Error('SUBSCRIPTION_CONFIG not found in module');
+			}
+			return Config;
+		} catch (error: unknown) {
+			throw new Error(
+				`Failed to get SUBSCRIPTION_CONFIG: ${error instanceof Error ? error.message : 'unknown error'}`,
+				{ cause: error },
+			);
+		}
 	}
 
 	constructor(moduleRef: ModuleRef) {
@@ -69,7 +80,9 @@ export class ConnectionManagerService implements ILazyModuleRefService {
 	public AddConnection(ws: any, userId: string, authenticatedUserId: string): void {
 		// Verify the authenticated user matches the requested userId
 		if (userId !== authenticatedUserId) {
-			this.Logger.warn(`Connection rejected: authenticated user ${authenticatedUserId} attempted to connect as ${userId}`);
+			const SafeAuth = authenticatedUserId ? authenticatedUserId.replace(/[\n\r]/g, ' ') : 'unknown';
+			const SafeUser = userId ? userId.replace(/[\n\r]/g, ' ') : 'unknown';
+			this.Logger.warn(`Connection rejected: authenticated user ${SafeAuth} attempted to connect as ${SafeUser}`);
 			throw new Error(`Unauthorized: cannot create connection for user ${userId}`);
 		}
 
@@ -93,7 +106,7 @@ export class ConnectionManagerService implements ILazyModuleRefService {
 
 		this.ConnectionTimers.set(ConnectionId, Timer);
 
-		this.Logger.debug(`Added connection for user: ${userId}`);
+		this.Logger.debug(`Added connection for user: ${userId ? userId.replace(/[\n\r]/g, ' ') : 'unknown'}`);
 	}
 
 	/**
@@ -138,7 +151,7 @@ export class ConnectionManagerService implements ILazyModuleRefService {
 		// Remove all subscriptions for this connection
 		this.RemoveAllSubscriptionsForUser(userId);
 
-		this.Logger.debug(`Removed connection for user: ${userId}`);
+		this.Logger.debug(`Removed connection for user: ${userId ? userId.replace(/[\n\r]/g, ' ') : 'unknown'}`);
 	}
 
 	/**
@@ -163,7 +176,9 @@ export class ConnectionManagerService implements ILazyModuleRefService {
 		}
 		this.Subscriptions.get(userId)?.add(subscriptionId);
 
-		this.Logger.debug(`Added subscription ${subscriptionId} for user: ${userId}`);
+		const SafeSub = subscriptionId ? subscriptionId.replace(/[\n\r]/g, ' ') : 'unknown';
+		const SafeUsr = userId ? userId.replace(/[\n\r]/g, ' ') : 'unknown';
+		this.Logger.debug(`Added subscription ${SafeSub} for user: ${SafeUsr}`);
 	}
 
 	/**
@@ -180,7 +195,9 @@ export class ConnectionManagerService implements ILazyModuleRefService {
 			}
 		}
 
-		this.Logger.debug(`Removed subscription ${subscriptionId} for user: ${userId}`);
+		const SafeSub2 = subscriptionId ? subscriptionId.replace(/[\n\r]/g, ' ') : 'unknown';
+		const SafeUsr2 = userId ? userId.replace(/[\n\r]/g, ' ') : 'unknown';
+		this.Logger.debug(`Removed subscription ${SafeSub2} for user: ${SafeUsr2}`);
 	}
 
 	/**

@@ -1,3 +1,58 @@
+## 2.1.1 (2026-04-11)
+
+### 🩹 Fixes
+
+- fix critical issue: process.exit(1) in resilience.service.ts ([426ecba](https://github.com/PhillipAWells/graphql/commit/426ecba))
+- fix critical issue: hardcoded require() path for graphql-ws ([5ca45ec](https://github.com/PhillipAWells/graphql/commit/5ca45ec))
+- fix critical issue: error code inconsistencies (INTERNAL_SERVER_ERROR → INTERNAL_ERROR) ([abc882c](https://github.com/PhillipAWells/graphql/commit/abc882c))
+- fix high priority issues: guards, service lifecycle, and configuration getters ([542a130](https://github.com/PhillipAWells/graphql/commit/542a130))
+- fix high priority issues: BSON availability, regex filter, and cache invalidation ([8d7dbe3](https://github.com/PhillipAWells/graphql/commit/8d7dbe3))
+- resolve lint errors and test failures from code review ([5e5a26c](https://github.com/PhillipAWells/graphql/commit/5e5a26c))
+- resolve critical security and module resolution issues ([5689266](https://github.com/PhillipAWells/graphql/commit/5689266))
+- **deps:** resolve compatibility issues with upgraded dependencies ([2f65073](https://github.com/PhillipAWells/graphql/commit/2f65073))
+- **graphql-codegen-react:** add Plugin export for API consistency ([8271589](https://github.com/PhillipAWells/graphql/commit/8271589))
+- **graphql-codegen-ts:** handle non-Error objects in error message formatting ([3d08f07](https://github.com/PhillipAWells/graphql/commit/3d08f07))
+- **graphql-codegen-ts:** extract magic numbers to named constants ([d95e122](https://github.com/PhillipAWells/graphql/commit/d95e122))
+- **graphql-common:** rename PascalCase standalone functions to camelCase ([d0ca0ad](https://github.com/PhillipAWells/graphql/commit/d0ca0ad))
+- **graphql-mongoose:** coerce ObjectId values in $in/$nin array operators ([3f770c1](https://github.com/PhillipAWells/graphql/commit/3f770c1))
+- **graphql-mongoose:** replace 'any' cast with proper IFieldDescriptor type ([e40deef](https://github.com/PhillipAWells/graphql/commit/e40deef))
+- **graphql-mongoose:** export BuildScalarFieldFilter and SCALAR_OPERATOR_MAP ([724cbc6](https://github.com/PhillipAWells/graphql/commit/724cbc6))
+- **nestjs-graphql:** include query variables in complexity cache hash key ([1898920](https://github.com/PhillipAWells/graphql/commit/1898920))
+- **nestjs-graphql:** align UNAUTHENTICATED error code with config key ([c42420c](https://github.com/PhillipAWells/graphql/commit/c42420c))
+- **nestjs-graphql:** reorder MapErrorToCode checks from specific to general ([6bfb292](https://github.com/PhillipAWells/graphql/commit/6bfb292))
+- **nestjs-graphql:** remove hollow OnModuleInit implementation ([ca9f405](https://github.com/PhillipAWells/graphql/commit/ca9f405))
+- **nestjs-graphql:** register BSON middleware and conditionally init BSON providers in forRootAsync ([a5a5f5c](https://github.com/PhillipAWells/graphql/commit/a5a5f5c))
+- **nestjs-graphql:** add exception handling in WebSocket and subscription services ([970766c](https://github.com/PhillipAWells/graphql/commit/970766c))
+- **nestjs-graphql:** add circular reference detection and variable shadowing fix ([2b31e61](https://github.com/PhillipAWells/graphql/commit/2b31e61))
+- **nestjs-graphql:** fix forRootAsync config factory double execution and BSON initialization ([1a20c5a](https://github.com/PhillipAWells/graphql/commit/1a20c5a))
+- **nestjs-graphql:** improve DataLoader result truncation error handling ([09cf9cd](https://github.com/PhillipAWells/graphql/commit/09cf9cd))
+- **nestjs-graphql:** document thread-safety and prevent timer leaks ([fa1905a](https://github.com/PhillipAWells/graphql/commit/fa1905a))
+- **nestjs-graphql:** resolve all ESLint warnings ([4e34b6c](https://github.com/PhillipAWells/graphql/commit/4e34b6c))
+- **nestjs-graphql:** improve type safety in guards ([55656c4](https://github.com/PhillipAWells/graphql/commit/55656c4))
+- **nestjs-graphql:** fix type safety and null guards in log calls ([a39558f](https://github.com/PhillipAWells/graphql/commit/a39558f))
+- **nestjs-graphql:** replace any with unknown in error pipeline ([d467119](https://github.com/PhillipAWells/graphql/commit/d467119))
+- **nestjs-graphql:** replace any with proper types in cache module ([67bb542](https://github.com/PhillipAWells/graphql/commit/67bb542))
+- **nestjs-graphql:** replace Observable<any> with Observable<unknown> in interceptors ([54bb88c](https://github.com/PhillipAWells/graphql/commit/54bb88c))
+- **nestjs-graphql:** replace any with unknown in validation pipes ([1b4f953](https://github.com/PhillipAWells/graphql/commit/1b4f953))
+- **nestjs-graphql:** replace any with proper types in subscriptions ([17a0e9d](https://github.com/PhillipAWells/graphql/commit/17a0e9d))
+- **nestjs-graphql:** fix type safety and logic bugs in GraphQL module core ([5174190](https://github.com/PhillipAWells/graphql/commit/5174190))
+- **nestjs-graphql:** fix ESLint naming conventions and log injection vulnerabilities ([d0cf45f](https://github.com/PhillipAWells/graphql/commit/d0cf45f))
+- **nx-graphql:** replace unsafe double cast with documented type assertion ([32aa33d](https://github.com/PhillipAWells/graphql/commit/32aa33d))
+- **react-graphql:** dispose client before unsubscribing in cleanup ([8965a8b](https://github.com/PhillipAWells/graphql/commit/8965a8b))
+- **react-graphql:** fix misleading JSDoc on persistCache field ([3b79543](https://github.com/PhillipAWells/graphql/commit/3b79543))
+- **react-graphql:** fix cleanup order in dispose pattern ([5ee013d](https://github.com/PhillipAWells/graphql/commit/5ee013d))
+- **test:** correct method name casing in module reference configuration ([0624d6e](https://github.com/PhillipAWells/graphql/commit/0624d6e))
+
+### 🔥 Performance
+
+- **nestjs-graphql:** optimize QueryComplexityGuard cache cleanup strategy ([443f319](https://github.com/PhillipAWells/graphql/commit/443f319))
+
+### ❤️ Thank You
+
+- Aaron Wells @PhillipAWells
+- Claude Haiku 4.5
+- Claude Sonnet 4.6
+
 ## 2.0.1 (2026-04-06)
 
 ### 🩹 Fixes
@@ -26,6 +81,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - `@pawells/graphql-codegen-ts`: Apollo Client v4 compatibility — removed `<NormalizedCacheObject>` type parameter from `ApolloClient` (no longer generic in v4) and updated `onError` link callback from the v3 `{ graphQLErrors, networkError }` destructuring pattern to the v4 `{ error }` pattern using `CombinedGraphQLErrors.is(error)` ([474e396](https://github.com/PhillipAWells/graphql/commit/474e396))
 
+## [2.1.0] - 2026-04-09
+
+### Added
+
+- **graphql-mongoose** — New package providing GraphQL-to-Mongoose filter builder — translates GraphQL filter inputs to strongly typed Mongoose `FilterQuery` objects with support for scalar, array, and logical operators
+- **graphql-mongoose** — `BuildMongooseFilter<TDoc>()` function for resolver-level filter translation, with field name remapping (e.g. `id` → `_id`), ObjectId string coercion, and allowlist-based security (unknown fields silently dropped)
+- **graphql-mongoose** — `BuildMongooseSubscriptionFilter<TDoc>()` helper for constructing Mongoose-compatible filter predicates in GraphQL subscription handlers
+- **graphql-mongoose** — Scalar operator support: `$eq`, `$ne`, `$in`, `$nin`, `$lt`, `$lte`, `$gt`, `$gte`, `$exists`, `$regex`
+- **graphql-mongoose** — Array operator support: `$all`, `$size`, `$elemMatch`
+- **graphql-mongoose** — Logical operator support: `$and`, `$or` (fully recursive)
+- **graphql-mongoose** — Comprehensive test suite (99 tests: 59 unit + 18 integration + 21 regression) with >80% coverage on all metrics
+- **graphql-mongoose** — Complete JSDoc and usage examples for resolver and subscription patterns
+- **graphql-common** — Scalar filter input types: `StringFilterInput`, `NumberFilterInput`, `BooleanFilterInput`, `DateFilterInput`, `ObjectIdFilterInput`
+- **graphql-common** — Structural filter types: `ArrayFilterInput<T>`, `IFilterCondition<T>` (recursive logical filter), `IFilterInputBase` (marker interface)
+
+### Changed
+
+- All packages upgraded to version 2.1.0 with fixed release versioning (NX `projectsRelationship: "fixed"`)
+
+### Fixed
+
+- Guard registration order documentation clarity in AGENTS.md (critical for security)
+- Test coverage gaps in graphql-mongoose subscription filter
+- Missing JSDoc and documentation for new filter module APIs
+- BSON configuration asymmetry documentation in `GraphQLModule.forRootAsync()` (clarified provider registration behavior)
+- Deprecated `IsBrowser` option in `@pawells/graphql-codegen-ts` marked with JSDoc deprecation notice
+- Internal API documentation for `IContextPrevious` in `@pawells/react-graphql` marked as `@internal`
+
 ## [2.0.0] - 2026-04-04
 
 ### Added
@@ -47,5 +130,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - WebSocket connection management: `WebSocketServer`, `WebSocketAuthService`, `ConnectionManagerService`, `ResilienceService`
 - Auth decorator re-exports from `@pawells/nestjs-auth`
 
-[Unreleased]: https://github.com/PhillipAWells/graphql/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/pawells/graphql/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/pawells/graphql/compare/v2.0.1...v2.1.0
+[2.0.1]: https://github.com/pawells/graphql/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/PhillipAWells/graphql/releases/tag/v2.0.0

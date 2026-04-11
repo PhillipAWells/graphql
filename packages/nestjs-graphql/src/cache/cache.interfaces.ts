@@ -1,3 +1,6 @@
+import { ModuleMetadata, InjectionToken } from '@nestjs/common';
+import { ICacheConfig } from './cache.types';
+
 /**
  * Async options for {@link CacheModule} configuration
  *
@@ -31,9 +34,9 @@
  */
 export interface ICacheModuleAsyncOptions {
 	/** Optional modules to import for dependency injection */
-	imports?: any[];
+	imports?: ModuleMetadata['imports'];
 	/** Factory function that returns cache configuration */
-	useFactory: (...args: any[]) => any | Promise<any>;
+	useFactory: (...args: unknown[]) => ICacheConfig | Promise<ICacheConfig>;
 	/** Dependencies to inject into the factory function */
-	inject?: any[];
+	inject?: InjectionToken[];
 }

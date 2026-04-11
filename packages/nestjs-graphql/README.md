@@ -149,6 +149,107 @@ export class AppModule {}
 
 ## Module Features
 
+### Guard Registration Order
+
+When using multiple guards, register them in this order for optimal security and performance:
+
+```typescript
+import { UseGuards } from '@nestjs/common';
+import { QueryComplexityGuard, GraphQLAuthGuard, GraphQLRateLimitGuard } from '@pawells/nestjs-graphql';
+
+@UseGuards(
+  QueryComplexityGuard,     // Static analysis first (fastest, cheap)
+  GraphQLAuthGuard,         // JWT verification second
+  GraphQLRateLimitGuard,    // Rate limiting last
+)
+@Query(() => [Post], { name: 'Posts' })
+async posts(): Promise<Post[]> {
+  return this.postService.findMany();
+}
+```
+
+**This order is critical.** Incorrect order can degrade performance or bypass authentication:
+- `QueryComplexityGuard` performs static AST analysis (no I/O) — register first
+- `GraphQLAuthGuard` validates JWT signatures (moderate cost) — register second
+- `GraphQLRateLimitGuard` checks Redis for rate limits (I/O required) — register last
+
+### BSON Serialization (Optional)
+
+BSON serialization is disabled by default. Enable it only if returning MongoDB BSON types to clients:
+
+```typescript
+import { GraphQLModule } from '@pawells/nestjs-graphql';
+
+@Module({
+  imports: [
+    GraphQLModule.forRoot({
+      autoSchemaFile: 'schema.gql',
+      bson: {
+        enabled: true,
+        maxPayloadSize: 10 * 1024 * 1024, // 10MB default
+      },
+    }),
+  ],
+})
+export class AppModule {}
+```
+
+**When to use:**
+- Returning `ObjectId` fields directly in GraphQL responses
+- Handling large binary payloads from MongoDB
+- Reducing JSON serialization overhead
+
+**Client side:**
+Clients must include `Accept: application/bson` header to receive BSON responses. Without this header, responses are JSON serialized.
+
+### Performance Interceptors
+
+The module registers two performance monitoring interceptors that serve complementary purposes:
+
+#### GraphQLPerformanceInterceptor
+
+Local performance tracking and integration with profiling services (Pyroscope):
+
+```typescript
+@UseInterceptors(GraphQLPerformanceInterceptor)
+@Query(() => [Post], { name: 'Posts' })
+async posts(): Promise<Post[]> {
+  // Execution time is tracked and logged locally
+  // Slow queries are logged with a configurable threshold
+  return this.postService.findMany();
+}
+```
+
+**Behavior:**
+- Tracks resolver execution time
+- Logs queries exceeding the slow query threshold
+- Integrates with Pyroscope for continuous profiling
+- Enabled by default when `@pawells/nestjs-pyroscope` is available
+
+#### GraphQLPerformanceMonitoringInterceptor
+
+Exports metrics to external monitoring services (Prometheus, Datadog):
+
+```typescript
+@UseInterceptors(GraphQLPerformanceMonitoringInterceptor)
+@Query(() => [Post], { name: 'Expensive' })
+async expensive(): Promise<Post[]> {
+  // Metrics are exported to monitoring backends
+  return this.postService.expensive();
+}
+```
+
+**Metrics exported:**
+- Request count and latency histograms
+- Error rates per resolver
+- DataLoader batch sizes
+- Query complexity scores
+- Cache hit/miss ratios
+
+**Integration:**
+- Enabled by default when `@pawells/nestjs-prometheus` or similar is available
+- Integrates with OpenTelemetry for distributed tracing
+
 ### Cache Module
 
 The Cache Module provides Redis-backed caching with automatic storage management, TTL support, and metrics tracking.
@@ -164,11 +265,11 @@ export class UserService {
   constructor(private cacheService: CacheService) {}
 
   async getUser(id: string) {
-    const cached = await this.cacheService.get(`user:${id}`);
+    const cached = await this.cacheService.Get(`user:${id}`);
     if (cached) return cached;
 
     const user = await this.db.user.findUnique({ where: { id } });
-    await this.cacheService.set(`user:${id}`, user, 300); // 5 minutes
+    await this.cacheService.Set(`user:${id}`, user, 300000); // 5 minutes
 
     return user;
   }
@@ -235,20 +336,46 @@ async deleteAllPosts(): Promise<void> {
 
 ```typescript
 // Get value from cache
-const value = await cacheService.get('key');
+const value = await cacheService.Get('key');
 
 // Set value with TTL (milliseconds)
-await cacheService.set('key', value, 60000); // 1 minute
+await cacheService.Set('key', value, 60000); // 1 minute
 
-// Delete specific key
-await cacheService.del('key');
+// Delete specific key or array of keys
+await cacheService.Del('key');
+await cacheService.Del(['key1', 'key2']);
 
 // Clear all cache
-await cacheService.clear();
+await cacheService.Clear();
+
+// Check whether a key exists without returning its value
+const exists = await cacheService.Exists('key');
+
+// Get or set using cache-aside pattern — calls factory only on cache miss
+const user = await cacheService.GetOrSet(
+  `user:${id}`,
+  () => this.db.user.findUnique({ where: { id } }),
+  300000, // TTL in milliseconds (optional)
+);
+
+// Invalidate all keys matching a glob pattern (requires Redis)
+// Returns the number of keys deleted
+const removed = await cacheService.InvalidatePattern('user:*');
 
 // Get cache statistics
-const stats = await cacheService.getStats();
+const stats = cacheService.GetStats();
+
+// Reset all cache statistics counters back to zero
+cacheService.ResetStats();
 ```
+
+**`Exists(key: string): Promise<boolean>`** — Returns `true` if the key is present in the cache, `false` otherwise. On Redis errors the method returns `false` rather than throwing.
+
+**`GetOrSet<T>(key, factory, ttl?): Promise<T>`** — Implements the cache-aside pattern. If the key is present the cached value is returned immediately. On a miss, `factory()` is awaited, the result is stored under `key` with the optional `ttl` (milliseconds), and the value is returned. Throws if `factory()` throws.
+
+**`InvalidatePattern(pattern: string): Promise<number>`** — Deletes every key matching `pattern` using a Redis `SCAN`-based key lookup. The pattern follows Redis glob syntax (e.g. `user:*`, `session:?`, `cache:[abc]`). Returns the number of keys deleted. Returns `0` if no keys match or if the backing store does not support pattern-based key enumeration. Does not throw on errors — logs them and returns `0`.
+
+**`ResetStats(): void`** — Resets all statistics counters (`hits`, `misses`, `sets`, `deletes`, `clears`, `errors`, `hitRate`, `evictions`, etc.) back to zero and clears the in-memory operation timing buffers.
 
 ### GraphQL Configuration
 
@@ -431,7 +558,7 @@ export class UserLoader {
 
   // Use in request scope
   loadUser(userId: string) {
-    return this.dataloaderRegistry.getOrCreate(
+    return this.dataloaderRegistry.GetOrCreate(
       'users',
       {
         batchLoadFn: async (userIds: readonly string[]) => {
@@ -567,10 +694,10 @@ import { GraphQLWebSocketServer } from '@pawells/nestjs-graphql';
   ],
   providers: [GraphQLWebSocketServer],
 })
-export class AppModule implements OnModuleInit {
+export class AppModule implements OnApplicationBootstrap {
   constructor(private wsServer: GraphQLWebSocketServer) {}
 
-  onModuleInit() {
+  onApplicationBootstrap() {
     this.wsServer.configure({
       path: '/graphql/subscriptions',
       maxPayloadSize: 102400,  // 100KB
@@ -581,6 +708,8 @@ export class AppModule implements OnModuleInit {
   }
 }
 ```
+
+> **Note:** `GraphQLWebSocketServer` uses `onApplicationBootstrap` — not `onModuleInit`. The WebSocket server must be configured after all modules have fully initialized and the Apollo schema has been built. Calling `configure()` during `onModuleInit` risks running before the schema is ready, which causes the server to silently skip initialization.
 
 ### Error Handling
 
@@ -686,6 +815,8 @@ async getCurrentUser(): Promise<string> {
 }
 ```
 
+> **IMPORTANT:** When combining multiple guards, see the [Guard Registration Order](#guard-registration-order) section above. The mandatory order is: `QueryComplexityGuard` → `GraphQLAuthGuard` → `GraphQLRateLimitGuard`. Incorrect order can bypass authentication entirely.
+
 #### GraphQLPublicGuard
 
 Marks resolvers as publicly accessible:
@@ -734,6 +865,8 @@ async expensiveQuery(): Promise<Post[]> {
 }
 ```
 
+> **IMPORTANT:** When combining multiple guards, see the [Guard Registration Order](#guard-registration-order) section above. The mandatory order is: `QueryComplexityGuard` → `GraphQLAuthGuard` → `GraphQLRateLimitGuard`. Incorrect order can bypass authentication entirely.
+
 #### GraphQLRateLimitGuard
 
 Rate limiting per user or IP:
@@ -750,6 +883,8 @@ async createPost(@Args() input: CreatePostInput): Promise<string> {
 }
 ```
 
+> **IMPORTANT:** When combining multiple guards, see the [Guard Registration Order](#guard-registration-order) section above. The mandatory order is: `QueryComplexityGuard` → `GraphQLAuthGuard` → `GraphQLRateLimitGuard`. Incorrect order can bypass authentication entirely.
+
 Configure custom limits:
 
 ```typescript
@@ -761,7 +896,7 @@ export class AppService implements OnModuleInit {
 
   onModuleInit() {
     // 50 requests per minute for mutations
-    this.rateLimitService.setOperationConfig('mutation', {
+    this.rateLimitService.SetOperationConfig('mutation', {
       maxRequests: 50,
       windowMs: 60000, // 1 minute
     });
@@ -876,8 +1011,8 @@ export class MetricsService {
   ) {}
 
   async getMetrics() {
-    const cacheStats = await this.cacheService.getStats();
-    const rateLimitStats = this.rateLimitService.getStats();
+    const cacheStats = this.cacheService.GetStats();
+    const rateLimitStats = this.rateLimitService.GetStats();
 
     return {
       cache: cacheStats,

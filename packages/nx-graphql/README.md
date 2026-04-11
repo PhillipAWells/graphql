@@ -21,11 +21,12 @@ npm install --save-dev @pawells/nx-graphql
 
 Peer dependencies that must be present in your project:
 
-- `@nx/devkit >=21.0.0`
-- `@nestjs/graphql >=12.0.0`
-- `@graphql-codegen/cli >=5.0.0`
+- `nx >=21.0.0`
+- `rxjs >=7.0.0`
 
 The `@pawells/graphql-codegen-ts` package is an optional peer dependency. It is only required when using the `codegen` executor with the default `typescript` target and its default plugin list. If you supply a custom `plugins` array that does not include `@pawells/graphql-codegen-ts`, this dependency is not needed.
+
+Runtime dependencies are bundled with this package: `@nx/devkit`, `@nestjs/graphql`, `@graphql-codegen/cli`, and `graphql`.
 
 ## Executors
 

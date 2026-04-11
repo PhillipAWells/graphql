@@ -18,14 +18,12 @@ export class RateLimitError extends GraphqlError {
 	 * @param message - The error message
 	 * @param context - Additional context information
 	 */
-	constructor(message = 'Rate limit exceeded', context?: Record<string, any>) {
-		const Options: any = {
+	constructor(message = 'Rate limit exceeded', context?: Record<string, unknown>) {
+		const Options: { code: string; statusCode: number; context: Record<string, unknown> | undefined } = {
 			code: 'RATE_LIMIT_EXCEEDED',
 			statusCode: 429,
+			context: context ?? undefined,
 		};
-		if (context !== undefined) {
-			Options.context = context;
-		}
 		super(message, Options);
 	}
 }

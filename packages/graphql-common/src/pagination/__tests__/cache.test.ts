@@ -1,16 +1,16 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import { CacheGet, CacheSet, CacheDelete } from '../cache';
+import { cacheGet, cacheSet, cacheDelete } from '../cache';
 import type { ICachedRequest } from '../page-info';
 
 describe('Cache', () => {
 	afterEach(async () => {
 		// Clean up cache after each test
 		const testId = 'test-id-1';
-		await CacheDelete(testId);
+		await cacheDelete(testId);
 	});
 
 	it('should return undefined for missing cache key', async () => {
-		const result = await CacheGet('nonexistent-key');
+		const result = await cacheGet('nonexistent-key');
 		expect(result).toBeUndefined();
 	});
 
@@ -21,8 +21,8 @@ describe('Cache', () => {
 			Expiration: new Date(),
 		};
 
-		await CacheSet(entry);
-		const result = await CacheGet<string>('test-id-1');
+		await cacheSet(entry);
+		const result = await cacheGet<string>('test-id-1');
 
 		expect(result).toBeDefined();
 		expect(result?.Id).toBe('test-id-1');
@@ -36,12 +36,12 @@ describe('Cache', () => {
 			Expiration: new Date(),
 		};
 
-		await CacheSet(entry);
-		let result = await CacheGet<number>('test-id-2');
+		await cacheSet(entry);
+		let result = await cacheGet<number>('test-id-2');
 		expect(result).toBeDefined();
 
-		await CacheDelete('test-id-2');
-		result = await CacheGet<number>('test-id-2');
+		await cacheDelete('test-id-2');
+		result = await cacheGet<number>('test-id-2');
 		expect(result).toBeUndefined();
 	});
 
@@ -56,8 +56,8 @@ describe('Cache', () => {
 			Expiration: new Date('2025-12-31'),
 		};
 
-		await CacheSet(entry);
-		const result = await CacheGet<User>('test-id-3');
+		await cacheSet(entry);
+		const result = await cacheGet<User>('test-id-3');
 
 		expect(result).toBeDefined();
 		expect(result?.Entries).toHaveLength(2);
@@ -72,8 +72,8 @@ describe('Cache', () => {
 			Expiration: new Date(),
 		};
 
-		await CacheSet(entry1);
-		let result = await CacheGet<string>('test-id-4');
+		await cacheSet(entry1);
+		let result = await cacheGet<string>('test-id-4');
 		expect(result?.Entries).toEqual(['old']);
 
 		const entry2: ICachedRequest<string> = {
@@ -82,8 +82,8 @@ describe('Cache', () => {
 			Expiration: new Date(),
 		};
 
-		await CacheSet(entry2);
-		result = await CacheGet<string>('test-id-4');
+		await cacheSet(entry2);
+		result = await cacheGet<string>('test-id-4');
 		expect(result?.Entries).toEqual(['new']);
 	});
 
@@ -94,8 +94,8 @@ describe('Cache', () => {
 			Expiration: new Date(),
 		};
 
-		await CacheSet(entry);
-		const result = await CacheGet<string>('test-id-5');
+		await cacheSet(entry);
+		const result = await cacheGet<string>('test-id-5');
 
 		expect(result).toBeDefined();
 		expect(result?.Entries).toEqual([]);

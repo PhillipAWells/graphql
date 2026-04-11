@@ -11,7 +11,7 @@ const _Mutex = new Mutex();
  * @param id - Request ID to look up.
  * @returns Cached request or undefined if not found.
  */
-export async function CacheGet<T>(id: string): Promise<ICachedRequest<T> | undefined> {
+export async function cacheGet<T>(id: string): Promise<ICachedRequest<T> | undefined> {
 	const Result = await _Mutex.runExclusive(() => _Cache.get(id) as ICachedRequest<T> | undefined);
 	return Result;
 }
@@ -21,7 +21,7 @@ export async function CacheGet<T>(id: string): Promise<ICachedRequest<T> | undef
  * Thread-safe write to process-local in-memory cache.
  * @param entry - Request entry to cache.
  */
-export async function CacheSet<T>(entry: ICachedRequest<T>): Promise<void> {
+export async function cacheSet<T>(entry: ICachedRequest<T>): Promise<void> {
 	await _Mutex.runExclusive(() => {
 		_Cache.set(entry.Id, entry as ICachedRequest<unknown>);
 	});
@@ -32,7 +32,7 @@ export async function CacheSet<T>(entry: ICachedRequest<T>): Promise<void> {
  * Thread-safe delete from process-local in-memory cache.
  * @param id - Request ID to delete.
  */
-export async function CacheDelete(id: string): Promise<void> {
+export async function cacheDelete(id: string): Promise<void> {
 	await _Mutex.runExclusive(() => {
 		_Cache.delete(id);
 	});

@@ -8,6 +8,7 @@ declare global {
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import { RedisPubSub } from 'graphql-redis-subscriptions';
 import { Redis } from 'ioredis';
+import type { RedisOptions } from 'ioredis';
 import { AppLogger } from '@pawells/nestjs-shared/common';
 import { IRedisConfig } from './subscription-config.interface.js';
 import { REDIS_PUBSUB_RESPONSE_TIMEOUT, REDIS_PUBSUB_CLEANUP_INTERVAL, REDIS_PUBSUB_HEALTH_CHECK_TIMEOUT } from '../constants/subscriptions.constants.js';
@@ -19,11 +20,11 @@ import { REDIS_PUBSUB_RESPONSE_TIMEOUT, REDIS_PUBSUB_CLEANUP_INTERVAL, REDIS_PUB
 export class RedisPubSubFactory implements OnModuleDestroy {
 	private readonly Logger: AppLogger;
 
-	private PubSubInstances: RedisPubSub[] = [];
+	private readonly PubSubInstances: RedisPubSub[] = [];
 
-	private readonly PublisherClients: any[] = [];
+	private readonly PublisherClients: Redis[] = [];
 
-	private readonly SubscriberClients: any[] = [];
+	private readonly SubscriberClients: Redis[] = [];
 
 	// eslint-disable-next-line no-undef
 	private HealthCheckInterval?: NodeJS.Timeout;
@@ -69,8 +70,8 @@ export class RedisPubSubFactory implements OnModuleDestroy {
    * @param config Redis configuration
    * @returns Redis client
    */
-	private CreateRedisClient(config: IRedisConfig): any {
-		const Options: any = {
+	private CreateRedisClient(config: IRedisConfig): Redis {
+		const Options: RedisOptions = {
 			host: config.host,
 			port: config.port,
 			db: config.db ?? 0,
@@ -137,13 +138,13 @@ export class RedisPubSubFactory implements OnModuleDestroy {
    * @param type Client type (publisher/subscriber)
    */
 	// eslint-disable-next-line require-await
-	private async CheckClientHealth(client: any, type: string): Promise<void> {
+	private async CheckClientHealth(client: Redis, type: string): Promise<void> {
 		return new Promise((resolve, reject) => {
 			const Timeout = setTimeout(() => {
 				reject(new Error(`${type} client health check timeout`));
 			}, REDIS_PUBSUB_HEALTH_CHECK_TIMEOUT);
 
-			client.ping((error: any, result: any) => {
+			client.ping((error: Error | null | undefined, result: string | null | undefined) => {
 				clearTimeout(Timeout);
 				if (error) {
 					reject(error);
@@ -215,8 +216,6 @@ export class RedisPubSubFactory implements OnModuleDestroy {
 			}
 		}
 
-		this.PubSubInstances = [];
-
 		// Close all Redis clients
 		for (const Client of this.PublisherClients) {
 			try {
@@ -235,6 +234,7 @@ export class RedisPubSubFactory implements OnModuleDestroy {
 			}
 		}
 
+		this.PubSubInstances.length = 0;
 		this.PublisherClients.length = 0;
 		this.SubscriberClients.length = 0;
 

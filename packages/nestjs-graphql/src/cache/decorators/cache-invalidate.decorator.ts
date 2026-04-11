@@ -1,4 +1,4 @@
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 import { ProfileMethod } from '@pawells/nestjs-pyroscope';
 import { AppLogger, getErrorStack } from '@pawells/nestjs-shared/common';
 
@@ -10,7 +10,7 @@ export interface ICacheInvalidateOptions {
 	 * Cache key(s) to invalidate — can be a string, array of strings, or a function
 	 * that generates keys dynamically based on method arguments
 	 */
-	keys: string | string[] | ((...args: any[]) => string | string[]);
+	keys: string | string[] | ((...args: unknown[]) => string | string[]);
 }
 
 /**
@@ -58,14 +58,15 @@ export function CacheInvalidate(options: ICacheInvalidateOptions) {
 	const Logger = new AppLogger(undefined, 'CacheInvalidateDecorator');
 
 	return function(
-		_target: any,
+		_target: unknown,
 		propertyKey: string,
 		descriptor: PropertyDescriptor,
 	) {
 		const OriginalMethod = descriptor.value;
+		const TargetName = (_target as unknown as { constructor: { name: string } }).constructor.name;
 
-		descriptor.value = async function(...args: any[]) {
-			const CacheManager = (this as any)[CACHE_MANAGER] ?? (this as any).cacheManager;
+		descriptor.value = async function(...args: unknown[]) {
+			const CacheManager = (this as { [CACHE_MANAGER]?: Cache })[CACHE_MANAGER] ?? (this as { cacheManager?: Cache }).cacheManager;
 			if (!CacheManager) {
 				Logger.warn(`Cache manager not found for ${propertyKey}, executing without cache invalidation`);
 				return OriginalMethod.apply(this, args);
@@ -100,9 +101,9 @@ export function CacheInvalidate(options: ICacheInvalidateOptions) {
 
 		// Apply profiling to the wrapped method
 		ProfileMethod({
-			name: `${_target.constructor.name}.${propertyKey}.cacheInvalidate`,
+			name: `${TargetName}.${propertyKey}.cacheInvalidate`,
 			tags: { decorator: 'cache_invalidate', operation: 'cache_decorator' },
-		})(_target, propertyKey, descriptor);
+		})(_target as unknown as Object, propertyKey, descriptor);
 
 		return descriptor;
 	};

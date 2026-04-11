@@ -2,6 +2,8 @@ import type { Types } from '@graphql-codegen/plugin-helpers';
 import type { GraphQLSchema } from 'graphql';
 import { OperationDefinitionNode } from 'graphql';
 
+import CodeBlockWriter from 'code-block-writer';
+
 export interface IRawPluginConfig {
 	// No React-specific config fields
 }
@@ -146,66 +148,92 @@ function ValidateRequiredPlugins(info: {
  * Generate React hook code for GraphQL query operations.
  */
 function GenerateQueryHooks(operations: IGQLOperation[]): string {
-	return operations
-		.map((op) => {
-			const VariablesParam = op.IsOptionalVariables
-				? `variables?: ${op.VariablesTypeName}`
-				: `variables: ${op.VariablesTypeName}`;
+	const writer = new CodeBlockWriter({ useTabs: true });
 
-			const VariablesArg = op.IsOptionalVariables
-				? '{ ...(variables && { variables }), ...options }'
-				: '{ variables, ...options }';
+	for (const op of operations) {
+		const VariablesParam = op.IsOptionalVariables
+			? `variables?: ${op.VariablesTypeName}`
+			: `variables: ${op.VariablesTypeName}`;
+		const VariablesArg = op.IsOptionalVariables
+			? '{ ...(variables && { variables }), ...options }'
+			: '{ variables, ...options }';
 
-			return `export function ${op.HookName}(
-	${VariablesParam},
-	options?: QueryHookOptions<${op.TypeName}, ${op.VariablesTypeName}>,
-): QueryResult<${op.TypeName}, ${op.VariablesTypeName}> {
-	return useQuery<${op.TypeName}, ${op.VariablesTypeName}>(${op.DocumentName}, ${VariablesArg});
-}`;
-		})
-		.join('\n\n');
+		writer
+			.writeLine(`export function ${op.HookName}(`)
+			.indent(() => {
+				writer
+					.writeLine(`${VariablesParam},`)
+					.writeLine(`options?: QueryHookOptions<${op.TypeName}, ${op.VariablesTypeName}>,`);
+			})
+			.write(`): QueryResult<${op.TypeName}, ${op.VariablesTypeName}>`)
+			.block(() => {
+				writer.writeLine(`return useQuery<${op.TypeName}, ${op.VariablesTypeName}>(${op.DocumentName}, ${VariablesArg});`);
+			})
+			.blankLine();
+	}
+
+	return writer.toString().trimEnd();
 }
 
 /**
  * Generate React hook code for GraphQL mutation operations.
  */
 function GenerateMutationHooks(operations: IGQLOperation[]): string {
-	return operations
-		.map((op) => {
-			return `export function ${op.HookName}(
-	options?: MutationHookOptions<${op.TypeName}, ${op.VariablesTypeName}>,
-): MutationTuple<${op.TypeName}, ${op.VariablesTypeName}> {
-	return useMutation<${op.TypeName}, ${op.VariablesTypeName}>(${op.DocumentName}, options);
-}`;
-		})
-		.join('\n\n');
+	const writer = new CodeBlockWriter({ useTabs: true });
+
+	for (const op of operations) {
+		writer
+			.writeLine(`export function ${op.HookName}(`)
+			.indent(() => {
+				writer.writeLine(`options?: MutationHookOptions<${op.TypeName}, ${op.VariablesTypeName}>,`);
+			})
+			.write(`): MutationTuple<${op.TypeName}, ${op.VariablesTypeName}>`)
+			.block(() => {
+				writer.writeLine(`return useMutation<${op.TypeName}, ${op.VariablesTypeName}>(${op.DocumentName}, options);`);
+			})
+			.blankLine();
+	}
+
+	return writer.toString().trimEnd();
 }
 
 /**
  * Generate React hook code for GraphQL subscription operations.
  */
 function GenerateSubscriptionHooks(operations: IGQLOperation[]): string {
-	return operations
-		.map((op) => {
-			const VariablesParam = op.IsOptionalVariables
-				? `variables?: ${op.VariablesTypeName}`
-				: `variables: ${op.VariablesTypeName}`;
+	const writer = new CodeBlockWriter({ useTabs: true });
 
-			const SubscriptionArg = op.IsOptionalVariables
-				? '{ ...(variables && { variables }), ...options }'
-				: '{ variables, ...options }';
+	for (const op of operations) {
+		const VariablesParam = op.IsOptionalVariables
+			? `variables?: ${op.VariablesTypeName}`
+			: `variables: ${op.VariablesTypeName}`;
 
-			return `export function ${op.HookName}(
-	${VariablesParam},
-	options?: SubscriptionHookOptions<${op.TypeName}, ${op.VariablesTypeName}>,
-): SubscriptionResult<${op.TypeName}> {
-	return useSubscription<${op.TypeName}, ${op.VariablesTypeName}>(
-		${op.DocumentName},
-		${SubscriptionArg},
-	);
-}`;
-		})
-		.join('\n\n');
+		const SubscriptionArg = op.IsOptionalVariables
+			? '{ ...(variables && { variables }), ...options }'
+			: '{ variables, ...options }';
+
+		writer
+			.writeLine(`export function ${op.HookName}(`)
+			.indent(() => {
+				writer
+					.writeLine(`${VariablesParam},`)
+					.writeLine(`options?: SubscriptionHookOptions<${op.TypeName}, ${op.VariablesTypeName}>,`);
+			})
+			.write(`): SubscriptionResult<${op.TypeName}>`)
+			.block(() => {
+				writer
+					.writeLine(`return useSubscription<${op.TypeName}, ${op.VariablesTypeName}>(`)
+					.indent(() => {
+						writer
+							.writeLine(`${op.DocumentName},`)
+							.writeLine(`${SubscriptionArg},`);
+					})
+					.writeLine(');');
+			})
+			.blankLine();
+	}
+
+	return writer.toString().trimEnd();
 }
 
 /**

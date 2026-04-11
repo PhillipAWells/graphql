@@ -1,10 +1,12 @@
 import type { Types } from '@graphql-codegen/plugin-helpers';
 import type { GraphQLSchema } from 'graphql';
 import { OperationDefinitionNode } from 'graphql';
+import CodeBlockWriter from 'code-block-writer';
 
 /**
  * Plugin configuration interface (currently has no configuration options).
  */
+
 export interface IRawPluginConfig {
 	// No additional fields for TS variant
 }
@@ -150,134 +152,132 @@ function ValidateRequiredPlugins(info: {
  * Generates the ApolloQueries class with one method per query operation.
  */
 function GenerateApolloQueriesClass(operations: IGQLOperation[]): string {
-	if (operations.length === 0) {
-		return `export class ApolloQueries {
-	private readonly Apollo: ApolloClient<any>;
+	const writer = new CodeBlockWriter({ useTabs: true });
 
-	public constructor(apollo: ApolloClient<any>) {
-		this.Apollo = apollo;
-	}
-}`;
-	}
+	writer.write('export class ApolloQueries').block(() => {
+		writer
+			.writeLine('private readonly Apollo: ApolloClient<any>;')
+			.blankLine()
+			.write('public constructor(apollo: ApolloClient<any>)').block(() => {
+				writer.writeLine('this.Apollo = apollo;');
+			});
 
-	const methods = operations
-		.map((operation) => {
+		for (const operation of operations) {
 			const variablesParam = operation.IsOptionalVariables
 				? `variables?: ${operation.VariablesTypeName}`
 				: `variables: ${operation.VariablesTypeName}`;
 
-			return `	public async ${operation.Name}(${variablesParam}): Promise<ApolloQueryResult<${operation.TypeName}>> {
-		const result = await this.Apollo.query({
-			query: ${operation.DocumentName},
-			variables,
-			errorPolicy: 'all',
-		});
-		if (result.errors && result.errors.length > 0) {
-			const error = result.errors[0];
-			throw new Error(\`GraphQL error in ${operation.Name}: \${error.message}\`);
+			writer
+				.blankLine()
+				.write(`public async ${operation.Name}(${variablesParam}): Promise<ApolloQueryResult<${operation.TypeName}>>`)
+				.block(() => {
+					writer
+						.writeLine('const result = await this.Apollo.query({')
+						.indent(() => {
+							writer
+								.writeLine(`query: ${operation.DocumentName},`)
+								.writeLine('variables,')
+								.writeLine('errorPolicy: \'all\',');
+						})
+						.writeLine('});')
+						.write('if (result.errors && result.errors.length > 0)')
+						.block(() => {
+							writer
+								.writeLine('const error = result.errors[0];')
+								.writeLine(`throw new Error(\`GraphQL error in ${operation.Name}: \${error instanceof Error ? error.message : String(error)}\`);`);
+						})
+						.writeLine('return result;');
+				});
 		}
-		return result;
-	}`;
-		})
-		.join('\n\n');
+	});
 
-	return `export class ApolloQueries {
-	private readonly Apollo: ApolloClient<any>;
-
-	public constructor(apollo: ApolloClient<any>) {
-		this.Apollo = apollo;
-	}
-
-${methods}
-}`;
+	return writer.toString();
 }
 
 /**
  * Generates the ApolloMutations class with one method per mutation operation.
  */
 function GenerateApolloMutationsClass(operations: IGQLOperation[]): string {
-	if (operations.length === 0) {
-		return `export class ApolloMutations {
-	private readonly Apollo: ApolloClient<any>;
+	const writer = new CodeBlockWriter({ useTabs: true });
 
-	public constructor(apollo: ApolloClient<any>) {
-		this.Apollo = apollo;
-	}
-}`;
-	}
+	writer.write('export class ApolloMutations').block(() => {
+		writer
+			.writeLine('private readonly Apollo: ApolloClient<any>;')
+			.blankLine()
+			.write('public constructor(apollo: ApolloClient<any>)').block(() => {
+				writer.writeLine('this.Apollo = apollo;');
+			});
 
-	const methods = operations
-		.map((operation) => {
+		for (const operation of operations) {
 			const variablesParam = operation.IsOptionalVariables
 				? `variables?: ${operation.VariablesTypeName}`
 				: `variables: ${operation.VariablesTypeName}`;
 
-			return `	public async ${operation.Name}(${variablesParam}): Promise<FetchResult<${operation.TypeName}>> {
-		const result = await this.Apollo.mutate({
-			mutation: ${operation.DocumentName},
-			variables,
-			errorPolicy: 'all',
-		});
-		if (result.errors && result.errors.length > 0) {
-			const error = result.errors[0];
-			throw new Error(\`GraphQL error in ${operation.Name}: \${error.message}\`);
+			writer
+				.blankLine()
+				.write(`public async ${operation.Name}(${variablesParam}): Promise<FetchResult<${operation.TypeName}>>`)
+				.block(() => {
+					writer
+						.writeLine('const result = await this.Apollo.mutate({')
+						.indent(() => {
+							writer
+								.writeLine(`mutation: ${operation.DocumentName},`)
+								.writeLine('variables,')
+								.writeLine('errorPolicy: \'all\',');
+						})
+						.writeLine('});')
+						.write('if (result.errors && result.errors.length > 0)')
+						.block(() => {
+							writer
+								.writeLine('const error = result.errors[0];')
+								.writeLine(`throw new Error(\`GraphQL error in ${operation.Name}: \${error instanceof Error ? error.message : String(error)}\`);`);
+						})
+						.writeLine('return result;');
+				});
 		}
-		return result;
-	}`;
-		})
-		.join('\n\n');
+	});
 
-	return `export class ApolloMutations {
-	private readonly Apollo: ApolloClient<any>;
-
-	public constructor(apollo: ApolloClient<any>) {
-		this.Apollo = apollo;
-	}
-
-${methods}
-}`;
+	return writer.toString();
 }
 
 /**
  * Generates the ApolloSubscriptions class with one method per subscription operation.
  */
 function GenerateApolloSubscriptionsClass(operations: IGQLOperation[]): string {
-	if (operations.length === 0) {
-		return `export class ApolloSubscriptions {
-	private readonly Apollo: ApolloClient<any>;
+	const writer = new CodeBlockWriter({ useTabs: true });
 
-	public constructor(apollo: ApolloClient<any>) {
-		this.Apollo = apollo;
-	}
-}`;
-	}
+	writer.write('export class ApolloSubscriptions').block(() => {
+		writer
+			.writeLine('private readonly Apollo: ApolloClient<any>;')
+			.blankLine()
+			.write('public constructor(apollo: ApolloClient<any>)').block(() => {
+				writer.writeLine('this.Apollo = apollo;');
+			});
 
-	const methods = operations
-		.map((operation) => {
+		for (const operation of operations) {
 			const variablesParam = operation.IsOptionalVariables
 				? `variables?: ${operation.VariablesTypeName}`
 				: `variables: ${operation.VariablesTypeName}`;
 
-			return `	public async ${operation.Name}(${variablesParam}, handler: ${operation.Name}EventHandler): Promise<ZenObservable.Subscription> {
-		const observable = this.Apollo.subscribe({
-			query: ${operation.DocumentName},
-			variables,
-			errorPolicy: 'all',
-		});
-		return observable.subscribe(handler);
-	}`;
-		})
-		.join('\n\n');
+			writer
+				.blankLine()
+				.write(`public async ${operation.Name}(${variablesParam}, handler: ${operation.Name}EventHandler): Promise<ZenObservable.Subscription>`)
+				.block(() => {
+					writer
+						.writeLine('const observable = this.Apollo.subscribe({')
+						.indent(() => {
+							writer
+								.writeLine(`query: ${operation.DocumentName},`)
+								.writeLine('variables,')
+								.writeLine('errorPolicy: \'all\',');
+						})
+						.writeLine('});')
+						.writeLine('return observable.subscribe(handler);');
+				});
+		}
+	});
 
-	return `export class ApolloSubscriptions {
-	private readonly Apollo: ApolloClient<any>;
-
-	public constructor(apollo: ApolloClient<any>) {
-		this.Apollo = apollo;
-	}
-
-${methods}
-}`;
+	return writer.toString();
 }
 
 /**

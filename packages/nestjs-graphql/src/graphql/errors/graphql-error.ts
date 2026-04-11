@@ -28,7 +28,7 @@ export class GraphqlError extends GraphQLError {
 		options: {
 			code?: string;
 			statusCode?: number;
-			context: Record<string, any> | undefined;
+			context: Record<string, unknown> | undefined;
 			originalError?: Error;
 		} = {
 			context: undefined,
@@ -60,7 +60,7 @@ export class GraphqlError extends GraphQLError {
 	 * @returns string - The error code
 	 */
 	public get Code(): string {
-		return (this.extensions as any)?.code ?? 'INTERNAL_SERVER_ERROR';
+		return this.extensions['code'] as string | undefined ?? 'INTERNAL_SERVER_ERROR';
 	}
 
 	/**
@@ -69,15 +69,15 @@ export class GraphqlError extends GraphQLError {
 	 * @returns number - The HTTP status code
 	 */
 	public get StatusCode(): number {
-		return (this.extensions as any)?.statusCode ?? HTTP_STATUS_INTERNAL_SERVER_ERROR;
+		return this.extensions['statusCode'] as number | undefined ?? HTTP_STATUS_INTERNAL_SERVER_ERROR;
 	}
 
 	/**
 	 * Gets the error context
 	 *
-	 * @returns Record<string, any> - The error context
+	 * @returns Record<string, unknown> - The error context
 	 */
-	public get Context(): Record<string, any> {
-		return (this.extensions as any)?.context ?? {};
+	public get Context(): Record<string, unknown> {
+		return this.extensions['context'] as Record<string, unknown> | undefined ?? {};
 	}
 }

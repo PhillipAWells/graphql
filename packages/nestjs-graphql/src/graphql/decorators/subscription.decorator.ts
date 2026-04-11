@@ -48,7 +48,7 @@ export function Subscription(topic: string, options: ISubscriptionOptions = {}) 
  * @param filterFunction Filter function
  * @returns Parameter decorator
  */
-export function SubscriptionFilter(filterFunction: (payload: any, variables: any, context: any) => boolean) {
+export function SubscriptionFilter(filterFunction: (payload: unknown, variables: unknown, context: unknown) => boolean) {
 	return (target: any, propertyKey: string, parameterIndex: number) => {
 		const ExistingFilters = Reflect.getMetadata('subscription:filters', target, propertyKey) ?? [];
 		ExistingFilters.push({

@@ -1,7 +1,7 @@
 {
   "name": "@pawells/graphql-codegen-ts",
   "displayName": "@pawells/graphql-codegen-ts",
-  "version": "2.0.1",
+  "version": "2.1.1",
   "description": "graphql-codegen plugin generating typed Apollo Client classes for Node.js/TypeScript",
   "keywords": [
     "graphql",
@@ -38,11 +38,12 @@
   },
   "dependencies": {
     "@graphql-codegen/plugin-helpers": ">=6.2.1",
+    "code-block-writer": ">=13.0.3",
     "graphql-ws": ">=6.0.8",
     "strongly-typed-events": ">=3.0.11"
   },
   "peerDependencies": {
-    "@apollo/client": ">=3.0.0",
+    "@apollo/client": ">=4.0.0",
     "@graphql-codegen/typed-document-node": ">=5.0.0",
     "@graphql-codegen/typescript": ">=4.0.0",
     "@graphql-codegen/typescript-apollo-client-helpers": ">=3.0.0",
@@ -51,9 +52,9 @@
     "rxjs": ">=7.0.0"
   },
   "devDependencies": {
-    "@apollo/client": "^4.1.6",
+    "@apollo/client": "^4.1.7",
     "@pawells/graphql-common": "^2.0.0",
-    "@types/node": "^25.5.2",
+    "@types/node": "^25.6.0",
     "graphql": "^16.13.2",
     "rxjs": "^7.8.2"
   },

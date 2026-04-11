@@ -31,7 +31,7 @@ export interface IGraphQLClientOptions {
 	logNetworkErrors?: boolean;
 	/** Apollo InMemoryCache instance to use. */
 	cache?: unknown;
-	/** Function to persist cache for state restoration. */
+	/** Whether to persist the Apollo cache across sessions. */
 	persistCache?: boolean;
 }
 

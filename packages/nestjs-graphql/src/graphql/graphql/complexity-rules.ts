@@ -100,7 +100,10 @@ export function GetFieldComplexityWeight(
 	const TypeRules = FIELD_COMPLEXITY_RULES[type];
 	if (!TypeRules) return COMPLEXITY_WEIGHTS.SIMPLE_FIELD;
 
-	return (TypeRules as any)[field] ?? COMPLEXITY_WEIGHTS.SIMPLE_FIELD;
+	if (Object.prototype.hasOwnProperty.call(TypeRules, field)) {
+		return (TypeRules as Record<string, number>)[field];
+	}
+	return COMPLEXITY_WEIGHTS.SIMPLE_FIELD;
 }
 
 /**
@@ -160,14 +163,14 @@ export function ValidateComplexityConfig(config: IComplexityConfig): boolean {
 
 	// Validate multipliers
 	if (multipliers) {
-		if (multipliers.depth && multipliers.depth < 1) return false;
-		if (multipliers.list && multipliers.list < 1) return false;
+		if (multipliers.depth !== undefined && multipliers.depth < 1) return false;
+		if (multipliers.list !== undefined && multipliers.list < 1) return false;
 	}
 
 	// Validate limits
 	if (limits) {
-		if (limits.maxComplexity && limits.maxComplexity < 1) return false;
-		if (limits.maxDepth && limits.maxDepth < 1) return false;
+		if (limits.maxComplexity !== undefined && limits.maxComplexity < 1) return false;
+		if (limits.maxDepth !== undefined && limits.maxDepth < 1) return false;
 	}
 
 	return true;

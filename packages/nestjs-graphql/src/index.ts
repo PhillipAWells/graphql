@@ -150,7 +150,6 @@ export {
 // Services
 export {
 	RateLimitService,
-	MemoryRateLimitStorage,
 	GraphQLCacheService,
 	GraphQLPerformanceService,
 	BsonSerializationService,
@@ -160,6 +159,28 @@ export {
 	type IPerformanceMetrics,
 	type IPerformanceStats,
 } from './graphql/services/index.js';
+
+/**
+ * @internal Use {@link IRateLimitStorage} interface instead of concrete implementations
+ */
+export { MemoryRateLimitStorage } from './graphql/services/index.js';
+
+/**
+ * **IMPORTANT: Two different Cacheable decorators are exported from this package:**
+ *
+ * 1. {@link Cacheable} from cache/decorators (line 79) - Method-level caching for services
+ *    - Actual caching implementation with method wrapping
+ *    - Use for service methods, not GraphQL resolvers
+ *    - Example: `@Cacheable({ ttl: 300000 }) async getData() { ... }`
+ *
+ * 2. {@link Cacheable} from graphql/decorators (line 176+) - GraphQL resolver caching
+ *    - Metadata-only decorator for GraphQL fields
+ *    - Use for @Query, @Mutation, @Field resolvers
+ *    - Example: `@Cacheable({ ttl: 300000 }) @Query() async getUser() { ... }`
+ *
+ * These are intentionally separate because they serve different purposes and are applied
+ * at different levels of the application architecture.
+ */
 
 // Decorators
 export {
@@ -207,11 +228,29 @@ export {
 	GraphqlError,
 	RateLimitError,
 	ValidationError,
+	/**
+	 * @deprecated Use {@link NotFoundError} instead
+	 */
 	LegacyNotFoundError,
+	/**
+	 * @deprecated Use {@link ValidationError} instead
+	 */
 	LegacyValidationError,
+	/**
+	 * @deprecated Use {@link UnauthorizedError} instead
+	 */
 	LegacyUnauthorizedError,
+	/**
+	 * @deprecated Use {@link ForbiddenError} instead
+	 */
 	LegacyForbiddenError,
+	/**
+	 * @deprecated Use {@link ConflictError} instead
+	 */
 	LegacyConflictError,
+	/**
+	 * @deprecated Use {@link RateLimitError} instead
+	 */
 	LegacyRateLimitError,
 	type IErrorConfig,
 	type TErrorType,

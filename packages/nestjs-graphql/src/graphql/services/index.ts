@@ -10,7 +10,11 @@
  * @packageDocumentation
  */
 
-export { RateLimitService, MemoryRateLimitStorage } from './rate-limit.service.js';
+export { RateLimitService } from './rate-limit.service.js';
+/**
+ * @internal Use {@link IRateLimitStorage} interface instead
+ */
+export { MemoryRateLimitStorage } from './rate-limit.service.js';
 export type { IRateLimitResult, IRateLimitConfig, IRateLimitStorage } from './rate-limit.service.js';
 
 export { GraphQLCacheService } from './cache.service.js';

@@ -352,22 +352,191 @@ describe('QueryComplexityGuard', () => {
 			expect(QueryComplexity.CalculateQueryComplexity).toHaveBeenCalledTimes(2);
 		});
 
-		it('should periodically clear cache every 10 minutes', async () => {
+		it('should perform smart cleanup instead of full cache clear', async () => {
 			vi.useFakeTimers();
 
 			vi.spyOn(QueryComplexity, 'CalculateQueryComplexity').mockReturnValue(500);
 			vi.spyOn(QueryComplexity, 'ExceedsComplexityLimit').mockReturnValue(false);
 
-			// Populate cache
+			// Create three different documents to populate cache
+			const doc1 = { kind: 'Document', definitions: [{ name: 'Query1' }] };
+			const doc2 = { kind: 'Document', definitions: [{ name: 'Query2' }] };
+			const doc3 = { kind: 'Document', definitions: [{ name: 'Query3' }] };
+
+			// Insert doc1
+			(GqlExecutionContext.create as any).mockReturnValue({
+				getContext: () => ({ req: mockRequest }),
+				getArgs: () => ({
+					schema: {},
+					document: doc1,
+					variables: {},
+					operationName: 'Query1',
+				}),
+			});
+			await guard.canActivate(mockExecutionContext);
+
+			// Advance 2 minutes and insert doc2 (to create age gap)
+			vi.advanceTimersByTime(2 * 60 * 1000);
+			(GqlExecutionContext.create as any).mockReturnValue({
+				getContext: () => ({ req: mockRequest }),
+				getArgs: () => ({
+					schema: {},
+					document: doc2,
+					variables: {},
+					operationName: 'Query2',
+				}),
+			});
+			await guard.canActivate(mockExecutionContext);
+
+			// Advance 2 more minutes and insert doc3
+			vi.advanceTimersByTime(2 * 60 * 1000);
+			(GqlExecutionContext.create as any).mockReturnValue({
+				getContext: () => ({ req: mockRequest }),
+				getArgs: () => ({
+					schema: {},
+					document: doc3,
+					variables: {},
+					operationName: 'Query3',
+				}),
+			});
+			await guard.canActivate(mockExecutionContext);
+
+			// Reset spy call count after setup
+			vi.clearAllMocks();
+			vi.spyOn(QueryComplexity, 'CalculateQueryComplexity').mockReturnValue(500);
+			vi.spyOn(QueryComplexity, 'ExceedsComplexityLimit').mockReturnValue(false);
+
+			// Advance to just before cleanup interval (10 minutes from start)
+			// Current time is 4 minutes, need to get to 10 minutes (wait 6 more)
+			vi.advanceTimersByTime(6 * 60 * 1000);
+
+			// Access doc3 again (refresh its last accessed time)
+			(GqlExecutionContext.create as any).mockReturnValue({
+				getContext: () => ({ req: mockRequest }),
+				getArgs: () => ({
+					schema: {},
+					document: doc3,
+					variables: {},
+					operationName: 'Query3',
+				}),
+			});
+			await guard.canActivate(mockExecutionContext);
+
+			// Advance another 10 minutes past the cleanup interval to trigger eviction
+			vi.advanceTimersByTime(10 * 60 * 1000 + 1000);
+
+			// Now access the recently used doc3 (should still be in cache due to smart cleanup)
+			vi.clearAllMocks();
+			vi.spyOn(QueryComplexity, 'CalculateQueryComplexity').mockReturnValue(500);
+			vi.spyOn(QueryComplexity, 'ExceedsComplexityLimit').mockReturnValue(false);
+
+			(GqlExecutionContext.create as any).mockReturnValue({
+				getContext: () => ({ req: mockRequest }),
+				getArgs: () => ({
+					schema: {},
+					document: doc3,
+					variables: {},
+					operationName: 'Query3',
+				}),
+			});
+			await guard.canActivate(mockExecutionContext);
+
+			// doc3 should be in cache (0 calculations) because it was recently accessed
+			expect(QueryComplexity.CalculateQueryComplexity).toHaveBeenCalledTimes(0);
+
+			vi.useRealTimers();
+		});
+
+		it('should prevent cold-start storms by retaining hot cache entries', async () => {
+			vi.useFakeTimers();
+
+			vi.spyOn(QueryComplexity, 'CalculateQueryComplexity').mockReturnValue(500);
+			vi.spyOn(QueryComplexity, 'ExceedsComplexityLimit').mockReturnValue(false);
+
+			const doc = { kind: 'Document', definitions: [{ name: 'HotQuery' }] };
+
+			// Prime cache with hot query
+			(GqlExecutionContext.create as any).mockReturnValue({
+				getContext: () => ({ req: mockRequest }),
+				getArgs: () => ({
+					schema: {},
+					document: doc,
+					variables: {},
+					operationName: 'HotQuery',
+				}),
+			});
+			await guard.canActivate(mockExecutionContext);
+
+			// Continuously access the query within the cleanup interval
+			for (let i = 0; i < 5; i++) {
+				vi.advanceTimersByTime(1 * 60 * 1000);
+				await guard.canActivate(mockExecutionContext);
+			}
+
+			// Now past cleanup interval (5 minutes elapsed)
+			vi.advanceTimersByTime(6 * 60 * 1000);
+
+			// Reset spy to measure post-cleanup performance
+			vi.clearAllMocks();
+			vi.spyOn(QueryComplexity, 'CalculateQueryComplexity').mockReturnValue(500);
+			vi.spyOn(QueryComplexity, 'ExceedsComplexityLimit').mockReturnValue(false);
+
+			// After cleanup, hot query should still be cached
+			await guard.canActivate(mockExecutionContext);
+
+			// Should NOT recalculate (no cold-start storm)
+			expect(QueryComplexity.CalculateQueryComplexity).toHaveBeenCalledTimes(0);
+
+			vi.useRealTimers();
+		});
+
+		it('should use smart cache eviction strategy (not full clear)', async () => {
+			// This test verifies that the smart eviction strategy is in place
+			// by checking that cleanup doesn't require recalculation of all cached queries
+			vi.useFakeTimers();
+
+			vi.spyOn(QueryComplexity, 'CalculateQueryComplexity').mockReturnValue(500);
+			vi.spyOn(QueryComplexity, 'ExceedsComplexityLimit').mockReturnValue(false);
+
+			const doc = { kind: 'Document', definitions: [{ name: 'SmartCleanupTest' }] };
+			const MinutesMs = 60 * 1000;
+
+			// Insert entry and cache it
+			(GqlExecutionContext.create as any).mockReturnValue({
+				getContext: () => ({ req: mockRequest }),
+				getArgs: () => ({
+					schema: {},
+					document: doc,
+					variables: {},
+					operationName: 'SmartCleanupTest',
+				}),
+			});
 			await guard.canActivate(mockExecutionContext);
 			expect(QueryComplexity.CalculateQueryComplexity).toHaveBeenCalledTimes(1);
 
-			// Fast forward 10 minutes
-			vi.advanceTimersByTime(600000);
+			// Continuously access the entry within the cleanup interval
+			// (simulating a hot query that shouldn't be evicted)
+			for (let i = 0; i < 5; i++) {
+				vi.advanceTimersByTime(MinutesMs);
+				await guard.canActivate(mockExecutionContext);
+			}
+			// Called once on first access, then cached for the 5 iterations
+			expect(QueryComplexity.CalculateQueryComplexity).toHaveBeenCalledTimes(1);
 
-			// Next call should recalculate after cleanup
+			// Advance past cleanup interval to trigger cleanup
+			vi.advanceTimersByTime(6 * MinutesMs);
+
+			// Clear mocks to measure post-cleanup
+			vi.clearAllMocks();
 			vi.spyOn(QueryComplexity, 'CalculateQueryComplexity').mockReturnValue(500);
+			vi.spyOn(QueryComplexity, 'ExceedsComplexityLimit').mockReturnValue(false);
+
+			// Access the recently used query again (should still be cached)
 			await guard.canActivate(mockExecutionContext);
+
+			// Should NOT recalculate because entry was recently accessed
+			// This proves we're using smart eviction, not full clear
+			expect(QueryComplexity.CalculateQueryComplexity).toHaveBeenCalledTimes(0);
 
 			vi.useRealTimers();
 		});
