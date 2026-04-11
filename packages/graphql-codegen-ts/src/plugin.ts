@@ -174,7 +174,7 @@ function GenerateApolloQueriesClass(operations: IGQLOperation[]): string {
 		});
 		if (result.errors && result.errors.length > 0) {
 			const error = result.errors[0];
-			throw new Error(\`GraphQL error in ${operation.Name}: \${error.message}\`);
+			throw new Error(\`GraphQL error in ${operation.Name}: \${error instanceof Error ? error.message : String(error)}\`);
 		}
 		return result;
 	}`;
@@ -220,7 +220,7 @@ function GenerateApolloMutationsClass(operations: IGQLOperation[]): string {
 		});
 		if (result.errors && result.errors.length > 0) {
 			const error = result.errors[0];
-			throw new Error(\`GraphQL error in ${operation.Name}: \${error.message}\`);
+			throw new Error(\`GraphQL error in ${operation.Name}: \${error instanceof Error ? error.message : String(error)}\`);
 		}
 		return result;
 	}`;

@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { ApolloProvider } from '@apollo/client/react';
-import type { ApolloClient } from '@apollo/client/core';
 import { CreateGraphQLClient } from './client';
 import type { TGraphQLClientOptions } from './types';
 import { GraphQLConnectionState } from './types';
