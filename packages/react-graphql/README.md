@@ -13,6 +13,17 @@
 yarn add @pawells/react-graphql @apollo/client graphql graphql-ws
 ```
 
+## Requirements
+
+Peer dependencies that must be present in your project:
+
+- `@apollo/client >=4.0.0`
+- `graphql >=16.0.0`
+- `react >=18.0.0`
+- `rxjs >=7.0.0`
+
+The `graphql-ws` package is bundled as a runtime dependency.
+
 ## Quick Start
 
 ```tsx
