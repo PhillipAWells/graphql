@@ -163,7 +163,6 @@ export function BuildMongooseFilter<TDoc>(
 			inputValue as Record<string, unknown> | undefined,
 			descriptor.MongoField,
 			descriptor.Type,
-			schema,
 		);
 
 		// Accumulate results (merge into mongoFilter)
