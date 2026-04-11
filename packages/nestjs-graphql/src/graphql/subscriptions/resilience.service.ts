@@ -104,12 +104,21 @@ export class ResilienceService implements OnModuleDestroy, ILazyModuleRefService
 			return;
 		}
 
+		// Clear any existing timer for this connectionId before scheduling a new one
+		// to prevent timer accumulation on recursive retry attempts
+		const ExistingTimer = this.ReconnectionTimers.get(connectionId);
+		if (ExistingTimer) {
+			clearTimeout(ExistingTimer);
+		}
+
 		const Delay = this.CalculateReconnectionDelay(attempt);
 
 		const Timer = setTimeout(async () => {
 			try {
 				await callback();
 				this.Logger.info(`Reconnection successful for connection: ${connectionId}`);
+				// Clear timer on successful reconnection
+				this.ReconnectionTimers.delete(connectionId);
 			} catch (error: unknown) {
 				this.Logger.warn(`Reconnection attempt ${attempt} failed for ${connectionId}: ${getErrorMessage(error)}`);
 				// Schedule next attempt

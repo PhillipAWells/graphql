@@ -248,6 +248,11 @@ export class RateLimitService implements OnModuleInit, OnModuleDestroy, ILazyMod
 
 	/**
 	 * Check rate limit using in-memory storage (legacy implementation)
+	 *
+	 * THREAD-SAFETY NOTE: This method is safe in Node.js because:
+	 * 1. Node.js is single-threaded (event loop runs one callback at a time)
+	 * 2. All operations between get() and set() are synchronous (no await)
+	 * 3. Therefore, no other code can interleave between read and write
 	 */
 	private CheckLimitInMemory(clientId: string, config: IRateLimitConfig): IRateLimitResult {
 		const Now = Date.now();
