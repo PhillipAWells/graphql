@@ -91,6 +91,9 @@ export class GraphQLClient {
 	): ApolloClient {
 		const pingTimeoutCode = 4408;
 		const pingTimeoutWaitMs = 5000;
+		const retryInitialDelay = 1000;
+		const retryMaxDelay = 10000;
+		const retryMaxAttempts = 10;
 
 		const errorLink = onError(({ error }): void => {
 			if (CombinedGraphQLErrors.is(error)) {
@@ -106,12 +109,12 @@ export class GraphQLClient {
 
 		const retryLink = new RetryLinkClass({
 			delay: {
-				initial: 1000,
-				max: 10000,
+				initial: retryInitialDelay,
+				max: retryMaxDelay,
 				jitter: true,
 			},
 			attempts: {
-				max: 10,
+				max: retryMaxAttempts,
 				retryIf: (error): boolean => {
 					const isNetworkError = !error.message.startsWith('[GraphQL error');
 					return isNetworkError;
