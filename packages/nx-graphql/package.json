@@ -40,7 +40,7 @@
   "dependencies": {
     "@graphql-codegen/cli": ">=6.2.1",
     "@nestjs/common": ">=11.1.19",
-    "@nestjs/core": ">=11.1.18",
+    "@nestjs/core": ">=11.1.19",
     "@nestjs/graphql": ">=13.2.5",
     "@nx/devkit": ">=22.6.5",
     "graphql": ">=16.13.2",
