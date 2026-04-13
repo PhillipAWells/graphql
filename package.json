@@ -70,7 +70,7 @@
 		"eslint-plugin-import": "^2.32.0",
 		"eslint-plugin-unused-imports": "^4.4.1",
 		"express": "^5.2.1",
-		"globals": "^17.4.0",
+		"globals": "^17.5.0",
 		"graphql": "^16.13.2",
 		"graphql-query-complexity": "^1.1.0",
 		"graphql-redis-subscriptions": "^2.7.0",
