@@ -1773,7 +1773,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-codegen/plugin-helpers@npm:>=6.2.1, @graphql-codegen/plugin-helpers@npm:^6.0.0, @graphql-codegen/plugin-helpers@npm:^6.1.1, @graphql-codegen/plugin-helpers@npm:^6.2.0":
+"@graphql-codegen/plugin-helpers@npm:>=6.3.0":
+  version: 6.3.0
+  resolution: "@graphql-codegen/plugin-helpers@npm:6.3.0"
+  dependencies:
+    "@graphql-tools/utils": "npm:^11.0.0"
+    change-case-all: "npm:1.0.15"
+    common-tags: "npm:1.8.2"
+    import-from: "npm:4.0.0"
+    tslib: "npm:^2.8.0"
+  peerDependencies:
+    graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
+  checksum: 10c0/d461901522be77a4e5c5c4c7aa00d89d8f19c30a690b60bb8e7e6c029ab1efc8eba1764e2511b2645b675416950d207817a485a8f509dff1a44cf52424aefc82
+  languageName: node
+  linkType: hard
+
+"@graphql-codegen/plugin-helpers@npm:^6.0.0, @graphql-codegen/plugin-helpers@npm:^6.1.1, @graphql-codegen/plugin-helpers@npm:^6.2.0":
   version: 6.2.1
   resolution: "@graphql-codegen/plugin-helpers@npm:6.2.1"
   dependencies:
@@ -3485,7 +3500,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@pawells/graphql-codegen-react@workspace:packages/graphql-codegen-react"
   dependencies:
-    "@graphql-codegen/plugin-helpers": "npm:>=6.2.1"
+    "@graphql-codegen/plugin-helpers": "npm:>=6.3.0"
     "@types/node": "npm:^25.6.0"
     code-block-writer: "npm:>=13.0.3"
     graphql: "npm:^16.13.2"
@@ -3505,7 +3520,7 @@ __metadata:
   resolution: "@pawells/graphql-codegen-ts@workspace:packages/graphql-codegen-ts"
   dependencies:
     "@apollo/client": "npm:^4.1.7"
-    "@graphql-codegen/plugin-helpers": "npm:>=6.2.1"
+    "@graphql-codegen/plugin-helpers": "npm:>=6.3.0"
     "@pawells/graphql-common": "npm:^2.0.0"
     "@types/node": "npm:^25.6.0"
     code-block-writer: "npm:>=13.0.3"
@@ -11896,7 +11911,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:2.8.1, tslib@npm:^2.0.3, tslib@npm:^2.1.0, tslib@npm:^2.3.0, tslib@npm:^2.4.0, tslib@npm:^2.5.0, tslib@npm:^2.6.3, tslib@npm:^2.8.1":
+"tslib@npm:2.8.1, tslib@npm:^2.0.3, tslib@npm:^2.1.0, tslib@npm:^2.3.0, tslib@npm:^2.4.0, tslib@npm:^2.5.0, tslib@npm:^2.6.3, tslib@npm:^2.8.0, tslib@npm:^2.8.1":
   version: 2.8.1
   resolution: "tslib@npm:2.8.1"
   checksum: 10c0/9c4759110a19c53f992d9aae23aac5ced636e99887b51b9e61def52611732872ff7668757d4e4c61f19691e36f4da981cd9485e869b4a7408d689f6bf1f14e62

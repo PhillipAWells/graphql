@@ -38,7 +38,7 @@
     "pipeline": "yarn typecheck && yarn lint && yarn test && yarn build"
   },
   "dependencies": {
-    "@graphql-codegen/plugin-helpers": ">=6.2.1",
+    "@graphql-codegen/plugin-helpers": ">=6.3.0",
     "code-block-writer": ">=13.0.3"
   },
   "peerDependencies": {
