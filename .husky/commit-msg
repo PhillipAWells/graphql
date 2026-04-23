@@ -1,4 +1,12 @@
 if grep -qi "co-authored-by:" "$1"; then
-  echo "Error: Co-authored-by is not allowed in commit messages." >&2
+  cat >&2 << 'EOF'
+❌ Error: Co-Authored-By trailers are not allowed in commit messages.
+
+You are the sole author and copyright holder. Commits should reflect your
+authorship only. If you're working with Claude Code or other AI assistants,
+do not add Co-Authored-By trailers — the work is your responsibility.
+
+Fix: Remove the "Co-Authored-By:" line from your commit message and try again.
+EOF
   exit 1
 fi
