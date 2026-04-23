@@ -57,7 +57,7 @@
     }
   },
   "devDependencies": {
-    "@apollo/client": "^4.1.7",
+    "@apollo/client": "^4.1.8",
     "@types/react": "^19.2.14",
     "graphql": "^16.13.2",
     "graphql-ws": "^6.0.8",
