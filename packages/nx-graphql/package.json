@@ -1,7 +1,7 @@
 {
   "name": "@pawells/nx-graphql",
   "displayName": "@pawells/nx-graphql",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "NX executors for GraphQL schema generation and code generation",
   "keywords": [
     "nx",

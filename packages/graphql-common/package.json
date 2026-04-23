@@ -1,7 +1,7 @@
 {
   "name": "@pawells/graphql-common",
   "displayName": "@pawells/graphql-common",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Framework-agnostic shared GraphQL primitive types and utilities",
   "keywords": [
     "graphql",
