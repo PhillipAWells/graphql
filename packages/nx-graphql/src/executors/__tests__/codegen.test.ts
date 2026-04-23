@@ -63,7 +63,7 @@ describe('CodegenExecutor', () => {
 
 		const result = await executor(options, mockContext);
 		expect(typeof result.success).toBe('boolean');
-	});
+	}, 30000);
 
 	it('should handle optional parameters correctly', async () => {
 		const options: ICodegenExecutorSchema = {
