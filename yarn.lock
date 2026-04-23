@@ -3653,7 +3653,7 @@ __metadata:
     "@nx/vite": "npm:~22.6.5"
     "@opentelemetry/api": "npm:^1.9.1"
     "@opentelemetry/semantic-conventions": "npm:^1.40.0"
-    "@pawells/nestjs-auth": "npm:^2.0.2"
+    "@pawells/nestjs-auth": "npm:^2.1.0"
     "@stylistic/eslint-plugin": "npm:^5.10.0"
     "@swc-node/register": "npm:^1.11.1"
     "@swc/core": "npm:^1.15.30"
@@ -3720,11 +3720,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pawells/nestjs-auth@npm:^2.0.2":
-  version: 2.0.2
-  resolution: "@pawells/nestjs-auth@npm:2.0.2"
+"@pawells/nestjs-auth@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "@pawells/nestjs-auth@npm:2.1.0"
   dependencies:
-    "@pawells/nestjs-shared": "npm:2.0.2"
+    "@pawells/nestjs-shared": "npm:2.1.0"
   peerDependencies:
     "@nestjs/common": ">=10.0.0"
     "@nestjs/config": ">=3.0.0"
@@ -3741,14 +3741,17 @@ __metadata:
     express: ">=5.0.0"
     helmet: ">=7.0.0"
     joi: ">=18.0.0"
+    jsonwebtoken: ">=9.0.0"
     jwks-rsa: ">=3.0.0"
     prom-client: ">=15.0.0"
     rxjs: ">=7.0.0"
     xss: ">=1.0.0"
   peerDependenciesMeta:
+    jsonwebtoken:
+      optional: true
     jwks-rsa:
       optional: true
-  checksum: 10c0/f843bfe6405f8f28824e8bbe80270dd515e03d0cef334f590fb9bfe27c52cfcb80411ee3ed08f51ab466394f90d0dc1f8e92196466e181819148b5383736dce9
+  checksum: 10c0/efa570f5a2bf6587c80a61cc5035f147641734cdf83100d6754b7cdcda6f2d86fcff3a9f3e08ce3fcafce3bd2d3d57806b854e7b8ca453e0ac48d80c1fccff3c
   languageName: node
   linkType: hard
 
@@ -3766,9 +3769,9 @@ __metadata:
     "@nestjs/terminus": "npm:^11.1.1"
     "@nestjs/throttler": "npm:^6.5.0"
     "@opentelemetry/api": "npm:^1.9.1"
-    "@pawells/nestjs-open-telemetry": "npm:^2.0.2"
-    "@pawells/nestjs-pyroscope": "npm:^2.0.2"
-    "@pawells/nestjs-shared": "npm:^2.0.2"
+    "@pawells/nestjs-open-telemetry": "npm:^2.1.0"
+    "@pawells/nestjs-pyroscope": "npm:^2.1.0"
+    "@pawells/nestjs-shared": "npm:^2.1.0"
     cache-manager: "npm:^7.2.8"
     class-transformer: "npm:^0.5.1"
     class-validator: "npm:^0.15.1"
@@ -3801,7 +3804,7 @@ __metadata:
     "@nestjs/terminus": ">=10.0.0"
     "@nestjs/throttler": ">=5.0.0"
     "@opentelemetry/api": ">=1.0.0"
-    "@pawells/nestjs-auth": ^2.0.1
+    "@pawells/nestjs-auth": ^2.1.0
     cache-manager: ">=7.0.0"
     class-transformer: ">=0.5.0"
     class-validator: ">=0.14.0"
@@ -3830,12 +3833,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@pawells/nestjs-open-telemetry@npm:^2.0.2":
-  version: 2.0.2
-  resolution: "@pawells/nestjs-open-telemetry@npm:2.0.2"
+"@pawells/nestjs-open-telemetry@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "@pawells/nestjs-open-telemetry@npm:2.1.0"
   dependencies:
     "@pawells/logger": "npm:^1.2.2"
-    "@pawells/nestjs-shared": "npm:2.0.2"
+    "@pawells/nestjs-shared": "npm:2.1.0"
   peerDependencies:
     "@nestjs/common": ">=10.0.0"
     "@nestjs/config": ">=3.0.0"
@@ -3852,15 +3855,15 @@ __metadata:
     prom-client: ">=15.0.0"
     rxjs: ">=7.0.0"
     xss: ">=1.0.0"
-  checksum: 10c0/92cddac8ee9f1b3cba7f62406cb4ec88bee0b418b0d30ac6d0a70a2514367c44af706705ba0465a43fe6b869aac72d26a833212b0a2b7155b834961a5b6d9993
+  checksum: 10c0/0b14cb7f5d8bdf2b6187846051796aeae5519ea947db7ffe732d1296ca0e90557439202f3b52b2fbfd39393c3c5d93d42f7103e79af64a9dd620f0a834a6b39d
   languageName: node
   linkType: hard
 
-"@pawells/nestjs-pyroscope@npm:^2.0.2":
-  version: 2.0.2
-  resolution: "@pawells/nestjs-pyroscope@npm:2.0.2"
+"@pawells/nestjs-pyroscope@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "@pawells/nestjs-pyroscope@npm:2.1.0"
   dependencies:
-    "@pawells/nestjs-shared": "npm:2.0.2"
+    "@pawells/nestjs-shared": "npm:2.1.0"
     "@pyroscope/nodejs": "npm:^0.4.11"
   peerDependencies:
     "@nestjs/common": ">=10.0.0"
@@ -3879,13 +3882,13 @@ __metadata:
     prom-client: ">=15.0.0"
     rxjs: ">=7.0.0"
     xss: ">=1.0.0"
-  checksum: 10c0/87574a49d73ac712e7b0f7ee8700fbea14af4bb24f480d1f7937e7a439a83e109b981c5a9efd5653a2a76204718d420e89b18521385a6177f01b4ebdf6141317
+  checksum: 10c0/549e8df5de3765adb0754355040b09011ff345f3ecf959639aea5b1c4c2370cdb88801d07ccf3bc6719978556a6f8368978a42a5823cf64d67e338424f290c92
   languageName: node
   linkType: hard
 
-"@pawells/nestjs-shared@npm:2.0.2, @pawells/nestjs-shared@npm:^2.0.2":
-  version: 2.0.2
-  resolution: "@pawells/nestjs-shared@npm:2.0.2"
+"@pawells/nestjs-shared@npm:2.1.0, @pawells/nestjs-shared@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "@pawells/nestjs-shared@npm:2.1.0"
   dependencies:
     "@pawells/logger": "npm:^1.2.2"
     "@pawells/typescript-common": "npm:^1.4.1"
@@ -3905,7 +3908,7 @@ __metadata:
     prom-client: ">=15.0.0"
     rxjs: ">=7.0.0"
     xss: ">=1.0.0"
-  checksum: 10c0/74e9962c9172fc7d3862914d8337d2c454aed3286a85d46617658e14903268e40f10ebd996825911bce876e2c56a9da80161b79836ab3cd17b54ed7c376f3610
+  checksum: 10c0/ed14f7638de80d7c889bd329301f85c4e20fb4807ee6f0051ecfb2dd0f824f326e1b81b859fc2f9e538e0dcd6872edcd8c8f04cf3d1320cae14fa626b5d825f4
   languageName: node
   linkType: hard
 
