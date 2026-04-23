@@ -1,3 +1,17 @@
+## 2.1.2 (2026-04-23)
+
+### Changed
+
+- **deps:** bump @nestjs/common from 11.1.18 to 11.1.19 ([4abcfd9](https://github.com/PhillipAWells/graphql/commit/4abcfd9))
+- **deps:** bump @nestjs/core from 11.1.18 to 11.1.19 ([e5bd778](https://github.com/PhillipAWells/graphql/commit/e5bd778))
+- **deps:** bump @graphql-codegen/plugin-helpers from 6.2.1 to 6.3.0 ([f246c39](https://github.com/PhillipAWells/graphql/commit/f246c39))
+- **deps:** bump softprops/action-gh-release from 2.6.1 to 3.0.0 ([dbf258d](https://github.com/PhillipAWells/graphql/commit/dbf258d))
+- **deps:** upgrade all dependencies (10 updates) ([a47e607](https://github.com/PhillipAWells/graphql/commit/a47e607))
+- **deps:** update @pawells/nestjs-* packages to 2.1.0 ([0421703](https://github.com/PhillipAWells/graphql/commit/0421703))
+- **husky:** improve commit-msg hook error message ([0df617a](https://github.com/PhillipAWells/graphql/commit/0df617a))
+- **test:** increase timeout for slow codegen tests in nx-graphql ([a490c56](https://github.com/PhillipAWells/graphql/commit/a490c56))
+- **deps-dev:** bump the dev-dependencies group across 1 directory with 13 updates ([1d6f3ab](https://github.com/PhillipAWells/graphql/commit/1d6f3ab))
+
 ## 2.1.1 (2026-04-11)
 
 ### 🩹 Fixes

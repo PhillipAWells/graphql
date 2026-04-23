@@ -77,7 +77,7 @@ describe('CodegenBuilder', () => {
 
 			// Will fail when trying to import @graphql-codegen/cli
 			await expect(ExecuteCodegen(params)).rejects.toThrow();
-		});
+		}, 30000);
 
 		it('should validate target is typescript', async () => {
 			const params = {

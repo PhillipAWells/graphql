@@ -1,7 +1,7 @@
 {
   "name": "@pawells/graphql-mongoose",
   "displayName": "@pawells/graphql-mongoose",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "GraphQL-to-Mongoose filter builder — translates GraphQL filter inputs to Mongoose FilterQuery",
   "keywords": [
     "graphql",
@@ -40,9 +40,9 @@
     "@pawells/graphql-common": "^2.1.0",
     "@types/node": "^25.6.0",
     "graphql": "^16.13.2",
-    "mongoose": "^9.4.1",
-    "typescript": "^6.0.2",
-    "vitest": "^4.1.4"
+    "mongoose": "^9.5.0",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.5"
   },
   "engines": {
     "node": ">=22.0.0"

@@ -1,7 +1,7 @@
 {
   "name": "@pawells/nestjs-graphql",
   "displayName": "@pawells/nestjs-graphql",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "NestJS GraphQL module with guards, decorators, subscriptions, and DataLoaders",
   "keywords": [
     "nestjs",
@@ -49,7 +49,7 @@
     "@nestjs/terminus": ">=10.0.0",
     "@nestjs/throttler": ">=5.0.0",
     "@opentelemetry/api": ">=1.0.0",
-    "@pawells/nestjs-auth": "^2.0.1",
+    "@pawells/nestjs-auth": "^2.1.0",
     "cache-manager": ">=7.0.0",
     "class-transformer": ">=0.5.0",
     "class-validator": ">=0.14.0",
@@ -80,18 +80,18 @@
     }
   },
   "dependencies": {
-    "@pawells/nestjs-open-telemetry": "^2.0.2",
-    "@pawells/nestjs-pyroscope": "^2.0.2",
-    "@pawells/nestjs-shared": "^2.0.2"
+    "@pawells/nestjs-open-telemetry": "^2.1.0",
+    "@pawells/nestjs-pyroscope": "^2.1.0",
+    "@pawells/nestjs-shared": "^2.1.0"
   },
   "devDependencies": {
     "@apollo/server": "^5.5.0",
-    "@nestjs/apollo": "^13.2.5",
-    "@nestjs/cache-manager": "^3.1.0",
-    "@nestjs/common": "^11.1.18",
+    "@nestjs/apollo": "^13.3.0",
+    "@nestjs/cache-manager": "^3.1.1",
+    "@nestjs/common": "^11.1.19",
     "@nestjs/config": "^4.0.4",
-    "@nestjs/core": "^11.1.18",
-    "@nestjs/graphql": "^13.2.5",
+    "@nestjs/core": "^11.1.19",
+    "@nestjs/graphql": "^13.3.0",
     "@nestjs/terminus": "^11.1.1",
     "@nestjs/throttler": "^6.5.0",
     "@opentelemetry/api": "^1.9.1",
@@ -114,7 +114,7 @@
     "prom-client": "^15.1.3",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
-    "uuid": "^13.0.0",
+    "uuid": "^14.0.0",
     "ws": "^8.20.0",
     "xss": "^1.0.15"
   },
