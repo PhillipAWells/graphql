@@ -80,14 +80,14 @@
     }
   },
   "dependencies": {
-    "@pawells/nestjs-open-telemetry": "^2.1.0",
-    "@pawells/nestjs-pyroscope": "^2.1.0",
-    "@pawells/nestjs-shared": "^2.1.0"
+    "@pawells/nestjs-open-telemetry": "^2.1.1",
+    "@pawells/nestjs-pyroscope": "^2.1.1",
+    "@pawells/nestjs-shared": "^2.1.1"
   },
   "devDependencies": {
     "@apollo/server": "^5.5.0",
     "@nestjs/apollo": "^13.3.0",
-    "@nestjs/cache-manager": "^3.1.1",
+    "@nestjs/cache-manager": "^3.1.2",
     "@nestjs/common": "^11.1.19",
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.1.19",

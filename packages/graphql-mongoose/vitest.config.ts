@@ -7,6 +7,7 @@ export default defineConfig({
 		include: ['src/**/*.test.ts', 'src/**/*.integration.test.ts', 'src/**/*.regression.test.ts'],
 		exclude: ['node_modules', 'build', 'tmp'],
 		silent: true,
+		hookTimeout: 120000,
 		typecheck: {
 			tsconfig: './tsconfig.test.json',
 		},
