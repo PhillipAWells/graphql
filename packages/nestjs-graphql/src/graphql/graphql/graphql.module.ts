@@ -2,6 +2,7 @@ import Joi from 'joi';
 import { Module, DynamicModule, Global, MiddlewareConsumer, NestModule, Optional, Provider, Type } from '@nestjs/common';
 import { GraphQLModule as NestGraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { ConfigModule } from '@nestjs/config';
 // Note: AuthModule NOT imported here to avoid circular dependency
 // AuthModule depends on CacheModule from this package
 // Applications should import both modules at root level
@@ -28,6 +29,7 @@ import { JSONScalar } from './scalars/json.scalar.js';
  * GraphQL module with Apollo Server 5.x integration
  * Provides comprehensive GraphQL functionality with custom scalars, types, and utilities
  */
+
 @Global()
 @Module({})
 export class GraphQLModule implements NestModule {
@@ -162,6 +164,7 @@ export class GraphQLModule implements NestModule {
 		return {
 			module: GraphQLModule,
 			imports: [
+				ConfigModule,
 				NestGraphQLModule.forRoot(DefaultOptions),
 			],
 			providers: Providers,
@@ -294,6 +297,7 @@ export class GraphQLModule implements NestModule {
 		return {
 			module: GraphQLModule,
 			imports: [
+				ConfigModule,
 				// Use a factory that injects the already-resolved config token
 				// instead of re-executing the factory
 				NestGraphQLModule.forRootAsync({
