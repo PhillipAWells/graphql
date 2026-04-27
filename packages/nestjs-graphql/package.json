@@ -81,7 +81,7 @@
   },
   "dependencies": {
     "@pawells/nestjs-open-telemetry": "^2.1.0",
-    "@pawells/nestjs-pyroscope": "^2.1.0",
+    "@pawells/nestjs-pyroscope": "^2.1.1",
     "@pawells/nestjs-shared": "^2.1.0"
   },
   "devDependencies": {

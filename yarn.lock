@@ -3770,7 +3770,7 @@ __metadata:
     "@nestjs/throttler": "npm:^6.5.0"
     "@opentelemetry/api": "npm:^1.9.1"
     "@pawells/nestjs-open-telemetry": "npm:^2.1.0"
-    "@pawells/nestjs-pyroscope": "npm:^2.1.0"
+    "@pawells/nestjs-pyroscope": "npm:^2.1.1"
     "@pawells/nestjs-shared": "npm:^2.1.0"
     cache-manager: "npm:^7.2.8"
     class-transformer: "npm:^0.5.1"
@@ -3859,11 +3859,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pawells/nestjs-pyroscope@npm:^2.1.0":
-  version: 2.1.0
-  resolution: "@pawells/nestjs-pyroscope@npm:2.1.0"
+"@pawells/nestjs-pyroscope@npm:^2.1.1":
+  version: 2.1.1
+  resolution: "@pawells/nestjs-pyroscope@npm:2.1.1"
   dependencies:
-    "@pawells/nestjs-shared": "npm:2.1.0"
+    "@pawells/nestjs-shared": "npm:2.1.1"
     "@pyroscope/nodejs": "npm:^0.4.11"
   peerDependencies:
     "@nestjs/common": ">=10.0.0"
@@ -3882,7 +3882,7 @@ __metadata:
     prom-client: ">=15.0.0"
     rxjs: ">=7.0.0"
     xss: ">=1.0.0"
-  checksum: 10c0/549e8df5de3765adb0754355040b09011ff345f3ecf959639aea5b1c4c2370cdb88801d07ccf3bc6719978556a6f8368978a42a5823cf64d67e338424f290c92
+  checksum: 10c0/723b66e36329c3680560c6bd0c08803581c12732ef480fda73fea1d8357d2aff8471e0f17720eacae8931fcdd3b376c60b3ecd87e9115e2c41f0fda9db079a2a
   languageName: node
   linkType: hard
 
@@ -3909,6 +3909,32 @@ __metadata:
     rxjs: ">=7.0.0"
     xss: ">=1.0.0"
   checksum: 10c0/ed14f7638de80d7c889bd329301f85c4e20fb4807ee6f0051ecfb2dd0f824f326e1b81b859fc2f9e538e0dcd6872edcd8c8f04cf3d1320cae14fa626b5d825f4
+  languageName: node
+  linkType: hard
+
+"@pawells/nestjs-shared@npm:2.1.1":
+  version: 2.1.1
+  resolution: "@pawells/nestjs-shared@npm:2.1.1"
+  dependencies:
+    "@pawells/logger": "npm:^1.2.2"
+    "@pawells/typescript-common": "npm:^1.4.1"
+  peerDependencies:
+    "@nestjs/common": ">=10.0.0"
+    "@nestjs/config": ">=3.0.0"
+    "@nestjs/core": ">=10.0.0"
+    "@nestjs/throttler": ">=5.0.0"
+    "@opentelemetry/api": ">=1.0.0"
+    class-transformer: ">=0.5.0"
+    class-validator: ">=0.14.0"
+    compression: ">=1.0.0"
+    csrf-csrf: ">=4.0.0"
+    express: ">=5.0.0"
+    helmet: ">=7.0.0"
+    joi: ">=18.0.0"
+    prom-client: ">=15.0.0"
+    rxjs: ">=7.0.0"
+    xss: ">=1.0.0"
+  checksum: 10c0/7c1d30113fad3e3cfa39fe30a7ce9751bc19f5b31857953516ec023bbc202f0c3b11bdc019a934be985aa86f24e020df5f3cbf0160da3c7f7876da1decb72168
   languageName: node
   linkType: hard
 
