@@ -352,9 +352,7 @@ export abstract class BaseCacheService implements ILazyModuleRefService, OnModul
 		const StartTime = Date.now();
 		this.Logger?.debug(`Cache delete: ${Keys.join(', ')}`);
 		try {
-			for (const K of Keys) {
-				await this.CacheManager.del(K);
-			}
+			await Promise.all(Keys.map((key) => this.CacheManager.del(key)));
 			this.Stats.deletes++;
 			const Duration = Date.now() - StartTime;
 			this.TrackOperationTiming('del', Duration);
