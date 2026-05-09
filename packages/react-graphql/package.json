@@ -21,7 +21,6 @@
   "exports": {
     ".": {
       "types": "./build/index.d.ts",
-      "require": "./build/index.js",
       "import": "./build/index.js"
     }
   },
@@ -37,7 +36,7 @@
     "pipeline": "yarn typecheck && yarn lint && yarn test && yarn build"
   },
   "dependencies": {
-    "graphql-ws": ">=6.0.8"
+    "graphql-ws": "^6.0.8"
   },
   "peerDependencies": {
     "@apollo/client": ">=4.0.0",
@@ -60,7 +59,6 @@
     "@apollo/client": "^4.1.9",
     "@types/react": "^19.2.14",
     "graphql": "^16.13.2",
-    "graphql-ws": "^6.0.8",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "rxjs": "^7.8.2"

@@ -21,7 +21,6 @@
   "exports": {
     ".": {
       "types": "./build/index.d.ts",
-      "require": "./build/index.js",
       "import": "./build/index.js"
     }
   },
@@ -37,10 +36,10 @@
     "pipeline": "yarn typecheck && yarn lint && yarn test && yarn build"
   },
   "dependencies": {
-    "@graphql-codegen/plugin-helpers": ">=6.3.0",
-    "code-block-writer": ">=13.0.3",
-    "graphql-ws": ">=6.0.8",
-    "strongly-typed-events": ">=3.0.11"
+    "@graphql-codegen/plugin-helpers": "^6.3.0",
+    "code-block-writer": "^13.0.3",
+    "graphql-ws": "^6.0.8",
+    "strongly-typed-events": "^3.0.11"
   },
   "peerDependencies": {
     "@apollo/client": ">=4.0.0",

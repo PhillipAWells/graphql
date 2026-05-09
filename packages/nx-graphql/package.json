@@ -21,7 +21,6 @@
   "exports": {
     ".": {
       "types": "./build/index.d.ts",
-      "require": "./build/index.js",
       "import": "./build/index.js"
     }
   },
@@ -38,13 +37,13 @@
     "pipeline": "yarn typecheck && yarn lint && yarn test && yarn build"
   },
   "dependencies": {
-    "@graphql-codegen/cli": ">=7.0.0",
-    "@nestjs/common": ">=11.1.19",
-    "@nestjs/core": ">=11.1.19",
-    "@nestjs/graphql": ">=13.3.0",
-    "@nx/devkit": ">=22.6.5",
-    "graphql": ">=16.13.2",
-    "reflect-metadata": ">=0.2.2"
+    "@graphql-codegen/cli": "^7.0.0",
+    "@nestjs/common": "^11.1.19",
+    "@nestjs/core": "^11.1.19",
+    "@nestjs/graphql": "^13.3.0",
+    "@nx/devkit": "^22.6.5",
+    "graphql": "^16.13.2",
+    "reflect-metadata": "^0.2.2"
   },
   "peerDependencies": {
     "@pawells/graphql-codegen-ts": "*",
@@ -57,9 +56,6 @@
     }
   },
   "devDependencies": {
-    "@graphql-codegen/cli": "^7.0.0",
-    "@nestjs/graphql": "^13.3.0",
-    "@nx/devkit": "^22.7.0",
     "@types/node": "^25.6.0",
     "nx": "^22.7.0",
     "rxjs": "^7.8.2"
