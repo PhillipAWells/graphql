@@ -38,7 +38,7 @@
     "pipeline": "yarn typecheck && yarn lint && yarn test && yarn build"
   },
   "dependencies": {
-    "@graphql-codegen/cli": ">=6.3.1",
+    "@graphql-codegen/cli": ">=7.0.0",
     "@nestjs/common": ">=11.1.19",
     "@nestjs/core": ">=11.1.19",
     "@nestjs/graphql": ">=13.3.0",
@@ -57,7 +57,7 @@
     }
   },
   "devDependencies": {
-    "@graphql-codegen/cli": "^6.3.1",
+    "@graphql-codegen/cli": "^7.0.0",
     "@nestjs/graphql": "^13.3.0",
     "@nx/devkit": "^22.7.0",
     "@types/node": "^25.6.0",
