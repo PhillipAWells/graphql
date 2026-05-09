@@ -75,7 +75,7 @@ jobs:
           HUSKY: '0'
 
       - name: Test
-        run: yarn test
+        run: yarn test --skip-nx-cache
 
   build:
     name: Build
