@@ -1,7 +1,7 @@
 {
   "name": "@pawells/graphql-mongoose",
   "displayName": "@pawells/graphql-mongoose",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "description": "GraphQL-to-Mongoose filter builder — translates GraphQL filter inputs to Mongoose FilterQuery",
   "keywords": [
     "graphql",
@@ -18,7 +18,6 @@
   "exports": {
     ".": {
       "types": "./build/index.d.ts",
-      "require": "./build/index.js",
       "import": "./build/index.js"
     }
   },
@@ -29,7 +28,7 @@
     "lint:fix": "eslint src/ --fix",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "pipeline": "yarn typecheck && yarn test && yarn build"
+    "pipeline": "yarn typecheck && yarn lint && yarn test && yarn build"
   },
   "peerDependencies": {
     "@pawells/graphql-common": ">=2.0.0",
@@ -39,9 +38,10 @@
   "devDependencies": {
     "@pawells/graphql-common": "^2.1.0",
     "@types/node": "^25.6.0",
+    "@vitest/coverage-v8": "^4.1.5",
     "graphql": "^16.13.2",
     "mongoose": "^9.5.0",
-    "typescript": "^6.0.3",
+    "typescript": "~6.0.3",
     "vitest": "^4.1.5"
   },
   "engines": {

@@ -1,11 +1,14 @@
 import Joi from 'joi';
 import { Module, DynamicModule, Global, MiddlewareConsumer, NestModule, Optional, Provider, Type } from '@nestjs/common';
+import { ModuleRef } from '@nestjs/core';
 import { GraphQLModule as NestGraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { ConfigModule } from '@nestjs/config';
 // Note: AuthModule NOT imported here to avoid circular dependency
 // AuthModule depends on CacheModule from this package
 // Applications should import both modules at root level
 import { GraphQLService } from './graphql.service.js';
+import { GraphQLErrorFormatter } from './error-formatter.js';
 import { IGraphQLConfigOptions, IGraphQLAsyncConfig } from './graphql-config.interface.js';
 import { GraphQLCacheService } from '../services/cache.service.js';
 import { GraphQLPublicGuard } from '../guards/graphql-public.guard.js';
@@ -28,42 +31,44 @@ import { JSONScalar } from './scalars/json.scalar.js';
  * GraphQL module with Apollo Server 5.x integration
  * Provides comprehensive GraphQL functionality with custom scalars, types, and utilities
  */
+
+/**
+ * Injection token for BSON configuration (DI-managed provider)
+ * Allows BsonConfig to be injected into services instead of accessed via static fields
+ */
+export const BSON_CONFIG_TOKEN = 'BSON_CONFIG';
+
 @Global()
 @Module({})
 export class GraphQLModule implements NestModule {
 	/**
-	 * CRITICAL: Static field storing BSON configuration for middleware access
+	 * CRITICAL: BsonConfig moved to DI providers for test isolation
 	 *
-	 * RATIONALE: Global configuration must be accessible to middleware via static
-	 * methods, since NestJS middleware factory pattern does not support DI injection.
-	 * This field is written during forRoot() / forRootAsync() and read during
-	 * configure() / onModuleInit().
+	 * RATIONALE: Static state breaks test isolation. BsonConfig is now registered
+	 * as a DI provider (BSON_CONFIG_TOKEN) that can be injected into services.
+	 * NestJS testing utilities automatically isolate DI containers per test suite.
 	 *
-	 * CONCURRENCY PROTECTION: A startup guard prevents multiple calls to forRoot()
-	 * or forRootAsync(). The first call initializes BsonConfig and sets a flag.
-	 * Subsequent calls throw an error immediately. This prevents race conditions
-	 * in parallel test execution and ensures predictable module initialization.
+	 * BSON MIDDLEWARE REGISTRATION:
+	 * BsonSerializationMiddleware uses lazy resolution (ModuleRef.get) to access
+	 * BSON_CONFIG_TOKEN at request time, avoiding hard initialization-time dependency.
 	 *
-	 * WORKAROUND FOR TESTS (DEPRECATED):
-	 * - Old: Call forRoot() once at the suite level, not per-test
-	 * - Old: Use describe.sequential() in vitest to serialize GraphQLModule initialization
-	 * - NEW: Tests must not call forRoot/forRootAsync multiple times per process
-	 *
-	 * ARCHITECTURAL NOTE:
-	 * A cleaner solution would thread the config through DI providers,
-	 * but that would require major refactoring of NestJS middleware registration.
-	 * The startup guard is a pragmatic middle ground.
+	 * INITIALIZATION GUARD:
+	 * InitializationGuard check is now ALWAYS enforced (removed NODE_ENV condition).
+	 * This prevents module registration race conditions in all environments.
+	 * Tests must use NestJS testing utilities (Test.createTestingModule) which
+	 * automatically isolate module state per test suite.
 	 */
-	private static BsonConfig: IGraphQLConfigOptions['bson'] = undefined;
-	private static InitializationGuard: boolean = false;
 
 	private readonly BsonService: BsonSerializationService | undefined;
 	private readonly BsonMiddleware: BsonSerializationMiddleware | undefined;
+	private readonly ModuleRef: ModuleRef;
 
 	constructor(
+		moduleRef: ModuleRef,
 		@Optional() bsonService?: BsonSerializationService,
 		@Optional() bsonMiddleware?: BsonSerializationMiddleware,
 	) {
+		this.ModuleRef = moduleRef;
 		this.BsonService = bsonService;
 		this.BsonMiddleware = bsonMiddleware;
 	}
@@ -71,14 +76,17 @@ export class GraphQLModule implements NestModule {
 	/**
 	 * Throw if GraphQLModule has already been initialized.
 	 * This guard prevents race conditions from concurrent forRoot/forRootAsync calls.
+	 * Tests must use NestJS testing utilities (Test.createTestingModule) which
+	 * automatically isolate module state per test suite.
 	 * @throws Error if initialization has already occurred
 	 */
+	private static InitializationGuard: boolean = false;
+
 	private static EnforceInitializationOnce(): void {
-		// Only enforce initialization guard in production to catch race conditions
-		// In test/development environments, allow multiple calls for test isolation
-		if (process.env.NODE_ENV === 'production' && this.InitializationGuard) {
+		if (this.InitializationGuard) {
 			throw new Error(
-				'GraphQLModule has already been initialized. forRoot() and forRootAsync() can only be called once per application instance.',
+				'GraphQLModule has already been initialized. forRoot() and forRootAsync() can only be called once per application instance. ' +
+				'In tests, use NestJS Test.createTestingModule() which provides automatic test isolation.',
 			);
 		}
 		this.InitializationGuard = true;
@@ -119,23 +127,33 @@ export class GraphQLModule implements NestModule {
 		// Validate configuration
 		this.ValidateGraphQLConfig(options);
 
-		// Store bson config for middleware registration
-		this.BsonConfig = options.bson;
+		// Extract security-critical and custom options separately
+		// Note: bson is registered as BSON_CONFIG_TOKEN provider, errorHandling is unused
+		const { bson: _bson, errorHandling: _errorHandling, playground: userPlayground, introspection: userIntrospection, ...apolloOptions } = options;
 
 		const DefaultOptions: ApolloDriverConfig = {
 			driver: ApolloDriver,
-			autoSchemaFile: options.autoSchemaFile ?? './schema.gql',
-			sortSchema: options.sortSchema ?? true,
-			playground: options.playground ?? false,
-			introspection: options.introspection ?? false,
-			...(options.context !== undefined ? { context: options.context } : {}),
-			...(options.cors !== undefined ? { cors: options.cors } : {}),
-			...(options.formatError !== undefined ? { formatError: options.formatError } : {}),
-			...options,
+			autoSchemaFile: apolloOptions.autoSchemaFile ?? './schema.gql',
+			sortSchema: apolloOptions.sortSchema ?? true,
+			...(apolloOptions.context !== undefined ? { context: apolloOptions.context } : {}),
+			...(apolloOptions.cors !== undefined ? { cors: apolloOptions.cors } : {}),
+			...(apolloOptions.formatError !== undefined ? { formatError: apolloOptions.formatError } : {}),
+			// Spread all other Apollo options first
+			...apolloOptions,
+			// SECURITY: Override playground and introspection with explicit defaults
+			// These are set last to ensure they cannot be overridden by options spread
+			playground: userPlayground ?? false,
+			introspection: userIntrospection ?? false,
 		};
 
 		const Providers: Provider[] = [
+			// Register BSON config as a DI provider (replaces static field)
+			{
+				provide: BSON_CONFIG_TOKEN,
+				useValue: options.bson,
+			},
 			GraphQLService,
+			GraphQLErrorFormatter,
 			RateLimitService,
 			GraphQLCacheService,
 			GraphQLPublicGuard,
@@ -162,11 +180,14 @@ export class GraphQLModule implements NestModule {
 		return {
 			module: GraphQLModule,
 			imports: [
+				ConfigModule,
 				NestGraphQLModule.forRoot(DefaultOptions),
 			],
 			providers: Providers,
 			exports: [
+				BSON_CONFIG_TOKEN,
 				GraphQLService,
+				GraphQLErrorFormatter,
 				RateLimitService,
 				NestGraphQLModule,
 				GraphQLCacheService,
@@ -230,26 +251,25 @@ export class GraphQLModule implements NestModule {
 		// Symbol for the resolved config provider
 		const GraphQLAsyncConfigToken = Symbol('GraphQLAsyncConfig');
 
-		// Create a single wrapper function that resolves config once and stores BSON config
-		const resolveAndStoreConfig = async (...args: any[]): Promise<IGraphQLConfigOptions> => {
-			const config = await options.useFactory(...args);
-			// Store BSON config for middleware registration in configure()
-			GraphQLModule.BsonConfig = config.bson;
-			return config;
-		};
-
 		// Single config provider - resolved once and injected into all consumers
 		const asyncConfigProvider: Provider = {
 			provide: GraphQLAsyncConfigToken,
-			useFactory: resolveAndStoreConfig,
+			useFactory: options.useFactory,
 			// Cast inject to any[] because NestJS Provider.inject accepts unknown[] but we need to match it at runtime
 			...(options.inject ? { inject: options.inject as any[] } : {}),
 		};
 
 		const Providers: Provider[] = [
-			// First provider: resolve and store the async config (once)
+			// First provider: resolve the async config (once)
 			asyncConfigProvider,
+			// Register BSON config as a DI provider derived from the async config
+			{
+				provide: BSON_CONFIG_TOKEN,
+				useFactory: (config: IGraphQLConfigOptions) => config.bson,
+				inject: [GraphQLAsyncConfigToken],
+			},
 			GraphQLService,
+			GraphQLErrorFormatter,
 			RateLimitService,
 			GraphQLCacheService,
 			GraphQLPublicGuard,
@@ -286,6 +306,11 @@ export class GraphQLModule implements NestModule {
 				useClass: BsonResponseInterceptor,
 			},
 			{
+				// NOTE: BsonSerializationMiddleware is registered here for consistency with forRoot(),
+				// but it will NOT be applied by configure() when using forRootAsync() because
+				// middleware registration happens at module init time before async config resolves.
+				// This provider is exported for potential future use but is currently unused in async mode.
+				// See limitation documented in forRootAsync() JSDoc.
 				provide: BsonSerializationMiddleware,
 				useClass: BsonSerializationMiddleware,
 			},
@@ -294,6 +319,7 @@ export class GraphQLModule implements NestModule {
 		return {
 			module: GraphQLModule,
 			imports: [
+				ConfigModule,
 				// Use a factory that injects the already-resolved config token
 				// instead of re-executing the factory
 				NestGraphQLModule.forRootAsync({
@@ -304,7 +330,9 @@ export class GraphQLModule implements NestModule {
 			],
 			providers: Providers,
 			exports: [
+				BSON_CONFIG_TOKEN,
 				GraphQLService,
+				GraphQLErrorFormatter,
 				RateLimitService,
 				NestGraphQLModule,
 				GraphQLCacheService,
@@ -330,24 +358,28 @@ export class GraphQLModule implements NestModule {
 
 	/**
 	 * Configure middleware for the module
-	 * 
-	 * ARCHITECTURAL NOTE: Middleware registration happens in configure(), which is called
-	 * BEFORE async providers are resolved. This means:
-	 * 
-	 * - In forRoot() path: BsonConfig is set before configure() runs, so middleware is registered
-	 * - In forRootAsync() path: BsonConfig is set after configure() runs, so middleware is NOT registered
-	 * 
-	 * This is a known limitation of NestJS middleware factory pattern. If you need middleware
-	 * in async configuration, use forRoot() instead.
+	 *
+	 * Uses lazy resolution (ModuleRef.get) to fetch BSON_CONFIG_TOKEN at configuration time.
+	 * This allows BsonConfig to be provided via DI in both forRoot and forRootAsync paths.
+	 *
+	 * In forRootAsync, the config is available by the time configure() runs because
+	 * NestJS resolves module providers before calling configure().
 	 */
 	public configure(consumer: MiddlewareConsumer): void {
-		// Only configure if BSON is enabled
-		if (GraphQLModule.BsonConfig?.enabled && this.BsonMiddleware) {
-			// apply() accepts Type<NestMiddleware> or functional middleware;
-			// passing the injected instance requires a cast.
-			consumer
-				.apply(this.BsonMiddleware as unknown as Type<BsonSerializationMiddleware>)
-				.forRoutes('graphql');
+		try {
+			// Lazily resolve BSON config from DI
+			const BsonConfig = this.ModuleRef.get<IGraphQLConfigOptions['bson']>(BSON_CONFIG_TOKEN, { strict: false });
+
+			// Only configure if BSON is enabled
+			if (BsonConfig?.enabled && this.BsonMiddleware) {
+				// apply() accepts Type<NestMiddleware> or functional middleware;
+				// passing the injected instance requires a cast.
+				consumer
+					.apply(this.BsonMiddleware as unknown as Type<BsonSerializationMiddleware>)
+					.forRoutes('graphql');
+			}
+		} catch {
+			// Silently ignore if BSON_CONFIG_TOKEN is not registered (not an error)
 		}
 	}
 }

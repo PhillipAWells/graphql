@@ -3,6 +3,7 @@ import { HttpAdapterHost , ModuleRef } from '@nestjs/core';
 import { GraphQLSchemaHost } from '@nestjs/graphql';
 import { WebSocketServer } from 'ws';
 import { useServer } from 'graphql-ws/use/ws';
+import type { Context } from 'graphql-ws';
 import type { ILazyModuleRefService } from '@pawells/nestjs-shared/common';
 import { AppLogger } from '@pawells/nestjs-shared/common';
 import { WebSocketAuthService } from './websocket-auth.service.js';
@@ -116,7 +117,7 @@ export class GraphQLWebSocketServer implements OnApplicationBootstrap, OnModuleD
 		const Cleanup = useServer(
 			{
 				schema,
-				onConnect: async (ctx: any) => {
+				onConnect: async (ctx: Context) => {
 					// Auth is fail-closed: require AuthService to be available
 					// If AuthService is not available, reject the connection
 					if (!AuthServiceVar) {

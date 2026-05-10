@@ -1,32 +1,32 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
 
 /**
- * Base IComment GraphQL type without relationships
+ * Base Comment GraphQL type without relationships
  * Contains only core comment fields to avoid circular dependencies
- * Extended by IComment type to include relationships with IUser and Post
+ * Extended by Comment type to include relationships with User and Post
  */
 @ObjectType('BaseComment')
 export class BaseComment {
 	/**
-	 * IComment unique identifier
+	 * Comment unique identifier
 	 */
 	@Field(() => ID)
 	public Id!: string;
 
 	/**
-	 * IComment text content
+	 * Comment text content
 	 */
 	@Field()
 	public Text!: string;
 
 	/**
-	 * IComment creation timestamp
+	 * Comment creation timestamp
 	 */
 	@Field()
 	public CreatedAt!: Date;
 
 	/**
-	 * IComment last update timestamp
+	 * Comment last update timestamp
 	 */
 	@Field()
 	public UpdatedAt!: Date;

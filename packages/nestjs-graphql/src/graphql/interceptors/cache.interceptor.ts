@@ -109,21 +109,21 @@ export class GraphQLCacheInterceptor extends BaseCacheInterceptor {
 
 	/**
 	 * Override intercept to add GraphQL-specific cache invalidation
+	 *
+	 * Only supports post-execution invalidation to ensure errors are properly
+	 * handled and stale cache is not left after failed invalidation attempts.
+	 * Pre-execution invalidation is not supported; use post-execution instead.
 	 */
 	public override intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
 		const GqlContext = GqlExecutionContext.create(context);
 		const Args = GqlContext.getArgs();
 		const GqlContextData = GqlContext.getContext();
 
-		// Use base class caching logic, but first handle pre-execution invalidation
-		// Note: pre-execution invalidation is intentionally non-blocking (fire-and-forget)
-		// to avoid delaying the response; errors are logged internally.
-		void this.HandleCacheInvalidation(context, Args, GqlContextData, null, 'before');
-
 		// Use base class caching logic
 		const Result = super.intercept(context, next);
 
 		// Handle cache invalidation (after execution)
+		// Await invalidation to ensure it completes and errors are properly handled
 		return Result.pipe(
 			tap(async (data) => {
 				await this.HandleCacheInvalidation(context, Args, GqlContextData, data, 'after');

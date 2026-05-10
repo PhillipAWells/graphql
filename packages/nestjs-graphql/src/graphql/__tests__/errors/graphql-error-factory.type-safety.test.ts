@@ -19,14 +19,14 @@ describe('GraphQL Error Factory - Type Safety', () => {
 	describe('Error creation with proper types', () => {
 		it('should create error with typed input', () => {
 			const errorInput: IGraphQLErrorInput = {
-				message: 'IUser not found',
+				message: 'User not found',
 				code: GraphQLErrorCode.NOT_FOUND,
 				statusCode: 404,
 				details: { userId: '123' },
 			};
 
 			expect(errorInput).toBeDefined();
-			expect(errorInput.message).toBe('IUser not found');
+			expect(errorInput.message).toBe('User not found');
 			expect(errorInput.code).toBe(GraphQLErrorCode.NOT_FOUND);
 			expect(errorInput.statusCode).toBe(404);
 			expect(errorInput.details?.userId).toBe('123');
@@ -150,7 +150,7 @@ describe('GraphQL Error Factory - Type Safety', () => {
 				GRAPHQL_ERROR_CONFIGS.NOT_FOUND,
 			);
 
-			const error = new NotFoundError('IUser not found', { userId: '123' });
+			const error = new NotFoundError('User not found', { userId: '123' });
 			const errorWithNewMessage = error.WithMessage('Resource does not exist');
 
 			expect(errorWithNewMessage.message).toBe('Resource does not exist');

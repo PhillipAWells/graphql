@@ -6,14 +6,14 @@ import { GraphQLErrorCode } from '../error-codes.js';
 export { GraphQLErrorCode } from '../error-codes.js';
 
 /**
- * IUser information interface for GraphQL context
+ * User information interface for GraphQL context
  */
 export interface IGraphQLUser {
-	/** IUser ID */
+	/** User ID */
 	id: string;
-	/** IUser email */
+	/** User email */
 	email?: string;
-	/** IUser roles */
+	/** User roles */
 	roles?: string[];
 	/** Additional user properties */
 	[key: string]: unknown;

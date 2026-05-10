@@ -69,33 +69,33 @@ describe('QueryComplexityGuard', () => {
 			expect(mockRequest.queryComplexity).toBe(complexity);
 		});
 
-		it('should reject query when complexity exceeds limit', async () => {
+		it('should reject query when complexity exceeds limit', () => {
 			vi.spyOn(QueryComplexity, 'CalculateQueryComplexity').mockReturnValue(COMPLEXITY_EXCEEDED);
 			vi.spyOn(QueryComplexity, 'ExceedsComplexityLimit').mockReturnValue(true);
 
-			await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(BadRequestException);
-			await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(/exceeds maximum/);
+			expect(() => guard.canActivate(mockExecutionContext)).toThrow(BadRequestException);
+			expect(() => guard.canActivate(mockExecutionContext)).toThrow(/exceeds maximum/);
 		});
 	});
 
 	describe('QueryComplexityGuard - Error Handling', () => {
 		const COMPLEXITY_EXCEEDED = 2000;
 
-		it('should throw InternalServerErrorException on complexity calculation error', async () => {
+		it('should throw InternalServerErrorException on complexity calculation error', () => {
 			vi.spyOn(QueryComplexity, 'CalculateQueryComplexity').mockImplementation(() => {
 				throw new Error('Complexity calculation failed');
 			});
 
-			await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(InternalServerErrorException);
+			expect(() => guard.canActivate(mockExecutionContext)).toThrow(InternalServerErrorException);
 		});
 
-		it('should NOT allow query on complexity calculation error', async () => {
+		it('should NOT allow query on complexity calculation error', () => {
 			vi.spyOn(QueryComplexity, 'CalculateQueryComplexity').mockImplementation(() => {
 				throw new Error('Complexity calculation failed');
 			});
 
 			// Should throw, not return true
-			await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow();
+			expect(() => guard.canActivate(mockExecutionContext)).toThrow();
 		});
 
 		it('should NOT return true on calculation error (fail closed)', async () => {
@@ -130,20 +130,20 @@ describe('QueryComplexityGuard', () => {
 			}
 		});
 
-		it('should handle errors from calculateQueryComplexity function', async () => {
+		it('should handle errors from calculateQueryComplexity function', () => {
 			vi.spyOn(QueryComplexity, 'CalculateQueryComplexity').mockImplementation(() => {
 				throw new Error('Schema validation failed');
 			});
 
-			await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(InternalServerErrorException);
+			expect(() => guard.canActivate(mockExecutionContext)).toThrow(InternalServerErrorException);
 		});
 
-		it('should distinguish between BadRequestException (limit exceeded) and other errors', async () => {
+		it('should distinguish between BadRequestException (limit exceeded) and other errors', () => {
 			// First test: BadRequestException should be re-thrown
 			vi.spyOn(QueryComplexity, 'CalculateQueryComplexity').mockReturnValue(COMPLEXITY_EXCEEDED);
 			vi.spyOn(QueryComplexity, 'ExceedsComplexityLimit').mockReturnValue(true);
 
-			await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(BadRequestException);
+			expect(() => guard.canActivate(mockExecutionContext)).toThrow(BadRequestException);
 
 			// Second test: Other errors should throw InternalServerErrorException
 			// Use a different document to avoid cache hit from previous call
@@ -161,29 +161,30 @@ describe('QueryComplexityGuard', () => {
 				throw new Error('Unexpected error');
 			});
 
-			await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(InternalServerErrorException);
+			expect(() => guard.canActivate(mockExecutionContext)).toThrow(InternalServerErrorException);
 		});
 
-		it('should throw InternalServerErrorException with appropriate message on error', async () => {
+		it('should throw InternalServerErrorException with appropriate message on error', () => {
 			vi.spyOn(QueryComplexity, 'CalculateQueryComplexity').mockImplementation(() => {
 				throw new Error('Complexity calculation failed');
 			});
 
 			try {
-				await guard.canActivate(mockExecutionContext);
+				guard.canActivate(mockExecutionContext);
+				expect.fail('Should have thrown');
 			} catch (err: any) {
 				expect(err).toBeInstanceOf(InternalServerErrorException);
 				expect(err.message).toContain('validate');
 			}
 		});
 
-		it('should handle thrown errors gracefully', async () => {
+		it('should handle thrown errors gracefully', () => {
 			const thrownError = new Error('Some unexpected error');
 			vi.spyOn(QueryComplexity, 'CalculateQueryComplexity').mockImplementation(() => {
 				throw thrownError;
 			});
 
-			await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(InternalServerErrorException);
+			expect(() => guard.canActivate(mockExecutionContext)).toThrow(InternalServerErrorException);
 		});
 	});
 

@@ -7,9 +7,10 @@ import { GraphQLErrorCode } from '../error-codes.js';
 describe('GraphQLErrorFormatter', () => {
 	describe('formatError', () => {
 		it('should format a basic GraphQL error', () => {
+			const formatter = new GraphQLErrorFormatter();
 			const error = new GraphQLError('Test error');
 
-			const formatted = GraphQLErrorFormatter.FormatError(error);
+			const formatted = formatter.FormatError(error);
 
 			expect(formatted.message).toBeDefined();
 			expect((formatted.extensions as any)).toBeDefined();
@@ -18,13 +19,14 @@ describe('GraphQLErrorFormatter', () => {
 		});
 
 		it('should include user context in error object', () => {
+			const formatter = new GraphQLErrorFormatter();
 			const error = new GraphQLError('Test error');
 			const request = {
 				user: { id: 'user_123', email: 'test@example.com' },
 				operationName: 'GetUser',
 			} as any;
 
-			const formatted = GraphQLErrorFormatter.FormatError(error, request);
+			const formatted = formatter.FormatError(error, request);
 
 			expect((formatted.extensions as any)).toBeDefined();
 			expect((formatted.extensions as any).userId).toBe('user_123');
@@ -33,23 +35,25 @@ describe('GraphQLErrorFormatter', () => {
 		});
 
 		it('should include error code in extensions', () => {
+			const formatter = new GraphQLErrorFormatter();
 			const error = new GraphQLError('Invalid input');
 			(error as any).originalError = new BadRequestException('Invalid input');
 			const request = {} as any;
 
-			const formatted = GraphQLErrorFormatter.FormatError(error, request);
+			const formatted = formatter.FormatError(error, request);
 
 			expect((formatted.extensions as any).code).toBeDefined();
 			expect((formatted.extensions as any).statusCode).toBeDefined();
 		});
 
 		it('should handle missing user context gracefully', () => {
+			const formatter = new GraphQLErrorFormatter();
 			const error = new GraphQLError('Test error');
 			const request = {
 				operationName: 'GetUser',
 			} as any;
 
-			const formatted = GraphQLErrorFormatter.FormatError(error, request);
+			const formatted = formatter.FormatError(error, request);
 
 			expect((formatted.extensions as any)).toBeDefined();
 			expect((formatted.extensions as any).userId).toBeUndefined();
@@ -57,12 +61,13 @@ describe('GraphQLErrorFormatter', () => {
 		});
 
 		it('should handle missing operationName gracefully', () => {
+			const formatter = new GraphQLErrorFormatter();
 			const error = new GraphQLError('Test error');
 			const request = {
 				user: { id: 'user_456' },
 			} as any;
 
-			const formatted = GraphQLErrorFormatter.FormatError(error, request);
+			const formatted = formatter.FormatError(error, request);
 
 			expect((formatted.extensions as any)).toBeDefined();
 			expect((formatted.extensions as any).userId).toBe('user_456');
@@ -70,36 +75,40 @@ describe('GraphQLErrorFormatter', () => {
 		});
 
 		it('should include timestamp in all errors', () => {
+			const formatter = new GraphQLErrorFormatter();
 			const error = new GraphQLError('Test error');
 			const request = {} as any;
 
-			const formatted = GraphQLErrorFormatter.FormatError(error, request);
+			const formatted = formatter.FormatError(error, request);
 
 			expect((formatted.extensions as any).timestamp).toBeDefined();
 			expect(typeof (formatted.extensions as any).timestamp).toBe('string');
 		});
 
 		it('should handle null/undefined context', () => {
+			const formatter = new GraphQLErrorFormatter();
 			const error = new GraphQLError('Test error');
 
-			const formatted = GraphQLErrorFormatter.FormatError(error, undefined);
+			const formatted = formatter.FormatError(error, undefined);
 
 			expect((formatted.extensions as any)).toBeDefined();
 			expect((formatted.extensions as any).timestamp).toBeDefined();
 		});
 
 		it('should extract user id from nested user object', () => {
+			const formatter = new GraphQLErrorFormatter();
 			const error = new GraphQLError('Test error');
 			const request = {
 				user: { id: 'nested_user_id', name: 'John' },
 			} as any;
 
-			const formatted = GraphQLErrorFormatter.FormatError(error, request);
+			const formatted = formatter.FormatError(error, request);
 
 			expect((formatted.extensions as any).userId).toBe('nested_user_id');
 		});
 
 		it('should preserve other extensions when adding context', () => {
+			const formatter = new GraphQLErrorFormatter();
 			const error = new GraphQLError('Test error');
 			(error as any).originalError = new BadRequestException('Bad request');
 			const request = {
@@ -107,7 +116,7 @@ describe('GraphQLErrorFormatter', () => {
 				operationName: 'CreateUser',
 			} as any;
 
-			const formatted = GraphQLErrorFormatter.FormatError(error, request);
+			const formatted = formatter.FormatError(error, request);
 
 			expect((formatted.extensions as any).userId).toBe('user_789');
 			expect((formatted.extensions as any).operationName).toBe('CreateUser');
@@ -120,7 +129,8 @@ describe('GraphQLErrorFormatter', () => {
 			const error = new GraphQLError('App error');
 			(error as any).originalError = { code: GraphQLErrorCode.INTERNAL_ERROR, message: 'Internal error' };
 
-			const formatted = GraphQLErrorFormatter.FormatError(error);
+			const formatter = new GraphQLErrorFormatter();
+			const formatted = formatter.FormatError(error);
 
 			expect((formatted.extensions as any).code).toBe(GraphQLErrorCode.INTERNAL_ERROR);
 		});
@@ -133,7 +143,8 @@ describe('GraphQLErrorFormatter', () => {
 				details: { reason: 'test' },
 			};
 
-			const formatted = GraphQLErrorFormatter.FormatError(error);
+			const formatter = new GraphQLErrorFormatter();
+			const formatted = formatter.FormatError(error);
 
 			expect((formatted.extensions as any).details).toBeDefined();
 			expect((formatted.extensions as any).details.reason).toBe('test');
@@ -145,7 +156,8 @@ describe('GraphQLErrorFormatter', () => {
 			const error = new GraphQLError('Validation error');
 			(error as any).originalError = { message: 'validation failed' };
 
-			const formatted = GraphQLErrorFormatter.FormatError(error);
+			const formatter = new GraphQLErrorFormatter();
+			const formatted = formatter.FormatError(error);
 
 			expect((formatted.extensions as any).code).toBe(GraphQLErrorCode.BAD_USER_INPUT);
 			expect(formatted.message).toContain('Validation');
@@ -159,7 +171,8 @@ describe('GraphQLErrorFormatter', () => {
 				],
 			};
 
-			const formatted = GraphQLErrorFormatter.FormatError(error);
+			const formatter = new GraphQLErrorFormatter();
+			const formatted = formatter.FormatError(error);
 
 			expect((formatted.extensions as any).code).toBe(GraphQLErrorCode.BAD_USER_INPUT);
 			expect((formatted.extensions as any).validationErrors).toBeDefined();
@@ -174,7 +187,8 @@ describe('GraphQLErrorFormatter', () => {
 				],
 			};
 
-			const formatted = GraphQLErrorFormatter.FormatError(error);
+			const formatter = new GraphQLErrorFormatter();
+			const formatted = formatter.FormatError(error);
 
 			expect((formatted.extensions as any).validationErrors.length).toBe(2);
 			expect((formatted.extensions as any).validationErrors[0].field).toBe('username');
@@ -186,7 +200,8 @@ describe('GraphQLErrorFormatter', () => {
 			const error = new GraphQLError('Auth error');
 			(error as any).originalError = { name: 'UnauthorizedException', message: 'Not authenticated' };
 
-			const formatted = GraphQLErrorFormatter.FormatError(error);
+			const formatter = new GraphQLErrorFormatter();
+			const formatted = formatter.FormatError(error);
 
 			expect((formatted.extensions as any).code).toBe(GraphQLErrorCode.UNAUTHENTICATED);
 		});
@@ -195,7 +210,8 @@ describe('GraphQLErrorFormatter', () => {
 			const error = new GraphQLError('Auth error');
 			(error as any).originalError = { message: 'authentication failed' };
 
-			const formatted = GraphQLErrorFormatter.FormatError(error);
+			const formatter = new GraphQLErrorFormatter();
+			const formatted = formatter.FormatError(error);
 
 			expect((formatted.extensions as any).code).toBe(GraphQLErrorCode.UNAUTHENTICATED);
 		});
@@ -204,7 +220,8 @@ describe('GraphQLErrorFormatter', () => {
 			const error = new GraphQLError('Auth error');
 			(error as any).originalError = { message: 'invalid token' };
 
-			const formatted = GraphQLErrorFormatter.FormatError(error);
+			const formatter = new GraphQLErrorFormatter();
+			const formatted = formatter.FormatError(error);
 
 			expect((formatted.extensions as any).code).toBe(GraphQLErrorCode.UNAUTHENTICATED);
 		});
@@ -215,7 +232,8 @@ describe('GraphQLErrorFormatter', () => {
 			const error = new GraphQLError('Authz error');
 			(error as any).originalError = { name: 'ForbiddenException', message: 'Forbidden' };
 
-			const formatted = GraphQLErrorFormatter.FormatError(error);
+			const formatter = new GraphQLErrorFormatter();
+			const formatted = formatter.FormatError(error);
 
 			expect((formatted.extensions as any).code).toBe(GraphQLErrorCode.FORBIDDEN);
 		});
@@ -224,7 +242,8 @@ describe('GraphQLErrorFormatter', () => {
 			const error = new GraphQLError('Authz error');
 			(error as any).originalError = { message: 'permission denied' };
 
-			const formatted = GraphQLErrorFormatter.FormatError(error);
+			const formatter = new GraphQLErrorFormatter();
+			const formatted = formatter.FormatError(error);
 
 			expect((formatted.extensions as any).code).toBe(GraphQLErrorCode.FORBIDDEN);
 		});
@@ -233,7 +252,8 @@ describe('GraphQLErrorFormatter', () => {
 			const error = new GraphQLError('Authz error');
 			(error as any).originalError = { message: 'forbidden' };
 
-			const formatted = GraphQLErrorFormatter.FormatError(error);
+			const formatter = new GraphQLErrorFormatter();
+			const formatted = formatter.FormatError(error);
 
 			expect((formatted.extensions as any).code).toBe(GraphQLErrorCode.FORBIDDEN);
 		});
@@ -244,7 +264,8 @@ describe('GraphQLErrorFormatter', () => {
 			const error = new GraphQLError('Rate limit error');
 			(error as any).originalError = { name: 'RateLimitException', message: 'Too many requests' };
 
-			const formatted = GraphQLErrorFormatter.FormatError(error);
+			const formatter = new GraphQLErrorFormatter();
+			const formatted = formatter.FormatError(error);
 
 			expect((formatted.extensions as any).code).toBe(GraphQLErrorCode.RATE_LIMIT_EXCEEDED);
 		});
@@ -253,7 +274,8 @@ describe('GraphQLErrorFormatter', () => {
 			const error = new GraphQLError('Rate limit error');
 			(error as any).originalError = { message: 'rate limit exceeded' };
 
-			const formatted = GraphQLErrorFormatter.FormatError(error);
+			const formatter = new GraphQLErrorFormatter();
+			const formatted = formatter.FormatError(error);
 
 			expect((formatted.extensions as any).code).toBe(GraphQLErrorCode.RATE_LIMIT_EXCEEDED);
 		});
@@ -262,7 +284,8 @@ describe('GraphQLErrorFormatter', () => {
 			const error = new GraphQLError('Rate limit error');
 			(error as any).originalError = { message: 'too many requests' };
 
-			const formatted = GraphQLErrorFormatter.FormatError(error);
+			const formatter = new GraphQLErrorFormatter();
+			const formatted = formatter.FormatError(error);
 
 			expect((formatted.extensions as any).code).toBe(GraphQLErrorCode.RATE_LIMIT_EXCEEDED);
 		});
@@ -272,7 +295,8 @@ describe('GraphQLErrorFormatter', () => {
 		it('should handle errors without originalError', () => {
 			const error = new GraphQLError('Generic error');
 
-			const formatted = GraphQLErrorFormatter.FormatError(error);
+			const formatter = new GraphQLErrorFormatter();
+			const formatted = formatter.FormatError(error);
 
 			expect((formatted.extensions as any).code).toBe(GraphQLErrorCode.INTERNAL_ERROR);
 		});
@@ -284,7 +308,8 @@ describe('GraphQLErrorFormatter', () => {
 				message: 'Server error',
 			};
 
-			const formatted = GraphQLErrorFormatter.FormatError(error);
+			const formatter = new GraphQLErrorFormatter();
+			const formatted = formatter.FormatError(error);
 
 			expect((formatted.extensions as any).statusCode).toBe(500);
 		});
@@ -296,7 +321,8 @@ describe('GraphQLErrorFormatter', () => {
 				message: 'Bad request',
 			};
 
-			const formatted = GraphQLErrorFormatter.FormatError(error);
+			const formatter = new GraphQLErrorFormatter();
+			const formatted = formatter.FormatError(error);
 
 			expect((formatted.extensions as any).statusCode).toBe(400);
 		});
@@ -308,7 +334,8 @@ describe('GraphQLErrorFormatter', () => {
 				message: 'Forbidden',
 			};
 
-			const formatted = GraphQLErrorFormatter.FormatError(error);
+			const formatter = new GraphQLErrorFormatter();
+			const formatted = formatter.FormatError(error);
 
 			expect((formatted.extensions as any).statusCode).toBe(403);
 		});
@@ -324,7 +351,8 @@ describe('GraphQLErrorFormatter', () => {
 				],
 			};
 
-			const formatted = GraphQLErrorFormatter.FormatError(error);
+			const formatter = new GraphQLErrorFormatter();
+			const formatted = formatter.FormatError(error);
 
 			expect((formatted.extensions as any).validationErrors).toHaveLength(2);
 		});
@@ -337,7 +365,8 @@ describe('GraphQLErrorFormatter', () => {
 				],
 			};
 
-			const formatted = GraphQLErrorFormatter.FormatError(error);
+			const formatter = new GraphQLErrorFormatter();
+			const formatted = formatter.FormatError(error);
 
 			expect((formatted.extensions as any).validationErrors).toBeDefined();
 			expect((formatted.extensions as any).validationErrors[0].field).toBe('email');
@@ -349,7 +378,8 @@ describe('GraphQLErrorFormatter', () => {
 				message: 'validation failed',
 			};
 
-			const formatted = GraphQLErrorFormatter.FormatError(error);
+			const formatter = new GraphQLErrorFormatter();
+			const formatted = formatter.FormatError(error);
 
 			expect((formatted.extensions as any).validationErrors).toBeDefined();
 			expect((formatted.extensions as any).validationErrors[0].message).toBe('validation failed');

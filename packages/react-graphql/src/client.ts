@@ -42,9 +42,8 @@ const PING_TIMEOUT_CODE = 4408;
 
 /**
  * WebSocket ping timeout duration in milliseconds
- * @internal
  */
-const PING_TIMEOUT_MS = 5000;
+export const PING_TIMEOUT_MS = 5000;
 
 /**
  * Creates a configured Apollo Client with HTTP and WebSocket transport.

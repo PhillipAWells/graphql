@@ -32,7 +32,7 @@ export interface IWebSocketServerConfig {
 	 * Maximum payload size in bytes
 	 * @default 102400 (100KB)
 	 */
-	maxPayloadSize: number;
+	maxPayloadSize?: number;
 
 	/**
 	 * Keepalive ping interval in milliseconds
@@ -46,7 +46,7 @@ export interface IWebSocketServerConfig {
 	 * Time to wait for initial connection message before closing
 	 * @default 60000 (60 seconds)
 	 */
-	connectionTimeout: number;
+	connectionTimeout?: number;
 
 	/**
 	 * Maximum number of concurrent WebSocket connections

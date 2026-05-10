@@ -15,6 +15,8 @@ const SECONDS_PER_MINUTE = 60;
 const DEFAULT_RATE_LIMIT_WINDOW_MINUTES = 15;
 const DEFAULT_RATE_LIMIT_MAX_REQUESTS = 100;
 const CLEANUP_INTERVAL_MS = 60_000;
+const IP_PREFIX_LENGTH = 3; // Length of 'ip:' prefix
+const IP_OCTET_COUNT = 4;
 
 /**
  * Rate limit result interface
@@ -147,7 +149,7 @@ export class MemoryRateLimitStorage implements IRateLimitStorage {
 @Injectable()
 export class RateLimitService implements OnModuleInit, OnModuleDestroy, ILazyModuleRefService {
 	public readonly Module: ModuleRef;
-	private readonly Store = new Map<string, IRateLimitEntry>();
+	private readonly InMemoryStore = new Map<string, IRateLimitEntry>();
 
 	// eslint-disable-next-line no-undef
 	private CleanupInterval?: NodeJS.Timeout;
@@ -160,7 +162,7 @@ export class RateLimitService implements OnModuleInit, OnModuleDestroy, ILazyMod
 		return this.AppLogger.createContextualLogger(RateLimitService.name);
 	}
 
-	private get Storage(): IRateLimitStorage | undefined {
+	private get RedisStorage(): IRateLimitStorage | undefined {
 		try {
 			return this.Module.get<IRateLimitStorage>('RATE_LIMIT_STORAGE', { strict: false });
 		} catch {
@@ -203,6 +205,29 @@ export class RateLimitService implements OnModuleInit, OnModuleDestroy, ILazyMod
 	}
 
 	/**
+	 * Masks sensitive client identifiers for secure logging
+	 *
+	 * SECURITY: Prevents leakage of user IDs and IP addresses in logs by redacting
+	 * the sensitive portion while preserving enough info to identify the entry.
+	 *
+	 * @param clientId - Client identifier to mask
+	 * @returns string - Masked identifier safe for logging
+	 */
+	private MaskClientId(clientId: string): string {
+		if (clientId.startsWith('user:')) {
+			return 'user:[REDACTED]';
+		}
+		if (clientId.startsWith('ip:')) {
+			const IP = clientId.substring(IP_PREFIX_LENGTH);
+			const Parts = IP.split('.');
+			if (Parts.length === IP_OCTET_COUNT) {
+				return `ip:${Parts[0]}.${Parts[1]}.[REDACTED]`;
+			}
+		}
+		return '[REDACTED]';
+	}
+
+	/**
 	 * Checks if a client is within rate limits
 	 *
 	 * @param clientId - Unique client identifier (user ID or IP)
@@ -215,9 +240,9 @@ export class RateLimitService implements OnModuleInit, OnModuleDestroy, ILazyMod
 
 		// Use storage backend (Redis) if available as single source of truth
 		// In-memory store is used only when storage is unavailable
-		const { Storage } = this;
-		if (Storage) {
-			return this.CheckLimitWithStorage(clientId, Config, Storage);
+		const { RedisStorage } = this;
+		if (RedisStorage) {
+			return this.CheckLimitWithStorage(clientId, Config, RedisStorage);
 		} else {
 			return this.CheckLimitInMemory(clientId, Config);
 		}
@@ -240,7 +265,8 @@ export class RateLimitService implements OnModuleInit, OnModuleDestroy, ILazyMod
 				current: Current,
 			};
 		} catch (error) {
-			this.Logger.error(`Storage rate limit check failed for ${clientId.replace(/[\n\r]/g, ' ')}:`, getErrorMessage(error));
+			// SECURITY: Mask client ID before logging to prevent PII leakage
+			this.Logger.error(`Storage rate limit check failed for ${this.MaskClientId(clientId)}:`, getErrorMessage(error));
 			// Fall back to in-memory on storage error
 			return this.CheckLimitInMemory(clientId, config);
 		}
@@ -253,11 +279,14 @@ export class RateLimitService implements OnModuleInit, OnModuleDestroy, ILazyMod
 	 * 1. Node.js is single-threaded (event loop runs one callback at a time)
 	 * 2. All operations between get() and set() are synchronous (no await)
 	 * 3. Therefore, no other code can interleave between read and write
+	 *
+	 * SECURITY: Fixed-window algorithm allows up to maxRequests per window.
+	 * Check `count < maxRequests` before incrementing ensures we never exceed the limit.
 	 */
 	private CheckLimitInMemory(clientId: string, config: IRateLimitConfig): IRateLimitResult {
 		const Now = Date.now();
 
-		let Entry = this.Store.get(clientId);
+		let Entry = this.InMemoryStore.get(clientId);
 
 		if (!Entry || Now > Entry.resetTime) {
 			// Create new entry or reset expired entry
@@ -267,11 +296,12 @@ export class RateLimitService implements OnModuleInit, OnModuleDestroy, ILazyMod
 			};
 		}
 
+		// SECURITY: Check count < maxRequests before incrementing to ensure limit is never exceeded
 		const Allowed = Entry.count < config.maxRequests;
 
 		if (Allowed) {
 			Entry.count++;
-			this.Store.set(clientId, Entry);
+			this.InMemoryStore.set(clientId, Entry);
 		}
 
 		const Remaining = Math.max(0, config.maxRequests - Entry.count);
@@ -293,7 +323,9 @@ export class RateLimitService implements OnModuleInit, OnModuleDestroy, ILazyMod
 	 */
 	public SetOperationConfig(operation: string, config: IRateLimitConfig): void {
 		this.OperationConfigs.set(operation, config);
-		this.Logger.info(`Set custom rate limit for operation '${operation.replace(/[\n\r]/g, ' ')}': ${config.maxRequests} requests per ${config.windowMs}ms`);
+		// SECURITY: Sanitize operation name to prevent log injection
+		const SafeOperation = operation.replace(/[\n\r]/g, ' ');
+		this.Logger.info(`Set custom rate limit for operation '${SafeOperation}': ${config.maxRequests} requests per ${config.windowMs}ms`);
 	}
 
 	/**
@@ -314,16 +346,18 @@ export class RateLimitService implements OnModuleInit, OnModuleDestroy, ILazyMod
 	public async ResetLimit(clientId: string): Promise<void> {
 		// If storage backend is available, reset there (source of truth)
 		// Otherwise reset in-memory store (fallback)
-		if (this.Storage) {
+		if (this.RedisStorage) {
 			try {
-				await this.Storage.Reset(clientId);
+				await this.RedisStorage.Reset(clientId);
 			} catch (error) {
-				this.Logger.error(`Failed to reset rate limit in storage for ${clientId.replace(/[\n\r]/g, ' ')}:`, getErrorMessage(error));
+				// SECURITY: Mask client ID before logging to prevent PII leakage
+				this.Logger.error(`Failed to reset rate limit in storage for ${this.MaskClientId(clientId)}:`, getErrorMessage(error));
 			}
 		} else {
-			this.Store.delete(clientId);
+			this.InMemoryStore.delete(clientId);
 		}
-		this.Logger.info(`Reset rate limit for client: ${clientId.replace(/[\n\r]/g, ' ')}`);
+		// SECURITY: Mask client ID before logging to prevent PII leakage
+		this.Logger.info(`Reset rate limit for client: ${this.MaskClientId(clientId)}`);
 	}
 
 	/**
@@ -337,9 +371,9 @@ export class RateLimitService implements OnModuleInit, OnModuleDestroy, ILazyMod
 		const Config = operation ? this.GetConfigForOperation(operation) : this.DefaultConfig;
 
 		// Check storage backend first if available (source of truth)
-		if (this.Storage) {
+		if (this.RedisStorage) {
 			try {
-				const Count = await this.Storage.Get(clientId);
+				const Count = await this.RedisStorage.Get(clientId);
 				if (Count > 0) {
 					const Remaining = Math.max(0, Config.maxRequests - Count);
 					return {
@@ -351,13 +385,14 @@ export class RateLimitService implements OnModuleInit, OnModuleDestroy, ILazyMod
 					};
 				}
 			} catch (error) {
-				this.Logger.error(`Storage status check failed for ${clientId.replace(/[\n\r]/g, ' ')}:`, getErrorMessage(error));
+				// SECURITY: Mask client ID before logging to prevent PII leakage
+				this.Logger.error(`Storage status check failed for ${this.MaskClientId(clientId)}:`, getErrorMessage(error));
 				// Fall back to in-memory store only on storage error
 			}
 		}
 
 		// Fall back to in-memory store (used when storage is unavailable)
-		const Entry = this.Store.get(clientId);
+		const Entry = this.InMemoryStore.get(clientId);
 
 		if (!Entry) {
 			return null;
@@ -376,25 +411,29 @@ export class RateLimitService implements OnModuleInit, OnModuleDestroy, ILazyMod
 
 	/**
 	 * Cleans up expired rate limit entries
+	 * O(n) single-pass iteration over in-memory store entries
+	 * Already efficient; no priority queue needed since entries naturally expire at reset times
 	 */
 	private async Cleanup(): Promise<void> {
 		// Clean up storage backend if available
-		const { Storage } = this;
-		if (Storage) {
+		const { RedisStorage } = this;
+		if (RedisStorage) {
 			try {
-				await Storage.Cleanup();
+				await RedisStorage.Cleanup();
 			} catch (error) {
 				this.Logger.error('Storage cleanup failed:', getErrorMessage(error));
 			}
 		}
 
-		// Clean up in-memory store
+		// Clean up in-memory store: single pass, no heap/priority queue needed
+		// All entries expire at fixed times (resetTime), so a heap wouldn't provide benefit
+		// A single pass through all entries is efficient and simple
 		const Now = Date.now();
 		let Cleaned = 0;
 
-		for (const [ClientId, Entry] of this.Store.entries()) {
+		for (const [ClientId, Entry] of this.InMemoryStore.entries()) {
 			if (Now > Entry.resetTime) {
-				this.Store.delete(ClientId);
+				this.InMemoryStore.delete(ClientId);
 				Cleaned++;
 			}
 		}
@@ -411,7 +450,7 @@ export class RateLimitService implements OnModuleInit, OnModuleDestroy, ILazyMod
 	 */
 	public GetStats(): { totalEntries: number; operationConfigs: number } {
 		return {
-			totalEntries: this.Store.size,
+			totalEntries: this.InMemoryStore.size,
 			operationConfigs: this.OperationConfigs.size,
 		};
 	}

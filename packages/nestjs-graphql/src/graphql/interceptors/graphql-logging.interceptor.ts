@@ -6,6 +6,7 @@ import type { ILazyModuleRefService, IContextualLogger } from '@pawells/nestjs-s
 import { AppLogger, getErrorMessage } from '@pawells/nestjs-shared/common';
 
 const RESULT_SUMMARY_MAX_KEYS = 3;
+const SANITIZE_MAX_DEPTH = 5;
 
 /**
  * GraphQL Logging Interceptor
@@ -16,8 +17,8 @@ const RESULT_SUMMARY_MAX_KEYS = 3;
  * @example
  * ```typescript
  * @UseInterceptors(GraphQLLoggingInterceptor)
- * @Query(() => IUser, { name: 'GetUser' })
- * async getUser(): Promise<IUser> {
+ * @Query(() => User, { name: 'GetUser' })
+ * async getUser(): Promise<User> {
  *   // This operation will be logged
  * }
  * ```
@@ -100,21 +101,38 @@ export class GraphQLLoggingInterceptor implements NestInterceptor, ILazyModuleRe
 	/**
 	 * Sanitizes operation arguments to avoid logging sensitive data
 	 *
+	 * SECURITY: Recursively sanitizes nested objects to prevent PII leakage from
+	 * nested input structures. Limits recursion depth to prevent performance impact
+	 * on deeply nested objects.
+	 *
 	 * @param args - The operation arguments
 	 * @returns unknown - Sanitized arguments
 	 */
-	private SanitizeArgs(args: unknown): unknown {
-		if (!args || typeof args !== 'object') {
+	private SanitizeArgs(args: unknown, depth = 0, maxDepth = SANITIZE_MAX_DEPTH): unknown {
+		// Prevent stack overflow on circular or deeply nested structures
+		if (depth > maxDepth || !args || typeof args !== 'object') {
 			return args;
 		}
 
+		// Handle arrays
+		if (Array.isArray(args)) {
+			return args.map(item => this.SanitizeArgs(item, depth + 1, maxDepth));
+		}
+
+		// Handle objects
 		const Sanitized = { ...(args as Record<string, unknown>) };
 
-		// Remove sensitive fields
-		const SensitiveFields = ['password', 'token', 'secret', 'key', 'authorization'];
-		for (const Field of SensitiveFields) {
-			if (Sanitized[Field]) {
-				Sanitized[Field] = '[REDACTED]';
+		// SECURITY: Redact top-level sensitive fields (case-insensitive pattern matching)
+		const SensitivePatterns = ['password', 'token', 'secret', 'key', 'authorization', 'apikey', 'accesstoken', 'bearertoken'];
+		for (const Field in Sanitized) {
+			if (Object.prototype.hasOwnProperty.call(Sanitized, Field)) {
+				const LowerField = Field.toLowerCase();
+				if (SensitivePatterns.includes(LowerField)) {
+					Sanitized[Field] = '[REDACTED]';
+				} else if (typeof Sanitized[Field] === 'object' && Sanitized[Field] !== null) {
+					// SECURITY: Recursively sanitize nested objects
+					Sanitized[Field] = this.SanitizeArgs(Sanitized[Field], depth + 1, maxDepth);
+				}
 			}
 		}
 

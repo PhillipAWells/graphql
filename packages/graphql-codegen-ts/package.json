@@ -1,7 +1,7 @@
 {
   "name": "@pawells/graphql-codegen-ts",
   "displayName": "@pawells/graphql-codegen-ts",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "description": "graphql-codegen plugin generating typed Apollo Client classes for Node.js/TypeScript",
   "keywords": [
     "graphql",
@@ -21,7 +21,6 @@
   "exports": {
     ".": {
       "types": "./build/index.d.ts",
-      "require": "./build/index.js",
       "import": "./build/index.js"
     }
   },
@@ -37,10 +36,10 @@
     "pipeline": "yarn typecheck && yarn lint && yarn test && yarn build"
   },
   "dependencies": {
-    "@graphql-codegen/plugin-helpers": ">=6.3.0",
-    "code-block-writer": ">=13.0.3",
-    "graphql-ws": ">=6.0.8",
-    "strongly-typed-events": ">=3.0.11"
+    "@graphql-codegen/plugin-helpers": "^6.3.0",
+    "code-block-writer": "^13.0.3",
+    "graphql-ws": "^6.0.8",
+    "strongly-typed-events": "^3.0.11"
   },
   "peerDependencies": {
     "@apollo/client": ">=4.0.0",
@@ -48,15 +47,18 @@
     "@graphql-codegen/typescript": ">=4.0.0",
     "@graphql-codegen/typescript-apollo-client-helpers": ">=3.0.0",
     "@graphql-codegen/typescript-operations": ">=4.0.0",
+    "@pawells/graphql-common": "*",
     "graphql": ">=16.0.0",
     "rxjs": ">=7.0.0"
   },
   "devDependencies": {
-    "@apollo/client": "^4.1.8",
-    "@pawells/graphql-common": "^2.0.0",
+    "@apollo/client": "^4.1.9",
     "@types/node": "^25.6.0",
+    "@vitest/coverage-v8": "^4.1.5",
     "graphql": "^16.13.2",
-    "rxjs": "^7.8.2"
+    "rxjs": "^7.8.2",
+    "typescript": "~6.0.3",
+    "vitest": "^4.1.5"
   },
   "engines": {
     "node": ">=22.0.0"

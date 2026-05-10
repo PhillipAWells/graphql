@@ -3,7 +3,7 @@ set -euo pipefail
 
 corepack enable
 
-COREPACK_ENABLE_STRICT=0 COREPACK_ENABLE_DOWNLOAD_PROMPT=0 corepack prepare yarn@stable --activate
+corepack install
 
 yarn config set --home enableTelemetry 0
 

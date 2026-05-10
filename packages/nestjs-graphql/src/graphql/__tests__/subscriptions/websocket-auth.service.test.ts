@@ -289,7 +289,74 @@ describe('WebSocketAuthService', () => {
 			expect(result.userId).toBe('metadata-user');
 		});
 
-		it('should initialize connection with unique connection ID', async () => {
+		it('should handle Bearer token with extra whitespace', async () => {
+			const payload = Buffer.from(JSON.stringify({
+				sub: 'whitespace-user',
+				exp: Math.floor(Date.now() / 1000) + 3600,
+			})).toString('base64url');
+			const token = `header.${payload}.sig`;
+
+			// Test with Bearer prefix and extra spaces (whitespace trim path)
+			const result = await service.Authenticate({ authorization: `Bearer  ${token}` });
+			expect(result.authenticated).toBe(true);
+		});
+
+		it('should reject empty Bearer token after prefix', async () => {
+			// Test empty token after Bearer prefix stripping
+			const result = await service.Authenticate({ authorization: 'Bearer   ' });
+			expect(result.authenticated).toBe(false);
+		});
+
+		it('should handle raw JWT token without Bearer prefix', async () => {
+			const payload = Buffer.from(JSON.stringify({
+				sub: 'raw-jwt-user',
+				exp: Math.floor(Date.now() / 1000) + 3600,
+			})).toString('base64url');
+			const token = `header.${payload}.sig`;
+
+			// Test without Bearer prefix (should be accepted as raw JWT)
+			const result = await service.Authenticate({ authorization: token });
+			expect(result.authenticated).toBe(true);
+		});
+
+		it('should reject malformed Bearer prefix', async () => {
+			// Bearer prefix without space should be treated as invalid Bearer format
+			const payload = Buffer.from(JSON.stringify({
+				sub: 'user',
+				exp: Math.floor(Date.now() / 1000) + 3600,
+			})).toString('base64url');
+			const token = `Bearer${payload}`;
+
+			const result = await service.Authenticate({ authorization: token });
+			// This depends on implementation - if it requires 'Bearer ' with space, it should fail
+			expect(result.authenticated).toBe(false);
+		});
+
+		it('should handle Bearer with empty space after prefix', async () => {
+			const payload = Buffer.from(JSON.stringify({
+				sub: 'user',
+				exp: Math.floor(Date.now() / 1000) + 3600,
+			})).toString('base64url');
+			const _token = `header.${payload}.sig`;
+
+			// Test "Bearer " with just space (should fail trim check)
+			const result = await service.Authenticate({ authorization: 'Bearer ' });
+			expect(result.authenticated).toBe(false);
+		});
+
+		it('should handle non-Bearer token with space correctly', async () => {
+			const payload = Buffer.from(JSON.stringify({
+				sub: 'user',
+				exp: Math.floor(Date.now() / 1000) + 3600,
+			})).toString('base64url');
+			const token = `header.${payload}.sig`;
+
+			// Token with space that's NOT Bearer format
+			const result = await service.Authenticate({ authorization: `Custom ${token}` });
+			expect(result.authenticated).toBe(false);
+		});
+
+		it('should handle initialization connection with unique connection ID', async () => {
 			const header = Buffer.from(JSON.stringify({ alg: 'HS256' })).toString('base64url');
 			const payload = Buffer.from(JSON.stringify({
 				sub: 'connection-user',

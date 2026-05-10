@@ -10,7 +10,6 @@ import { DataLoaderRegistry } from './dataloader-registry.js';
  */
 export interface ITag {
 	id: string;
-	[key: string]: any;
 }
 
 /**

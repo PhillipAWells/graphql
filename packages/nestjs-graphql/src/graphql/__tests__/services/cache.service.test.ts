@@ -270,8 +270,8 @@ describe('GraphQLCacheService', () => {
 			expect(stats).toHaveProperty('hits');
 			expect(stats).toHaveProperty('misses');
 			expect(stats).toHaveProperty('hitRate');
-			expect(stats).toHaveProperty('store');
-			expect(stats.store).toBe('CacheManager');
+			expect(stats).toHaveProperty('evictions');
+			expect(stats).toHaveProperty('operationTimings');
 		});
 
 		it('should calculate hit rate correctly', async () => {
@@ -384,7 +384,7 @@ describe('GraphQLCacheService', () => {
 
 			const listData = Array.from({ length: pageSize }, (_, i) => ({
 				id: `user-${i}`,
-				name: `IUser ${i}`,
+				name: `User ${i}`,
 			}));
 
 			mockCacheManager.get.mockResolvedValue(null);

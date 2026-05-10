@@ -6,6 +6,7 @@ import { Traced } from '@pawells/nestjs-open-telemetry';
 import { AppLogger } from '@pawells/nestjs-shared/common';
 import type { IContextualLogger } from '@pawells/nestjs-shared/common';
 import { GraphQLErrorCode } from './error-codes.js';
+import { ErrorClassifier } from '../errors/error-classifier.js';
 import { CursorUtils } from './types/connection.type.js';
 
 /**
@@ -100,42 +101,36 @@ export class GraphQLService {
 	}
 
 	/**
-   * Map error to custom error code
-   * @param error The error to map
-   * @returns Error code string
-   */
+	 * Map error to custom error code using ErrorClassifier
+	 * @param error The error to map
+	 * @returns Error code string
+	 */
 	private MapErrorToCode(error: Error | Record<string, unknown>): GraphQLErrorCode {
-		const ErrorRecord = error as Record<string, unknown>;
-		const ErrorMessage = error instanceof Error
-			? error.message.toLowerCase()
-			: String(ErrorRecord['message'] ?? '').toLowerCase();
+		const Classification = ErrorClassifier.Classify(error);
 
-		// Check specific authorization-related errors first, before validation
-		if (ErrorMessage.includes('authorization')) {
-			return GraphQLErrorCode.FORBIDDEN;
-		}
-		if (ErrorMessage.includes('forbidden')) {
-			return GraphQLErrorCode.FORBIDDEN;
-		}
-		if (ErrorMessage.includes('unauthorized')) {
+		// Map error classification to GraphQL error code
+		if (Classification.isAuthentication) {
 			return GraphQLErrorCode.UNAUTHENTICATED;
 		}
-		if (ErrorMessage.includes('not allowed')) {
+		if (Classification.isAuthorization) {
 			return GraphQLErrorCode.FORBIDDEN;
 		}
-		// Then check authentication
-		if (ErrorMessage.includes('authentication')) {
-			return GraphQLErrorCode.UNAUTHENTICATED;
-		}
-		// Then check validation and other general errors
-		if (ErrorMessage.includes('validation')) {
+		if (Classification.isValidation) {
 			return GraphQLErrorCode.VALIDATION_ERROR;
 		}
-		if (ErrorMessage.includes('not found')) {
-			return GraphQLErrorCode.NOT_FOUND;
+		if (Classification.isRateLimit) {
+			return GraphQLErrorCode.RATE_LIMIT_EXCEEDED;
 		}
 
-		return GraphQLErrorCode.INTERNAL_ERROR;
+		// Handle additional error codes from the classification code
+		switch (Classification.code) {
+			case 'NOT_FOUND':
+				return GraphQLErrorCode.NOT_FOUND;
+			case 'CONFLICT':
+				return GraphQLErrorCode.CONFLICT;
+			default:
+				return GraphQLErrorCode.INTERNAL_ERROR;
+		}
 	}
 
 	/**

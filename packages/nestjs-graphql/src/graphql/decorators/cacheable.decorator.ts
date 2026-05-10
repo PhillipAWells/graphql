@@ -72,8 +72,8 @@ export interface ICacheableOptions extends IBaseCacheableOptions {
  * @example
  * ```typescript
  * @Cacheable({ ttl: 300000 }) // 5 minutes
- * @Query(() => IUser, { name: 'GetUser' })
- * async getUser(@Args('id') id: string): Promise<IUser> {
+ * @Query(() => User, { name: 'GetUser' })
+ * async getUser(@Args('id') id: string): Promise<User> {
  *   return this.userService.findById(id);
  * }
  *

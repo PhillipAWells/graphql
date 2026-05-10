@@ -3,7 +3,6 @@ name: Publish
 on:
   push:
     tags: ['v*']
-    branches: ['development/[0-9]*.[0-9]*']
   workflow_dispatch:
     inputs:
       preid:
@@ -40,6 +39,7 @@ jobs:
       id-token: write
     env:
       CI: true
+      HUSKY: 0
       NX_DAEMON: false
     steps:
       - uses: actions/checkout@v6
@@ -60,6 +60,7 @@ jobs:
         with:
           node-version: '24'
           cache: 'yarn'
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
         run: yarn install --immutable
@@ -68,7 +69,7 @@ jobs:
         if: startsWith(github.ref, 'refs/heads/')
         run: |
           SHA=$(git rev-parse --short HEAD)
-          BASE=$(node -p "require('./packages/nestjs-graphql/package.json').version.replace(/-.*$/, '')")
+          BASE=$(node -p "require('./packages/graphql-common/package.json').version.replace(/-.*$/, '')")
           export SNAP="${BASE}-dev.${SHA}"
           echo "Snapshot version: ${SNAP}"
           node -e "
@@ -87,6 +88,34 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         run: npx nx release version prerelease --preid ${{ inputs.preid }} --yes --git-commit --git-tag
 
+      - name: Rewrite workspace protocols
+        run: |
+          node -e "
+            const fs = require('fs');
+            const sharedPkg = JSON.parse(fs.readFileSync('packages/graphql-common/package.json'));
+            const version = sharedPkg.version;
+            console.log('Rewriting workspace:* to ' + version);
+            for (const d of fs.readdirSync('packages')) {
+              const p = 'packages/' + d + '/package.json';
+              if (!fs.existsSync(p)) continue;
+              const pkg = JSON.parse(fs.readFileSync(p));
+              let changed = false;
+              for (const field of ['dependencies', 'devDependencies', 'peerDependencies']) {
+                if (!pkg[field]) continue;
+                for (const [dep, ver] of Object.entries(pkg[field])) {
+                  if (ver === 'workspace:*') {
+                    pkg[field][dep] = version;
+                    changed = true;
+                  }
+                }
+              }
+              if (changed) {
+                fs.writeFileSync(p, JSON.stringify(pkg, null, 2) + '\n');
+                console.log('Updated ' + d);
+              }
+            }
+          "
+
       - name: Build all packages
         run: yarn build
 
@@ -95,18 +124,21 @@ jobs:
         run: npx nx release publish --parallel=1
         env:
           NPM_CONFIG_PROVENANCE: true
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish dev snapshot
         if: startsWith(github.ref, 'refs/heads/')
         run: npx nx release publish --tag dev --parallel=1
         env:
           NPM_CONFIG_PROVENANCE: true
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish pre-release
         if: github.event_name == 'workflow_dispatch'
         run: npx nx release publish --tag ${{ inputs.preid }} --parallel=1
         env:
           NPM_CONFIG_PROVENANCE: true
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/') && !contains(github.ref_name, '-')

@@ -73,14 +73,27 @@ describe('ConnectionManagerService', () => {
 		it('should set connection timeout', () => {
 			vi.useFakeTimers();
 
-			service.AddConnection(mockWs, 'user123', 'user123');
+			// Create service with fake timers active so the interval uses fake timers
+			const mockModuleRef = {
+				get: (token: any) => {
+					if (token === 'SUBSCRIPTION_CONFIG') return config;
+					throw new Error(`Unknown token: ${String(token)}`);
+				},
+			} as any;
+			const timeoutService = new ConnectionManagerService(mockModuleRef);
 
-			expect(service.GetConnectionCount()).toBe(1);
+			timeoutService.AddConnection(mockWs, 'user123', 'user123');
+
+			expect(timeoutService.GetConnectionCount()).toBe(1);
 
 			// Fast-forward past timeout
-			vi.advanceTimersByTime(config.connection.timeout + 1000);
+			// Need to advance by timeout + check interval (5000ms) for cleanup to run
+			vi.advanceTimersByTime(config.connection.timeout + 5000);
 
-			expect(service.GetConnectionCount()).toBe(0);
+			expect(timeoutService.GetConnectionCount()).toBe(0);
+
+			// Cleanup
+			timeoutService.onModuleDestroy();
 		});
 	});
 
@@ -337,7 +350,8 @@ describe('ConnectionManagerService', () => {
 
 			for (let i = 0; i < 10; i++) {
 				service.RemoveConnection({ id: `ws${i}` }, 'user123');
-				service.RemoveSubscription('user123', `sub${i}`);
+				// Note: RemoveConnection removes all subscriptions for the user,
+				// so RemoveSubscription is only needed if subscriptions were added separately
 			}
 
 			expect(service.GetConnectionCount()).toBe(0);
@@ -503,6 +517,230 @@ describe('ConnectionManagerService', () => {
 
 			expect(service.GetConnectionCount()).toBe(0);
 			expect(service.GetSubscriptionCount()).toBe(0);
+		});
+	});
+
+	describe('RemoveConnection - Branch Coverage', () => {
+		let service: ConnectionManagerService;
+		let config: ISubscriptionConfig;
+
+		beforeEach(() => {
+			config = {
+				redis: {
+					host: 'localhost',
+					port: 6379,
+				},
+				websocket: {
+					path: '/subscriptions',
+					maxPayloadSize: 100 * 1024,
+					keepalive: 30000,
+					connectionTimeout: 60000,
+					maxConnections: 5,
+				},
+				auth: {
+					jwtSecret: 'test-secret',
+					tokenExpiration: '1h',
+				},
+				connection: {
+					maxSubscriptionsPerUser: 10,
+					cleanupInterval: 60000,
+					timeout: 300000,
+				},
+				resilience: {
+					keepalive: { enabled: true, interval: 30000, timeout: 5000 },
+					reconnection: { enabled: true, attempts: 3, delay: 1000, backoff: 'exponential' },
+					errorRecovery: { enabled: true, retryDelay: 1000, maxRetries: 3 },
+					shutdown: { timeout: 10000, force: true },
+				},
+			};
+
+			const mockModuleRef = {
+				get: (token: any) => {
+					if (token === 'SUBSCRIPTION_CONFIG') return config;
+					throw new Error(`Unknown token: ${String(token)}`);
+				},
+			} as any;
+
+			service = new ConnectionManagerService(mockModuleRef);
+		});
+
+		it('should handle RemoveConnection when connection removed was false (object ref mismatch)', () => {
+			// Add two connections with IDs
+			const ws1 = { id: 'ws1' };
+			const ws2 = { id: 'ws2' };
+
+			service.AddConnection(ws1, 'user1', 'user1');
+			service.AddConnection(ws2, 'user1', 'user1');
+			expect(service.GetConnectionCount()).toBe(2);
+
+			// Try to remove a different object (not tracked)
+			service.RemoveConnection({ id: 'ws3' }, 'user1');
+
+			// Count should not change because ws3 was never added
+			expect(service.GetConnectionCount()).toBe(2);
+		});
+
+		it('should handle RemoveConnection without id property (WeakMap path)', () => {
+			const wsNoId = {};
+			service.AddConnection(wsNoId, 'user1', 'user1');
+			expect(service.GetConnectionCount()).toBe(1);
+
+			// Remove with same reference
+			service.RemoveConnection(wsNoId, 'user1');
+			expect(service.GetConnectionCount()).toBe(0);
+		});
+
+		it('should decrement counter to zero but not below', () => {
+			const ws = { id: 'ws1' };
+			service.AddConnection(ws, 'user1', 'user1');
+			expect(service.GetConnectionCount()).toBe(1);
+
+			service.RemoveConnection(ws, 'user1');
+			expect(service.GetConnectionCount()).toBe(0);
+
+			// Try removing again
+			service.RemoveConnection(ws, 'user1');
+			expect(service.GetConnectionCount()).toBe(0);
+		});
+
+		it('should handle RemoveConnection for user with no connections', () => {
+			// Try removing from user that was never added
+			service.RemoveConnection({ id: 'ws1' }, 'user1');
+			expect(service.GetConnectionCount()).toBe(0);
+		});
+	});
+
+	describe('AddSubscription - Duplicate Handling', () => {
+		let service: ConnectionManagerService;
+		let config: ISubscriptionConfig;
+
+		beforeEach(() => {
+			config = {
+				redis: {
+					host: 'localhost',
+					port: 6379,
+				},
+				websocket: {
+					path: '/subscriptions',
+					maxPayloadSize: 100 * 1024,
+					keepalive: 30000,
+					connectionTimeout: 60000,
+					maxConnections: 5,
+				},
+				auth: {
+					jwtSecret: 'test-secret',
+					tokenExpiration: '1h',
+				},
+				connection: {
+					maxSubscriptionsPerUser: 10,
+					cleanupInterval: 60000,
+					timeout: 300000,
+				},
+				resilience: {
+					keepalive: { enabled: true, interval: 30000, timeout: 5000 },
+					reconnection: { enabled: true, attempts: 3, delay: 1000, backoff: 'exponential' },
+					errorRecovery: { enabled: true, retryDelay: 1000, maxRetries: 3 },
+					shutdown: { timeout: 10000, force: true },
+				},
+			};
+
+			const mockModuleRef = {
+				get: (token: any) => {
+					if (token === 'SUBSCRIPTION_CONFIG') return config;
+					throw new Error(`Unknown token: ${String(token)}`);
+				},
+			} as any;
+
+			service = new ConnectionManagerService(mockModuleRef);
+		});
+
+		it('should not increment counter when adding duplicate subscription', () => {
+			service.AddSubscription('user1', 'sub1');
+			expect(service.GetSubscriptionCount()).toBe(1);
+
+			// Add same subscription again (should not increment)
+			service.AddSubscription('user1', 'sub1');
+			expect(service.GetSubscriptionCount()).toBe(1);
+		});
+
+		it('should handle subscription add for new user', () => {
+			service.AddSubscription('user1', 'sub1');
+			service.AddSubscription('user2', 'sub1');
+			expect(service.GetSubscriptionCount()).toBe(2);
+		});
+	});
+
+	describe('RemoveSubscription - Counter Decrement', () => {
+		let service: ConnectionManagerService;
+		let config: ISubscriptionConfig;
+
+		beforeEach(() => {
+			config = {
+				redis: {
+					host: 'localhost',
+					port: 6379,
+				},
+				websocket: {
+					path: '/subscriptions',
+					maxPayloadSize: 100 * 1024,
+					keepalive: 30000,
+					connectionTimeout: 60000,
+					maxConnections: 5,
+				},
+				auth: {
+					jwtSecret: 'test-secret',
+					tokenExpiration: '1h',
+				},
+				connection: {
+					maxSubscriptionsPerUser: 10,
+					cleanupInterval: 60000,
+					timeout: 300000,
+				},
+				resilience: {
+					keepalive: { enabled: true, interval: 30000, timeout: 5000 },
+					reconnection: { enabled: true, attempts: 3, delay: 1000, backoff: 'exponential' },
+					errorRecovery: { enabled: true, retryDelay: 1000, maxRetries: 3 },
+					shutdown: { timeout: 10000, force: true },
+				},
+			};
+
+			const mockModuleRef = {
+				get: (token: any) => {
+					if (token === 'SUBSCRIPTION_CONFIG') return config;
+					throw new Error(`Unknown token: ${String(token)}`);
+				},
+			} as any;
+
+			service = new ConnectionManagerService(mockModuleRef);
+		});
+
+		it('should not decrement when removing non-existent subscription', () => {
+			service.AddSubscription('user1', 'sub1');
+			expect(service.GetSubscriptionCount()).toBe(1);
+
+			// Try removing non-existent subscription
+			service.RemoveSubscription('user1', 'sub999');
+			expect(service.GetSubscriptionCount()).toBe(1);
+		});
+
+		it('should decrement to zero but not below', () => {
+			service.AddSubscription('user1', 'sub1');
+			expect(service.GetSubscriptionCount()).toBe(1);
+
+			service.RemoveSubscription('user1', 'sub1');
+			expect(service.GetSubscriptionCount()).toBe(0);
+
+			// Try removing again
+			service.RemoveSubscription('user1', 'sub1');
+			expect(service.GetSubscriptionCount()).toBe(0);
+		});
+
+		it('should remove user when no subscriptions remain', () => {
+			service.AddSubscription('user1', 'sub1');
+			service.RemoveSubscription('user1', 'sub1');
+
+			const stats = service.GetStats();
+			expect(stats.subscriptionsByUser['user1']).toBeUndefined();
 		});
 	});
 });

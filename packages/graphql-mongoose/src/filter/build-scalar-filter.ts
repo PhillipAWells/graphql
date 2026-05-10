@@ -1,6 +1,10 @@
 import { Types } from 'mongoose';
 import { SCALAR_OPERATOR_MAP } from './operator-map.constant';
 
+// Constants for error messages and validation
+const MAX_REGEX_PATTERN_LENGTH = 1000;
+const ERROR_MESSAGE_PREVIEW_LENGTH = 50;
+
 /**
  * Builds a MongoDB field filter object for a single scalar or array field.
  *
@@ -164,10 +168,25 @@ export function BuildScalarFieldFilter(
 
 	// Handle regex: if pattern is present, compile it with options if available
 	if (regexPattern !== undefined) {
-		const regexValue = regexOptions !== undefined
-			? new RegExp(regexPattern, regexOptions)
-			: regexPattern;
-		mongoFieldFilter.$regex = regexValue;
+		// Security: validate pattern length to prevent ReDoS attacks
+		if (regexPattern.length > MAX_REGEX_PATTERN_LENGTH) {
+			throw new Error(
+				`Regex pattern exceeds maximum length (${MAX_REGEX_PATTERN_LENGTH} characters): "${regexPattern.substring(0, ERROR_MESSAGE_PREVIEW_LENGTH)}..."`,
+			);
+		}
+
+		try {
+			const regexValue = regexOptions !== undefined
+				? new RegExp(regexPattern, regexOptions)
+				: regexPattern;
+			mongoFieldFilter.$regex = regexValue;
+		} catch (error) {
+			// Invalid regex pattern (including catastrophic backtracking patterns)
+			throw new Error(
+				`Invalid regex pattern: ${(error as Error).message}`,
+				{ cause: error },
+			);
+		}
 	}
 
 	// Return the field object with all operators accumulated

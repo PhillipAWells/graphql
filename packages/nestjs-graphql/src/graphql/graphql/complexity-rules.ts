@@ -51,7 +51,7 @@ export const DEFAULT_COMPLEXITY_RULES: IComplexityConfig = {
  * Complexity rules for specific field patterns
  */
 export const FIELD_COMPLEXITY_RULES = {
-	// IUser-related fields
+	// User-related fields
 	user: {
 		profile: COMPLEXITY_WEIGHTS.OBJECT_FIELD,
 		friends: COMPLEXITY_WEIGHTS.LIST_ITEM,
@@ -73,7 +73,7 @@ export const FIELD_COMPLEXITY_RULES = {
 		customer: COMPLEXITY_WEIGHTS.OBJECT_FIELD,
 	},
 
-	// IComment-related fields
+	// Comment-related fields
 	comment: {
 		replies: COMPLEXITY_WEIGHTS.LIST_ITEM,
 		author: COMPLEXITY_WEIGHTS.OBJECT_FIELD,

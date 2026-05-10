@@ -60,15 +60,15 @@ export class HttpCacheKeyGenerator implements ICacheKeyGenerator {
 	 * @param obj Object to sort (can be nested)
 	 * @returns Object with sorted keys
 	 */
-	private SortObject(obj: any): any {
+	private SortObject(obj: unknown): unknown {
 		if (!obj || typeof obj !== 'object') return obj;
 		if (Array.isArray(obj)) return obj.map(this.SortObject.bind(this));
 
-		const Sorted: any = {};
-		Object.keys(obj)
+		const Sorted: Record<string, unknown> = {};
+		Object.keys(obj as Record<string, unknown>)
 			.sort()
 			.forEach((key) => {
-				Sorted[key] = this.SortObject(obj[key]);
+				Sorted[key] = this.SortObject((obj as Record<string, unknown>)[key]);
 			});
 
 		return Sorted;

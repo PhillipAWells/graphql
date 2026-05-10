@@ -524,8 +524,12 @@ describe('Cache Service and Decorators - Integration Tests', () => {
 			expect(stats.hits).toBe(0);
 			expect(stats.misses).toBe(0);
 			expect(stats.hitRate).toBe(0);
-			expect(stats.size).toBe(0);
-			expect(stats.store).toBe('CacheManager');
+			expect(stats.evictions).toBe(0);
+			expect(stats.operationTimings).toEqual({
+				get: [],
+				set: [],
+				del: [],
+			});
 		});
 	});
 

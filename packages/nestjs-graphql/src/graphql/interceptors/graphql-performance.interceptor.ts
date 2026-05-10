@@ -25,7 +25,7 @@ import { SLOW_OPERATION_THRESHOLD_MS, PERFORMANCE_WARNING_THRESHOLD_MS } from '.
  * @example
  * ```typescript
  * @UseInterceptors(GraphQLPerformanceInterceptor)
- * @Query(() => [IUser], { name: 'GetUsers' })
+ * @Query(() => [User], { name: 'GetUsers' })
  * async getUsers(): Promise<IUser[]> {
  *   // This operation's performance will be logged and profiled
  * }

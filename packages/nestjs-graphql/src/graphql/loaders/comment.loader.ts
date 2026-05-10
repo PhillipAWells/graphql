@@ -105,7 +105,7 @@ export class CommentLoader implements ILazyModuleRefService {
 
 	/**
    * Clears the cache for a specific comment
-   * @param commentId IComment ID to clear from cache
+   * @param commentId Comment ID to clear from cache
    */
 	public Clear(commentId: string): void {
 		const Loader = this.GetLoader();

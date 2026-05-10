@@ -59,8 +59,6 @@ export interface ICacheableOptions {
  * - Async-safe; works with async/await methods
  */
 export function Cacheable(options: ICacheableOptions = {}) {
-	const Logger = new AppLogger(undefined, 'CacheableDecorator');
-
 	return function(
 		target: unknown,
 		propertyKey: string,
@@ -70,6 +68,10 @@ export function Cacheable(options: ICacheableOptions = {}) {
 		const TargetName = (target as unknown as { constructor: { name: string } }).constructor.name;
 
 		descriptor.value = async function(...args: unknown[]) {
+			// Lazy logger creation - happens once at first method invocation, not at class definition time
+			// This avoids instantiating loggers for decorators on methods that are never called
+			const Logger = new AppLogger(undefined, 'CacheableDecorator');
+
 			// Check condition if provided
 			if (options.condition && !options.condition(...args)) {
 				return OriginalMethod.apply(this, args);

@@ -1,7 +1,7 @@
 {
   "name": "@pawells/graphql-codegen-react",
   "displayName": "@pawells/graphql-codegen-react",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "description": "graphql-codegen plugin generating typed Apollo Client 4 hooks for React",
   "keywords": [
     "graphql",
@@ -22,7 +22,6 @@
   "exports": {
     ".": {
       "types": "./build/index.d.ts",
-      "require": "./build/index.js",
       "import": "./build/index.js"
     }
   },
@@ -38,8 +37,8 @@
     "pipeline": "yarn typecheck && yarn lint && yarn test && yarn build"
   },
   "dependencies": {
-    "@graphql-codegen/plugin-helpers": ">=6.3.0",
-    "code-block-writer": ">=13.0.3"
+    "@graphql-codegen/plugin-helpers": "^6.3.0",
+    "code-block-writer": "^13.0.3"
   },
   "peerDependencies": {
     "@apollo/client": ">=4.0.0",

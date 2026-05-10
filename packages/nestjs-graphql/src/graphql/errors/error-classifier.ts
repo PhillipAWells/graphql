@@ -28,6 +28,10 @@ export interface IErrorClassification {
  * Provides centralized error classification logic using instanceof checks
  * instead of fragile substring matching on error messages.
  *
+ * Uses WeakMap caching to avoid reclassifying the same Error objects,
+ * which improves performance in hot paths where the same error is processed
+ * multiple times (e.g., in error interceptors and formatters).
+ *
  * Usage:
  * ```typescript
  * const classification = ErrorClassifier.Classify(error);
@@ -35,6 +39,12 @@ export interface IErrorClassification {
  * ```
  */
 export class ErrorClassifier {
+	/**
+	 * Cache for error classifications using WeakMap
+	 * Only works for Error objects (uses object identity), not primitives
+	 * WeakMap prevents memory leaks by allowing GC of classified errors
+	 */
+	private static readonly ClassificationCache = new WeakMap<Error, IErrorClassification>();
 	/**
 	 * HTTP status codes
 	 */
@@ -57,14 +67,29 @@ export class ErrorClassifier {
 
 	/**
 	 * Classifies an error and returns its code, message, and HTTP status
+	 * Uses caching to avoid reclassifying the same Error object multiple times
+	 * Returns early after first positive match to avoid unnecessary checks
 	 *
 	 * @param error - The error to classify
 	 * @returns IErrorClassification - The classification result
 	 */
 	public static Classify(error: unknown): IErrorClassification {
-		// Handle validation errors
+		// Check cache for Error objects only (WeakMap requires object keys)
+		if (error instanceof Error) {
+			const Cached = this.ClassificationCache.get(error);
+			if (Cached) {
+				return Cached;
+			}
+		}
+
+		let Classification: IErrorClassification;
+
+		// Check each error type and return early on first match to avoid O(n) checks
+		// Order by likelihood in typical GraphQL applications
+
+		// Handle validation errors (common in user input)
 		if (this.IsValidationError(error)) {
-			return {
+			Classification = {
 				code: 'VALIDATION_ERROR',
 				graphqlCode: 'BAD_USER_INPUT',
 				statusCode: this.HTTP_STATUS.BAD_REQUEST,
@@ -74,11 +99,9 @@ export class ErrorClassifier {
 				isAuthorization: false,
 				isRateLimit: false,
 			};
-		}
-
-		// Handle authentication errors
-		if (this.IsAuthenticationError(error)) {
-			return {
+		} else if (this.IsAuthenticationError(error)) {
+			// Handle authentication errors (also common)
+			Classification = {
 				code: 'UNAUTHENTICATED',
 				graphqlCode: 'UNAUTHENTICATED',
 				statusCode: this.HTTP_STATUS.UNAUTHORIZED,
@@ -88,11 +111,9 @@ export class ErrorClassifier {
 				isAuthorization: false,
 				isRateLimit: false,
 			};
-		}
-
-		// Handle authorization errors
-		if (this.IsAuthorizationError(error)) {
-			return {
+		} else if (this.IsAuthorizationError(error)) {
+			// Handle authorization errors
+			Classification = {
 				code: 'FORBIDDEN',
 				graphqlCode: 'FORBIDDEN',
 				statusCode: this.HTTP_STATUS.FORBIDDEN,
@@ -102,11 +123,9 @@ export class ErrorClassifier {
 				isAuthorization: true,
 				isRateLimit: false,
 			};
-		}
-
-		// Handle not found errors
-		if (this.IsNotFoundError(error)) {
-			return {
+		} else if (this.IsNotFoundError(error)) {
+			// Handle not found errors
+			Classification = {
 				code: 'NOT_FOUND',
 				graphqlCode: 'NOT_FOUND',
 				statusCode: this.HTTP_STATUS.NOT_FOUND,
@@ -116,11 +135,9 @@ export class ErrorClassifier {
 				isAuthorization: false,
 				isRateLimit: false,
 			};
-		}
-
-		// Handle conflict/duplicate errors
-		if (this.IsConflictError(error)) {
-			return {
+		} else if (this.IsConflictError(error)) {
+			// Handle conflict/duplicate errors
+			Classification = {
 				code: 'CONFLICT',
 				graphqlCode: 'CONFLICT',
 				statusCode: this.HTTP_STATUS.CONFLICT,
@@ -130,11 +147,9 @@ export class ErrorClassifier {
 				isAuthorization: false,
 				isRateLimit: false,
 			};
-		}
-
-		// Handle rate limit errors
-		if (this.IsRateLimitError(error)) {
-			return {
+		} else if (this.IsRateLimitError(error)) {
+			// Handle rate limit errors
+			Classification = {
 				code: 'RATE_LIMIT_EXCEEDED',
 				graphqlCode: 'RATE_LIMIT_EXCEEDED',
 				statusCode: this.HTTP_STATUS.RATE_LIMIT,
@@ -144,19 +159,26 @@ export class ErrorClassifier {
 				isAuthorization: false,
 				isRateLimit: true,
 			};
+		} else {
+			// Default to internal server error
+			Classification = {
+				code: 'INTERNAL_ERROR',
+				graphqlCode: 'INTERNAL_ERROR',
+				statusCode: this.HTTP_STATUS.INTERNAL_SERVER_ERROR,
+				message: 'An unexpected error occurred',
+				isValidation: false,
+				isAuthentication: false,
+				isAuthorization: false,
+				isRateLimit: false,
+			};
 		}
 
-		// Default to internal server error
-		return {
-			code: 'INTERNAL_ERROR',
-			graphqlCode: 'INTERNAL_ERROR',
-			statusCode: this.HTTP_STATUS.INTERNAL_SERVER_ERROR,
-			message: 'An unexpected error occurred',
-			isValidation: false,
-			isAuthentication: false,
-			isAuthorization: false,
-			isRateLimit: false,
-		};
+		// Cache for Error objects (for future calls)
+		if (error instanceof Error) {
+			this.ClassificationCache.set(error, Classification);
+		}
+
+		return Classification;
 	}
 
 	/**
@@ -265,9 +287,9 @@ export class ErrorClassifier {
 		// But NOT if this is a generic error being passed through with a status code
 		if ((error as { message?: unknown }).message && typeof (error as { message?: unknown }).message === 'string' && !(error as { statusCode?: unknown }).statusCode) {
 			const MessageLower = ((error as { message: string }).message).toLowerCase().trim();
-			// Match if message includes "permission" or is exactly "forbidden" (lowercase)
+			// Match if message includes "permission", "authorization", or "forbidden"
 			// BUT NOT if the original message is just "Forbidden" (with capital F) alone
-			if (MessageLower.includes('permission')) {
+			if (MessageLower.includes('permission') || MessageLower.includes('authorization')) {
 				return true;
 			}
 			// Allow "forbidden" if it's a standalone word (not just "Forbidden" with capital)

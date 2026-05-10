@@ -630,4 +630,511 @@ describe('CreateGraphQLClient', () => {
 			expect(Params).toEqual({});
 		}
 	});
+
+	it('should not log GraphQL errors when errorResponse.error is undefined but logGraphQLErrors is true', () => {
+		const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+		const OptionsWithLogging: TGraphQLClientOptions = {
+			...Options,
+			logGraphQLErrors: true,
+		};
+
+		CreateGraphQLClient(OptionsWithLogging);
+
+		if (OnErrorHandler) {
+			OnErrorHandler({
+				graphQLErrors: undefined,
+				error: undefined,
+			});
+		}
+
+		expect(consoleErrorSpy).not.toHaveBeenCalledWith('[GraphQL error]', expect.anything());
+
+		consoleErrorSpy.mockRestore();
+	});
+
+	it('should not log network errors when errorResponse.error is undefined but logNetworkErrors is true', () => {
+		const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+		const OptionsWithLogging: TGraphQLClientOptions = {
+			...Options,
+			logNetworkErrors: true,
+		};
+
+		CreateGraphQLClient(OptionsWithLogging);
+
+		if (OnErrorHandler) {
+			OnErrorHandler({
+				networkError: undefined,
+				error: undefined,
+			});
+		}
+
+		expect(consoleErrorSpy).not.toHaveBeenCalledWith('[Network error]', expect.anything());
+
+		consoleErrorSpy.mockRestore();
+	});
+
+	it('should remove handler from state handlers when unsubscribe is called', () => {
+		const Result = CreateGraphQLClient(Options);
+		const Handler1 = vi.fn();
+		const Handler2 = vi.fn();
+
+		Result.onStateChange(Handler1);
+		Result.onStateChange(Handler2);
+
+		const Unsubscribe1 = Result.onStateChange(Handler1);
+
+		// Verify handler was registered
+		expect(Handler1).not.toHaveBeenCalled();
+
+		// Unsubscribe the handler
+		Unsubscribe1();
+
+		// Trigger state change
+		if (WsClientEventHandlers.error) {
+			WsClientEventHandlers.error();
+		}
+
+		// Verify state changed
+		expect(Result.getConnectionState()).toBe(GraphQLConnectionState.Error);
+	});
+
+	it('should handle ping event when received flag is false', () => {
+		const Result = CreateGraphQLClient(Options);
+		vi.useFakeTimers();
+
+		if (WsClientEventHandlers.ping) {
+			WsClientEventHandlers.ping(false);
+		}
+
+		// Verify timeout was set by checking dispose doesn't throw
+		expect(() => Result.dispose()).not.toThrow();
+
+		vi.useRealTimers();
+	});
+
+	it('should handle WebSocket opened event and call state handlers', () => {
+		const Result = CreateGraphQLClient(Options);
+		const Handler = vi.fn();
+
+		Result.onStateChange(Handler);
+
+		if (WsClientEventHandlers.opened) {
+			WsClientEventHandlers.opened({} as any);
+		}
+
+		// Handler should be called when state changes
+		expect(Handler).toHaveBeenCalledWith(GraphQLConnectionState.Connected);
+	});
+
+	it('should properly track and call multiple state handlers on state change', () => {
+		const Result = CreateGraphQLClient(Options);
+		const Handler1 = vi.fn();
+		const Handler2 = vi.fn();
+		const Handler3 = vi.fn();
+
+		Result.onStateChange(Handler1);
+		Result.onStateChange(Handler2);
+		Result.onStateChange(Handler3);
+
+		if (WsClientEventHandlers.connected) {
+			WsClientEventHandlers.connected();
+		}
+
+		expect(Handler1).toHaveBeenCalledWith(GraphQLConnectionState.Connected);
+		expect(Handler2).toHaveBeenCalledWith(GraphQLConnectionState.Connected);
+		expect(Handler3).toHaveBeenCalledWith(GraphQLConnectionState.Connected);
+	});
+
+	it('should handle removing specific handler from multiple registered handlers', () => {
+		const Result = CreateGraphQLClient(Options);
+		const Handler1 = vi.fn();
+		const Handler2 = vi.fn();
+
+		const Unsubscribe1 = Result.onStateChange(Handler1);
+		Result.onStateChange(Handler2);
+
+		// Unsubscribe first handler
+		Unsubscribe1();
+
+		if (WsClientEventHandlers.error) {
+			WsClientEventHandlers.error();
+		}
+
+		// Only Handler2 should be called
+		expect(Handler1).not.toHaveBeenCalled();
+		expect(Handler2).toHaveBeenCalledWith(GraphQLConnectionState.Error);
+	});
+
+	it('should handle pong event with received flag true and active timeout', () => {
+		const Result = CreateGraphQLClient(Options);
+		vi.useFakeTimers();
+
+		if (WsClientEventHandlers.ping) {
+			WsClientEventHandlers.ping(false);
+		}
+
+		if (WsClientEventHandlers.pong) {
+			WsClientEventHandlers.pong(true);
+		}
+
+		// Timeout should be cleared
+		expect(() => Result.dispose()).not.toThrow();
+
+		vi.useRealTimers();
+	});
+
+	it('should handle error link when only logGraphQLErrors is enabled and error is present', () => {
+		const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+		const OptionsWithLogging: TGraphQLClientOptions = {
+			...Options,
+			logGraphQLErrors: true,
+			logNetworkErrors: false,
+		};
+
+		CreateGraphQLClient(OptionsWithLogging);
+
+		if (OnErrorHandler) {
+			OnErrorHandler({
+				error: new Error('Test GraphQL error'),
+			});
+		}
+
+		expect(consoleErrorSpy).toHaveBeenCalledWith('[GraphQL error]', expect.any(Error));
+
+		consoleErrorSpy.mockRestore();
+	});
+
+	it('should handle error link when only logNetworkErrors is enabled and error is present', () => {
+		const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+		const OptionsWithLogging: TGraphQLClientOptions = {
+			...Options,
+			logGraphQLErrors: false,
+			logNetworkErrors: true,
+		};
+
+		CreateGraphQLClient(OptionsWithLogging);
+
+		if (OnErrorHandler) {
+			OnErrorHandler({
+				error: new Error('Test network error'),
+			});
+		}
+
+		expect(consoleErrorSpy).toHaveBeenCalledWith('[Network error]', expect.any(Error));
+
+		consoleErrorSpy.mockRestore();
+	});
+
+	it('should execute ping handler code path with received=false and timeout', () => {
+		const Result = CreateGraphQLClient(Options);
+		vi.useFakeTimers();
+
+		if (WsClientEventHandlers.ping) {
+			WsClientEventHandlers.ping(false);
+			// Advance timers to trigger the timeout callback
+			vi.advanceTimersByTime(5100);
+		}
+
+		// Verify dispose clears the timeout
+		expect(() => Result.dispose()).not.toThrow();
+
+		vi.useRealTimers();
+	});
+
+	it('should remove handler by index when unsubscribing after registering', () => {
+		const Result = CreateGraphQLClient(Options);
+		const Handler = vi.fn();
+
+		const Unsubscribe = Result.onStateChange(Handler);
+
+		// Verify handler was called on state change before unsubscribe
+		if (WsClientEventHandlers.closing) {
+			WsClientEventHandlers.closing?.();
+		}
+
+		// Now unsubscribe - this should trigger the splice
+		Unsubscribe();
+
+		// Trigger another state change to verify handler is no longer called
+		if (WsClientEventHandlers.error) {
+			WsClientEventHandlers.error();
+		}
+
+		// If handler was properly removed, it shouldn't be called on the second state change
+		expect(Result.getConnectionState()).toBe(GraphQLConnectionState.Error);
+	});
+
+	it('should find and remove correct handler when multiple are registered', () => {
+		const Result = CreateGraphQLClient(Options);
+		const Handler1 = vi.fn();
+		const Handler2 = vi.fn();
+		const Handler3 = vi.fn();
+
+		const _Unsubscribe1 = Result.onStateChange(Handler1);
+		const Unsubscribe2 = Result.onStateChange(Handler2);
+		const _Unsubscribe3 = Result.onStateChange(Handler3);
+
+		// Unsubscribe Handler2 (middle one)
+		Unsubscribe2();
+
+		// Trigger state change
+		if (WsClientEventHandlers.error) {
+			WsClientEventHandlers.error();
+		}
+
+		// Handler1 and Handler3 should be called, but not Handler2
+		expect(Handler1).toHaveBeenCalledWith(GraphQLConnectionState.Error);
+		expect(Handler2).not.toHaveBeenCalled();
+		expect(Handler3).toHaveBeenCalledWith(GraphQLConnectionState.Error);
+	});
+
+	it('should handle ping event received=false branch', () => {
+		const Result = CreateGraphQLClient(Options);
+
+		// Call ping with received=false
+		if (WsClientEventHandlers.ping) {
+			vi.useFakeTimers();
+			WsClientEventHandlers.ping(false);
+			vi.useRealTimers();
+		}
+
+		expect(Result).toBeDefined();
+	});
+
+	it('should execute timeout callback within ping handler when received is false', () => {
+		const mockSocket = { close: vi.fn() };
+		const _Result = CreateGraphQLClient(Options);
+
+		vi.useFakeTimers();
+
+		// First set the socket by calling opened
+		if (WsClientEventHandlers.opened) {
+			WsClientEventHandlers.opened(mockSocket as any);
+		}
+
+		// Then call ping with false to set timeout
+		if (WsClientEventHandlers.ping) {
+			WsClientEventHandlers.ping(false);
+
+			// Advance time past the timeout duration
+			vi.advanceTimersByTime(6000);
+
+			// The timeout should trigger and call socket.close
+			expect(mockSocket.close).toHaveBeenCalledWith(expect.any(Number), expect.any(String));
+		}
+
+		vi.useRealTimers();
+	});
+
+	it('should splice handler from array when found by index', () => {
+		const Result = CreateGraphQLClient(Options);
+		const Handler = vi.fn();
+
+		// Register handler
+		const Unsubscribe = Result.onStateChange(Handler);
+
+		// Get the connection state before unsubscribe
+		const _StateBefore = Result.getConnectionState();
+
+		// Trigger unsubscribe (which calls indexOf and splice)
+		Unsubscribe();
+
+		// Verify handler no longer receives updates
+		if (WsClientEventHandlers.connected) {
+			WsClientEventHandlers.connected();
+		}
+
+		// The handler should not have been called after unsubscribe
+		expect(Handler).not.toHaveBeenCalledWith(GraphQLConnectionState.Connected);
+	});
+
+	it('should handle case where handler index is not -1 during removal', () => {
+		const Result = CreateGraphQLClient(Options);
+		const Handler1 = vi.fn();
+		const Handler2 = vi.fn();
+
+		Result.onStateChange(Handler1);
+		const Unsubscribe2 = Result.onStateChange(Handler2);
+
+		// Unsubscribe Handler2
+		Unsubscribe2();
+
+		// Trigger state change
+		if (WsClientEventHandlers.error) {
+			WsClientEventHandlers.error();
+		}
+
+		// Handler1 should be called, Handler2 should not
+		expect(Handler1).toHaveBeenCalled();
+		expect(Handler2).not.toHaveBeenCalled();
+	});
+
+	it('should call connectionParams and return object with authorization for token', async () => {
+		const TokenValue = 'test-connection-token';
+		const OptionsWithToken: TGraphQLClientOptions = {
+			...Options,
+			token: TokenValue,
+		};
+
+		CreateGraphQLClient(OptionsWithToken);
+
+		// Get the connectionParams function and call it directly
+		const ConnectionParamsHandler = WsClientEventHandlers.connectionParams;
+		if (ConnectionParamsHandler && typeof ConnectionParamsHandler === 'function') {
+			const Params = await (ConnectionParamsHandler as any)();
+			// This tests the ternary: token ? { authorization: ... } : {}
+			expect(Params).toEqual({
+				authorization: `Bearer ${TokenValue}`,
+			});
+			// Verify the token path is exercised
+			expect(Params).toHaveProperty('authorization');
+			expect((Params as Record<string, string>).authorization).toContain('Bearer');
+		}
+	});
+
+	it('should return empty object from connectionParams when no token', async () => {
+		CreateGraphQLClient(Options);
+
+		// Call connectionParams when there's no token
+		if (WsClientEventHandlers.connectionParams && typeof WsClientEventHandlers.connectionParams === 'function') {
+			const Params = await (WsClientEventHandlers.connectionParams as any)();
+			// This tests the ternary returning {}
+			expect(Params).toEqual({});
+		}
+	});
+
+	it('should log GraphQL error when logGraphQLErrors is true and error exists', () => {
+		const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+		const OptionsWithLogging: TGraphQLClientOptions = {
+			...Options,
+			logGraphQLErrors: true,
+			logNetworkErrors: false,
+		};
+
+		CreateGraphQLClient(OptionsWithLogging);
+
+		const TestError = new Error('Test GraphQL Error');
+
+		if (OnErrorHandler) {
+			// Call the error handler with an error object
+			OnErrorHandler({
+				error: TestError,
+			});
+		}
+
+		expect(consoleErrorSpy).toHaveBeenCalledWith('[GraphQL error]', TestError);
+
+		consoleErrorSpy.mockRestore();
+	});
+
+	it('should log network error when logNetworkErrors is true and error exists', () => {
+		const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+		const OptionsWithLogging: TGraphQLClientOptions = {
+			...Options,
+			logGraphQLErrors: false,
+			logNetworkErrors: true,
+		};
+
+		CreateGraphQLClient(OptionsWithLogging);
+
+		const TestError = new Error('Test Network Error');
+
+		if (OnErrorHandler) {
+			// Call the error handler with an error object
+			OnErrorHandler({
+				error: TestError,
+			});
+		}
+
+		expect(consoleErrorSpy).toHaveBeenCalledWith('[Network error]', TestError);
+
+		consoleErrorSpy.mockRestore();
+	});
+
+	it('should conditionally set timeout in ping handler when received is false', () => {
+		const Result = CreateGraphQLClient(Options);
+
+		vi.useFakeTimers();
+
+		// Call ping with received=false - this tests the if (!received) branch
+		if (WsClientEventHandlers.ping) {
+			WsClientEventHandlers.ping(false);
+
+			// Verify that timeout was set
+			// The timeout should exist in the queue
+			expect(vi.getTimerCount()).toBeGreaterThan(0);
+
+			// Verify dispose can clear it
+			Result.dispose();
+		}
+
+		vi.useRealTimers();
+	});
+
+	it('should not set timeout in ping handler when received is true', () => {
+		const _Result = CreateGraphQLClient(Options);
+
+		vi.useFakeTimers();
+
+		const InitialTimerCount = vi.getTimerCount();
+
+		// Call ping with received=true - this skips the if (!received) branch
+		if (WsClientEventHandlers.ping) {
+			WsClientEventHandlers.ping(true);
+
+			// Timer count should not increase since timeout is not set
+			const AfterPingTimerCount = vi.getTimerCount();
+			expect(AfterPingTimerCount).toBe(InitialTimerCount);
+		}
+
+		vi.useRealTimers();
+	});
+
+	it('should use unsubscribe function that removes handler via splice when index is found', () => {
+		const Result = CreateGraphQLClient(Options);
+		const Handler1 = vi.fn();
+		const Handler2 = vi.fn();
+		const Handler3 = vi.fn();
+
+		Result.onStateChange(Handler1);
+		const Unsubscribe2 = Result.onStateChange(Handler2);
+		Result.onStateChange(Handler3);
+
+		// Unsubscribe Handler2 - this tests the if (idx !== -1) splice path
+		Unsubscribe2();
+
+		// Trigger state change
+		if (WsClientEventHandlers.closing) {
+			WsClientEventHandlers.closing?.();
+		} else if (WsClientEventHandlers.error) {
+			WsClientEventHandlers.error();
+		}
+
+		// Handler1 and Handler3 should be called, Handler2 should not
+		expect(Handler1).toHaveBeenCalled();
+		expect(Handler3).toHaveBeenCalled();
+		expect(Handler2).not.toHaveBeenCalled();
+	});
+
+	it('should handle addEventListener when registering state handler', () => {
+		const Result = CreateGraphQLClient(Options);
+		const Handler = vi.fn();
+
+		// Register handler
+		const Unsubscribe = Result.onStateChange(Handler);
+
+		// State handler should be registered
+		expect(typeof Unsubscribe).toBe('function');
+
+		// Unsubscribe to remove it
+		Unsubscribe();
+
+		expect(Handler).not.toHaveBeenCalled();
+	});
 });

@@ -2,6 +2,7 @@ import { Injectable, PipeTransform, ArgumentMetadata, BadRequestException } from
 import { ModuleRef } from '@nestjs/core';
 import { validate, ValidationError } from 'class-validator';
 import { plainToClass } from 'class-transformer';
+import xss from 'xss';
 import { AppLogger } from '@pawells/nestjs-shared/common';
 import type { IContextualLogger } from '@pawells/nestjs-shared/common';
 
@@ -137,21 +138,59 @@ export class GraphQLInputValidationPipe implements PipeTransform<unknown> {
 	}
 
 	/**
+	 * Checks a string for XSS attacks using the xss library
+	 *
+	 * SECURITY: Uses the `xss` library to detect and prevent encoded XSS attacks
+	 * that simple regex patterns might miss (e.g., unicode escapes, case variations).
+	 *
+	 * @param value - The string to check
+	 * @param path - The path to the field (for logging)
+	 * @throws BadRequestException if XSS detected
+	 */
+	private CheckForXssWithLibrary(value: string, path: string): void {
+		try {
+			const Cleaned = xss(value);
+			if (Cleaned !== value) {
+				// XSS library detected and modified the input
+				this.Logger?.warn(`Potential XSS attack detected (via xss library) at ${path}`);
+				throw new BadRequestException({
+					message: 'Invalid characters or patterns detected in input',
+					code: 'XSS_DETECTED',
+				});
+			}
+		} catch (error) {
+			// If xss library throws, treat as XSS detection failure
+			if (error instanceof BadRequestException) {
+				throw error;
+			}
+			this.Logger?.warn(`XSS library error at ${path}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+			throw new BadRequestException({
+				message: 'Invalid characters or patterns detected in input',
+				code: 'XSS_DETECTED',
+			});
+		}
+	}
+
+	/**
 	 * Recursively checks object properties for XSS patterns.
+	 * Uses both regex patterns and the xss library for defense-in-depth.
 	 * SQL/NoSQL injection is prevented at the database layer via parameterized queries.
 	 */
 	private CheckForXssPatterns(obj: unknown, path = ''): void {
 		if (typeof obj !== 'object' || obj === null) {
 			if (typeof obj === 'string') {
+				// First check with regex patterns
 				for (const Pattern of this.XSS_PATTERNS) {
 					if (Pattern.test(obj)) {
-						this.Logger?.warn(`Potential XSS attack detected at ${path}`);
+						this.Logger?.warn(`Potential XSS attack detected (regex) at ${path}`);
 						throw new BadRequestException({
 							message: 'Invalid characters or patterns detected in input',
 							code: 'XSS_DETECTED',
 						});
 					}
 				}
+				// Then check with xss library for encoded/variant attacks
+				this.CheckForXssWithLibrary(obj, path);
 			}
 			return;
 		}
@@ -162,15 +201,18 @@ export class GraphQLInputValidationPipe implements PipeTransform<unknown> {
 				const CurrentPath = path ? `${path}.${Key}` : Key;
 
 				if (typeof Value === 'string') {
+					// First check with regex patterns
 					for (const Pattern of this.XSS_PATTERNS) {
 						if (Pattern.test(Value)) {
-							this.Logger?.warn(`Potential XSS attack detected at ${CurrentPath}`);
+							this.Logger?.warn(`Potential XSS attack detected (regex) at ${CurrentPath}`);
 							throw new BadRequestException({
 								message: 'Invalid characters or patterns detected in input',
 								code: 'XSS_DETECTED',
 							});
 						}
 					}
+					// Then check with xss library for encoded/variant attacks
+					this.CheckForXssWithLibrary(Value, CurrentPath);
 				} else if (typeof Value === 'object' && Value !== null) {
 					this.CheckForXssPatterns(Value, CurrentPath);
 				}

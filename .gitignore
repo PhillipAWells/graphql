@@ -57,3 +57,9 @@ Thumbs.db
 
 # Compiled test artifacts
 **/*.spec.js
+
+# Compiled TypeScript artifacts (should be in build/ only)
+src/**/*.js
+src/**/*.d.ts
+src/**/*.js.map
+src/**/*.d.ts.map

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { getErrorMessage } from '@pawells/nestjs-shared/common';
+import type { BSON, Document } from 'bson';
 
 /**
  * Service for BSON serialization and deserialization
@@ -7,41 +8,36 @@ import { getErrorMessage } from '@pawells/nestjs-shared/common';
  */
 @Injectable()
 export class BsonSerializationService {
-	private BsonLib: any = null;
-	private LoadPromise: Promise<any> | null = null;
+	private BsonLib: typeof BSON | null = null;
+	private LoadPromise: Promise<typeof BSON> | null = null;
 	private IsAvailableCache: boolean | null = null;
 
 	/**
 	 * Check if bson package is available (cached after first check)
+	 * Returns true only if already loaded; does not attempt to load synchronously
 	 */
 	public IsAvailable(): boolean {
 		if (this.IsAvailableCache !== null) {
 			return this.IsAvailableCache;
 		}
 
-		// Check synchronously if library is already loaded
+		// Check if library is already loaded (from previous async load or initial module discovery)
 		if (this.BsonLib) {
 			this.IsAvailableCache = true;
 			return true;
 		}
 
-		// Try to require bson synchronously
-		try {
-			const Bson = require('bson');
-			this.BsonLib = Bson;
-			this.IsAvailableCache = true;
-			return true;
-		} catch {
-			this.IsAvailableCache = false;
-			return false;
-		}
+		// Don't attempt synchronous require—this would block the event loop.
+		// Return false; GetBson() will handle availability when actually needed.
+		this.IsAvailableCache = false;
+		return false;
 	}
 
 	/**
 	 * Lazy load the bson library
 	 */
 	// eslint-disable-next-line require-await
-	private async GetBson(): Promise<any> {
+	private async GetBson(): Promise<typeof BSON> {
 		if (this.BsonLib) {
 			return this.BsonLib;
 		}
@@ -79,7 +75,7 @@ export class BsonSerializationService {
 		try {
 			const Bson = await this.GetBson();
 			// Use BSON.serialize to convert object to buffer
-			return Buffer.from(Bson.serialize(data));
+			return Buffer.from(Bson.serialize(data as Document));
 		} catch (error) {
 			throw new Error(
 				`Failed to serialize to BSON: ${getErrorMessage(error)}`,
