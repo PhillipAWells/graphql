@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { getErrorMessage } from '@pawells/nestjs-shared/common';
+import type { BSON, Document } from 'bson';
 
 /**
  * Service for BSON serialization and deserialization
@@ -7,8 +8,8 @@ import { getErrorMessage } from '@pawells/nestjs-shared/common';
  */
 @Injectable()
 export class BsonSerializationService {
-	private BsonLib: any = null;
-	private LoadPromise: Promise<any> | null = null;
+	private BsonLib: typeof BSON | null = null;
+	private LoadPromise: Promise<typeof BSON> | null = null;
 	private IsAvailableCache: boolean | null = null;
 
 	/**
@@ -36,7 +37,7 @@ export class BsonSerializationService {
 	 * Lazy load the bson library
 	 */
 	// eslint-disable-next-line require-await
-	private async GetBson(): Promise<any> {
+	private async GetBson(): Promise<typeof BSON> {
 		if (this.BsonLib) {
 			return this.BsonLib;
 		}
@@ -74,7 +75,7 @@ export class BsonSerializationService {
 		try {
 			const Bson = await this.GetBson();
 			// Use BSON.serialize to convert object to buffer
-			return Buffer.from(Bson.serialize(data));
+			return Buffer.from(Bson.serialize(data as Document));
 		} catch (error) {
 			throw new Error(
 				`Failed to serialize to BSON: ${getErrorMessage(error)}`,

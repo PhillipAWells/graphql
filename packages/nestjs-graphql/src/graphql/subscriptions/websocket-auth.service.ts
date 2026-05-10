@@ -118,8 +118,21 @@ export class WebSocketAuthService implements ILazyModuleRefService {
 				return null;
 			}
 
-			// Strip Bearer prefix if present
-			const BearerToken = token.startsWith('Bearer ') ? token.slice(BEARER_PREFIX_LENGTH) : token;
+			// SECURITY: Validate Bearer token format strictly before stripping prefix
+			// Only accept "Bearer <token>" format (with space), reject "Bearer123" or other malformed variants
+			let BearerToken: string | null = null;
+			if (token.startsWith('Bearer ')) {
+				BearerToken = token.slice(BEARER_PREFIX_LENGTH);
+			} else if (!token.includes(' ') && !token.toLowerCase().startsWith('bearer')) {
+				// Token without Bearer prefix is acceptable (raw JWT)
+				BearerToken = token;
+			}
+
+			// Validate that we have a non-empty token
+			if (!BearerToken || !BearerToken.trim()) {
+				this.Logger?.warn('Token validation failed: empty or invalid Bearer token format');
+				return null;
+			}
 
 			// Verify token with cryptographic signature validation
 			const Payload = await JwtService.verifyAsync(BearerToken);

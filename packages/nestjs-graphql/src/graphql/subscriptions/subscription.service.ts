@@ -6,6 +6,13 @@ import type { ILazyModuleRefService, IContextualLogger } from '@pawells/nestjs-s
 import { AppLogger, getErrorMessage, getErrorStack } from '@pawells/nestjs-shared/common';
 
 /**
+ * Regex pattern for validating topic names
+ * Moved to module constant to avoid recreating on every publish() call
+ * Topics must contain only word characters, dots, hyphens, and underscores
+ */
+const TOPIC_VALIDATION_REGEX = /^[\w.-]+$/;
+
+/**
  * Service for managing GraphQL subscriptions with Redis PubSub
  */
 @Injectable()
@@ -34,14 +41,15 @@ export class SubscriptionService implements OnModuleDestroy, ILazyModuleRefServi
 
 	/**
 	 * Publish an event to a topic
+	 * Uses pre-compiled regex for validation (not recreated on each call)
 	 * @param topic Topic to publish to
 	 * @param data Data to publish
 	 * @throws Error if publish fails
 	 */
 	public async Publish(topic: string, data: any): Promise<void> {
 		try {
-			// Validate topic format: must contain only word characters, dots, hyphens, and underscores
-			if (!/^[\w.-]+$/.test(topic)) {
+			// Validate topic format using pre-compiled regex: O(1) test instead of O(m) regex compile
+			if (!TOPIC_VALIDATION_REGEX.test(topic)) {
 				throw new Error('Invalid topic format');
 			}
 			this.Logger.debug(`Publishing to topic: ${topic}`);

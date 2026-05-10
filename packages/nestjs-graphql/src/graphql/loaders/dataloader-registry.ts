@@ -28,6 +28,12 @@ export class DataLoaderRegistry implements ILazyModuleRefService, OnModuleDestro
 
 	private readonly Loaders = new Map<string, DataLoader<any, any>>();
 
+	/**
+	 * Tracks which loaders were actually used in this request
+	 * Allows O(k) cleanup instead of O(n) where k = used loaders, n = total loaders
+	 */
+	private readonly UsedLoaders = new Set<string>();
+
 	public get DataLoaderFactory(): DataLoaderFactory {
 		return this.Module.get(DataLoaderFactory, { strict: false });
 	}
@@ -38,6 +44,7 @@ export class DataLoaderRegistry implements ILazyModuleRefService, OnModuleDestro
 
 	/**
    * Gets or creates a DataLoader for the given key
+   * Tracks access to enable O(k) cleanup instead of O(n)
    * @param key Unique identifier for the DataLoader
    * @param options DataLoader configuration options
    * @returns DataLoader instance
@@ -46,6 +53,9 @@ export class DataLoaderRegistry implements ILazyModuleRefService, OnModuleDestro
 		key: string,
 		options: IDataLoaderOptions<K, V>,
 	): DataLoader<K, V> {
+		// Track that this loader was used in this request
+		this.UsedLoaders.add(key);
+
 		if (this.Loaders.has(key)) {
 			this.Logger.debug(`Reusing existing DataLoader for key: ${key}`);
 			return this.Loaders.get(key) as DataLoader<K, V>;
@@ -110,11 +120,17 @@ export class DataLoaderRegistry implements ILazyModuleRefService, OnModuleDestro
 
 	/**
    * Clears all DataLoader caches
+   * O(k) where k = used loaders instead of O(n) where n = all loaders
+   * Only clears loaders that were actually accessed in this request
    */
 	public ClearAllCaches(): void {
-		for (const [Key, Loader] of this.Loaders) {
-			Loader.clearAll();
-			this.Logger.debug(`Cleared cache for DataLoader: ${Key}`);
+		// Only iterate over loaders that were actually used (O(k) instead of O(n))
+		for (const Key of this.UsedLoaders) {
+			const Loader = this.Loaders.get(Key);
+			if (Loader) {
+				Loader.clearAll();
+				this.Logger.debug(`Cleared cache for DataLoader: ${Key}`);
+			}
 		}
 	}
 
@@ -151,6 +167,7 @@ export class DataLoaderRegistry implements ILazyModuleRefService, OnModuleDestro
 	public Cleanup(): void {
 		this.ClearAllCaches();
 		this.Loaders.clear();
+		this.UsedLoaders.clear();
 		this.Logger.debug('DataLoader registry cleaned up');
 	}
 

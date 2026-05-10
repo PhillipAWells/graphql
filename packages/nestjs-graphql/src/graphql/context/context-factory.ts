@@ -92,13 +92,17 @@ export class GraphQLContextFactory {
 		const Req = connection.request ?? ({} as Request);
 		const Res = {} as Response; // WebSocket doesn't have a response object
 
+		// Generate UUID once and reuse for both requestId and connection.id
+		// Avoid calling randomUUID() twice per connection (expensive crypto operation)
+		const ConnectionId = connection.id ?? RequestId;
+
 		const Context: IWebSocketContext = {
 			req: Req,
 			res: Res,
 			requestId: RequestId,
 			startTime: StartTime,
 			connection: {
-				id: connection.id ?? randomUUID(),
+				id: ConnectionId,
 				connectedAt: new Date(),
 				params: connection.params ?? {},
 			},

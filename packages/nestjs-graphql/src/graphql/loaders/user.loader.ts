@@ -10,7 +10,6 @@ import { DataLoaderRegistry } from './dataloader-registry.js';
  */
 export interface IUser {
 	id: string;
-	[key: string]: any;
 }
 
 /**

@@ -29,7 +29,7 @@ export class ResilienceService implements OnModuleDestroy, ILazyModuleRefService
 	// eslint-disable-next-line no-undef
 	private ShutdownTimeout?: NodeJS.Timeout;
 
-	public get ISubscriptionConfig(): ISubscriptionConfig {
+	public get SubscriptionConfig(): ISubscriptionConfig {
 		try {
 			const Config = this.Module.get<ISubscriptionConfig>('SUBSCRIPTION_CONFIG', { strict: false });
 			if (!Config) {
@@ -64,7 +64,7 @@ export class ResilienceService implements OnModuleDestroy, ILazyModuleRefService
    * @param callback Keepalive callback function
    */
 	public StartKeepalive(connectionId: string, callback: () => void): void {
-		if (!this.ISubscriptionConfig.resilience.keepalive.enabled) {
+		if (!this.SubscriptionConfig.resilience.keepalive.enabled) {
 			return;
 		}
 
@@ -74,7 +74,7 @@ export class ResilienceService implements OnModuleDestroy, ILazyModuleRefService
 			} catch (error: unknown) {
 				this.Logger.error(`Keepalive error for connection ${this.EscapeForLog(connectionId)}: ${getErrorMessage(error)}`);
 			}
-		}, this.ISubscriptionConfig.resilience.keepalive.interval);
+		}, this.SubscriptionConfig.resilience.keepalive.interval);
 
 		this.KeepaliveTimers.set(connectionId, Timer);
 		this.Logger.debug(`Started keepalive for connection: ${this.EscapeForLog(connectionId)}`);
@@ -104,11 +104,11 @@ export class ResilienceService implements OnModuleDestroy, ILazyModuleRefService
 		callback: () => Promise<void>,
 		attempt: number = 1,
 	): void {
-		if (!this.ISubscriptionConfig.resilience.reconnection.enabled) {
+		if (!this.SubscriptionConfig.resilience.reconnection.enabled) {
 			return;
 		}
 
-		if (attempt > this.ISubscriptionConfig.resilience.reconnection.attempts) {
+		if (attempt > this.SubscriptionConfig.resilience.reconnection.attempts) {
 			this.Logger.warn(`Max reconnection attempts reached for connection: ${this.EscapeForLog(connectionId)}`);
 			return;
 		}
@@ -165,7 +165,7 @@ export class ResilienceService implements OnModuleDestroy, ILazyModuleRefService
 	): Promise<void> {
 		this.Logger.error(`Connection error for ${this.EscapeForLog(connectionId)}: ${getErrorMessage(error)}`, getErrorStack(error));
 
-		if (!this.ISubscriptionConfig.resilience.errorRecovery.enabled) {
+		if (!this.SubscriptionConfig.resilience.errorRecovery.enabled) {
 			return;
 		}
 
@@ -174,11 +174,11 @@ export class ResilienceService implements OnModuleDestroy, ILazyModuleRefService
 
 		// Attempt recovery
 		let Attempt = 1;
-		const { maxRetries } = this.ISubscriptionConfig.resilience.errorRecovery;
+		const { maxRetries } = this.SubscriptionConfig.resilience.errorRecovery;
 
 		while (Attempt <= maxRetries) {
 			try {
-				await new Promise(resolve => setTimeout(resolve, this.ISubscriptionConfig.resilience.errorRecovery.retryDelay));
+				await new Promise(resolve => setTimeout(resolve, this.SubscriptionConfig.resilience.errorRecovery.retryDelay));
 				await recoveryCallback();
 				this.Logger.info(`Error recovery successful for connection: ${this.EscapeForLog(connectionId)}`);
 				return;
@@ -201,7 +201,7 @@ export class ResilienceService implements OnModuleDestroy, ILazyModuleRefService
 		// Set shutdown timeout
 		this.ShutdownTimeout = setTimeout(() => {
 			this.Logger.warn('Graceful shutdown timeout exceeded - proceeding with hard shutdown');
-		}, this.ISubscriptionConfig.resilience.shutdown.timeout);
+		}, this.SubscriptionConfig.resilience.shutdown.timeout);
 
 		try {
 			await shutdownCallback();
@@ -221,9 +221,9 @@ export class ResilienceService implements OnModuleDestroy, ILazyModuleRefService
    * @returns Delay in milliseconds
    */
 	private CalculateReconnectionDelay(attempt: number): number {
-		const BaseDelay = this.ISubscriptionConfig.resilience.reconnection.delay;
+		const BaseDelay = this.SubscriptionConfig.resilience.reconnection.delay;
 
-		if (this.ISubscriptionConfig.resilience.reconnection.backoff === 'exponential') {
+		if (this.SubscriptionConfig.resilience.reconnection.backoff === 'exponential') {
 			return Math.min(BaseDelay * Math.pow(2, attempt - 1), REDIS_PUBSUB_CLEANUP_INTERVAL); // Max 30 seconds
 		} else {
 			return BaseDelay;
