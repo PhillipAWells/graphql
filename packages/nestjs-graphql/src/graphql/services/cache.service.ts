@@ -4,17 +4,7 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 import type { ILazyModuleRefService, IContextualLogger } from '@pawells/nestjs-shared/common';
 import { AppLogger, getErrorMessage } from '@pawells/nestjs-shared/common';
-
-/**
- * Cache statistics interface
- */
-interface ICacheStats {
-	hits: number;
-	misses: number;
-	hitRate: number;
-	size: number;
-	store: string;
-}
+import type { ICacheStats } from '../../cache/cache.types.js';
 
 /**
  * Extended cache manager interface for additional operations
@@ -288,9 +278,19 @@ export class GraphQLCacheService implements ILazyModuleRefService, OnModuleInit 
 		return {
 			hits: this.CacheStats.hits,
 			misses: this.CacheStats.misses,
+			sets: 0,
+			deletes: 0,
+			clears: 0,
+			errors: 0,
 			hitRate: this.GetHitRate(),
-			size: 0, // Redis would provide this
-			store: 'CacheManager',
+			evictions: 0,
+			evictionReasons: {},
+			invalidationPatterns: {},
+			operationTimings: {
+				get: [],
+				set: [],
+				del: [],
+			},
 		};
 	}
 }

@@ -1,3 +1,4 @@
+import { Injectable } from '@nestjs/common';
 import { GraphQLError, GraphQLFormattedError } from 'graphql';
 import { AppLogger } from '@pawells/nestjs-shared/common';
 import { GraphQLErrorCode } from './error-codes.js';
@@ -8,9 +9,16 @@ import { ErrorClassifier } from '../errors/error-classifier.js';
  *
  * Formats GraphQL errors for consistent client responses.
  * Removes sensitive internal information and provides user-friendly messages.
+ *
+ * Now an injectable service to avoid static logger instantiation.
  */
+@Injectable()
 export class GraphQLErrorFormatter {
-	private static readonly Logger: AppLogger = new AppLogger(undefined, GraphQLErrorFormatter.name);
+	private readonly Logger: AppLogger;
+
+	constructor() {
+		this.Logger = new AppLogger(undefined, GraphQLErrorFormatter.name);
+	}
 
 	/**
 	 * Formats a GraphQL error for client response
@@ -19,7 +27,7 @@ export class GraphQLErrorFormatter {
 	 * @param context - Optional request context with user and operation information
 	 * @returns Formatted error object
 	 */
-	public static FormatError(error: GraphQLError, context?: unknown): GraphQLFormattedError {
+	public FormatError(error: GraphQLError, context?: unknown): GraphQLFormattedError {
 		const { originalError } = error;
 
 		// Handle custom application errors
@@ -54,14 +62,14 @@ export class GraphQLErrorFormatter {
 	/**
 	 * Checks if error is an application-specific error
 	 */
-	private static IsApplicationError(error: unknown): error is { code: GraphQLErrorCode; message: string; details?: unknown } {
+	private IsApplicationError(error: unknown): error is { code: GraphQLErrorCode; message: string; details?: unknown } {
 		return typeof error === 'object' && error !== null && 'code' in error && Object.values(GraphQLErrorCode).includes((error as { code: unknown }).code as GraphQLErrorCode);
 	}
 
 	/**
 	 * Checks if error is a validation error using ErrorClassifier
 	 */
-	private static IsValidationError(error: unknown): boolean {
+	private IsValidationError(error: unknown): boolean {
 		const Classification = ErrorClassifier.Classify(error);
 		return Classification.isValidation;
 	}
@@ -69,7 +77,7 @@ export class GraphQLErrorFormatter {
 	/**
 	 * Checks if error is an authentication error using ErrorClassifier
 	 */
-	private static IsAuthenticationError(error: unknown): boolean {
+	private IsAuthenticationError(error: unknown): boolean {
 		const Classification = ErrorClassifier.Classify(error);
 		return Classification.isAuthentication;
 	}
@@ -77,7 +85,7 @@ export class GraphQLErrorFormatter {
 	/**
 	 * Checks if error is an authorization error using ErrorClassifier
 	 */
-	private static IsAuthorizationError(error: unknown): boolean {
+	private IsAuthorizationError(error: unknown): boolean {
 		const Classification = ErrorClassifier.Classify(error);
 		return Classification.isAuthorization;
 	}
@@ -85,7 +93,7 @@ export class GraphQLErrorFormatter {
 	/**
 	 * Checks if error is a rate limit error using ErrorClassifier
 	 */
-	private static IsRateLimitError(error: unknown): boolean {
+	private IsRateLimitError(error: unknown): boolean {
 		const Classification = ErrorClassifier.Classify(error);
 		return Classification.isRateLimit;
 	}
@@ -93,7 +101,7 @@ export class GraphQLErrorFormatter {
 	/**
 	 * Formats application-specific errors
 	 */
-	private static FormatApplicationError(_error: GraphQLError, originalError: unknown, context?: unknown): GraphQLFormattedError {
+	private FormatApplicationError(_error: GraphQLError, originalError: unknown, context?: unknown): GraphQLFormattedError {
 		const ErrorWithCode = originalError as { message?: string; code?: string; stack?: string; details?: unknown };
 		this.Logger.warn(`Application error: ${ErrorWithCode.message}`, ErrorWithCode.stack);
 
@@ -112,7 +120,7 @@ export class GraphQLErrorFormatter {
 	/**
 	 * Formats validation errors
 	 */
-	private static FormatValidationError(_error: GraphQLError, originalError: unknown, context?: unknown): GraphQLFormattedError {
+	private FormatValidationError(_error: GraphQLError, originalError: unknown, context?: unknown): GraphQLFormattedError {
 		const ValidationErrors = this.ExtractValidationErrors(originalError);
 		const OpName = this.GetOperationName(context);
 
@@ -130,7 +138,7 @@ export class GraphQLErrorFormatter {
 	/**
 	 * Formats authentication errors
 	 */
-	private static FormatAuthenticationError(_error: GraphQLError, context?: unknown): GraphQLFormattedError {
+	private FormatAuthenticationError(_error: GraphQLError, context?: unknown): GraphQLFormattedError {
 		const OpName = this.GetOperationName(context);
 		return {
 			message: 'Authentication required',
@@ -145,7 +153,7 @@ export class GraphQLErrorFormatter {
 	/**
 	 * Formats authorization errors
 	 */
-	private static FormatAuthorizationError(_error: GraphQLError, context?: unknown): GraphQLFormattedError {
+	private FormatAuthorizationError(_error: GraphQLError, context?: unknown): GraphQLFormattedError {
 		const OpName = this.GetOperationName(context);
 		return {
 			message: 'Access denied',
@@ -160,7 +168,7 @@ export class GraphQLErrorFormatter {
 	/**
 	 * Formats rate limit errors
 	 */
-	private static FormatRateLimitError(_error: GraphQLError, context?: unknown): GraphQLFormattedError {
+	private FormatRateLimitError(_error: GraphQLError, context?: unknown): GraphQLFormattedError {
 		const OpName = this.GetOperationName(context);
 		return {
 			message: 'Rate limit exceeded',
@@ -175,7 +183,7 @@ export class GraphQLErrorFormatter {
 	/**
 	 * Formats generic/unexpected errors
 	 */
-	private static FormatGenericError(error: GraphQLError, context?: unknown): GraphQLFormattedError {
+	private FormatGenericError(error: GraphQLError, context?: unknown): GraphQLFormattedError {
 		// Log internal errors for debugging
 		this.Logger.error(`GraphQL Error: ${error.message}`, error.stack);
 
@@ -200,7 +208,7 @@ export class GraphQLErrorFormatter {
 	/**
 	 * Extracts validation errors from various formats
 	 */
-	private static ExtractValidationErrors(error: unknown): unknown[] {
+	private ExtractValidationErrors(error: unknown): unknown[] {
 		const ErrorAny = error as Record<string, unknown>;
 
 		if (Array.isArray(ErrorAny.errors)) {
@@ -223,7 +231,7 @@ export class GraphQLErrorFormatter {
 	/**
 	 * Safely extracts operation name from context
 	 */
-	private static GetOperationName(context: unknown): string | undefined {
+	private GetOperationName(context: unknown): string | undefined {
 		if (typeof context === 'object' && context !== null && 'operationName' in context) {
 			return (context as { operationName: unknown }).operationName as string | undefined;
 		}
@@ -233,7 +241,7 @@ export class GraphQLErrorFormatter {
 	/**
 	 * Safely extracts user ID from context
 	 */
-	private static GetUserId(context: unknown): string | number | undefined {
+	private GetUserId(context: unknown): string | number | undefined {
 		if (typeof context === 'object' && context !== null && 'user' in context) {
 			const { user } = (context as { user: unknown });
 			if (typeof user === 'object' && user !== null && 'id' in user) {
