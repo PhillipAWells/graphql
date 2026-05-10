@@ -47,12 +47,12 @@
     "@graphql-codegen/typescript": ">=4.0.0",
     "@graphql-codegen/typescript-apollo-client-helpers": ">=3.0.0",
     "@graphql-codegen/typescript-operations": ">=4.0.0",
+    "@pawells/graphql-common": "*",
     "graphql": ">=16.0.0",
     "rxjs": ">=7.0.0"
   },
   "devDependencies": {
     "@apollo/client": "^4.1.9",
-    "@pawells/graphql-common": "workspace:*",
     "@types/node": "^25.6.0",
     "@vitest/coverage-v8": "^4.1.5",
     "graphql": "^16.13.2",
