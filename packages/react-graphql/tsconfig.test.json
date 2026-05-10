@@ -2,6 +2,11 @@
 	"extends": "./tsconfig.json",
 	"include": [
 		"src/**/*.ts",
-		"src/**/*.tsx"
+		"src/**/*.tsx",
+		"src/**/*.test.ts",
+		"src/**/*.test.tsx",
+		"src/**/*.type-safety.test.ts",
+		"src/**/__tests__/**/*.ts",
+		"src/**/__tests__/**/*.tsx"
 	]
 }

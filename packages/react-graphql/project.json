@@ -45,6 +45,20 @@
 				"command": "vitest run",
 				"cwd": "{projectRoot}"
 			}
+		},
+		"test:coverage": {
+			"executor": "nx:run-commands",
+			"options": {
+				"command": "vitest run --coverage",
+				"cwd": "{projectRoot}"
+			}
+		},
+		"clean": {
+			"executor": "nx:run-commands",
+			"options": {
+				"command": "rimraf build",
+				"cwd": "{projectRoot}"
+			}
 		}
 	}
 }
