@@ -24,7 +24,7 @@
       "import": "./build/index.js"
     }
   },
-  "executors": "./executors.json",
+  "executors": "./build/executors.json",
   "scripts": {
     "build": "tsc --project tsconfig.build.json",
     "typecheck": "tsc --noEmit",

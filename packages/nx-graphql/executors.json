@@ -1,12 +1,12 @@
 {
   "executors": {
     "build-schema": {
-      "implementation": "./src/executors/build-schema",
+      "implementation": "./executors/build-schema",
       "schema": "./src/executors/build-schema/schema.json",
       "description": "Export a NestJS GraphQL schema to a .graphql file"
     },
     "codegen": {
-      "implementation": "./src/executors/codegen",
+      "implementation": "./executors/codegen",
       "schema": "./src/executors/codegen/schema.json",
       "description": "Run graphql-codegen with a preconfigured plugin chain"
     }
