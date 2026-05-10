@@ -90,13 +90,13 @@ describe('QueryComplexityGuard', () => {
 			expect(Result).toBe(true);
 		});
 
-		it('should throw error on calculation failure', async () => {
+		it('should throw error on calculation failure', () => {
 			// Mock GqlExecutionContext to throw
 			vi.spyOn(GqlExecutionContext, 'create').mockImplementation(() => {
 				throw new Error('Context creation failed');
 			});
 
-			await expect(Guard.canActivate(MockExecutionContext)).rejects.toThrow(Error);
+			expect(() => Guard.canActivate(MockExecutionContext)).toThrow(Error);
 		});
 
 		it('should set queryComplexity on request when req exists', async () => {
@@ -375,12 +375,12 @@ describe('QueryComplexityGuard', () => {
 	});
 
 	describe('Error Handling', () => {
-		it('should handle GQL context creation errors', async () => {
+		it('should handle GQL context creation errors', () => {
 			vi.spyOn(GqlExecutionContext, 'create').mockImplementation(() => {
 				throw new Error('Context error');
 			});
 
-			await expect(Guard.canActivate(MockExecutionContext)).rejects.toThrow(Error);
+			expect(() => Guard.canActivate(MockExecutionContext)).toThrow(Error);
 
 			vi.spyOn(GqlExecutionContext, 'create').mockRestore();
 		});
