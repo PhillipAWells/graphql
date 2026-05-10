@@ -6,6 +6,7 @@ import type { ILazyModuleRefService, IContextualLogger } from '@pawells/nestjs-s
 import { AppLogger, getErrorMessage } from '@pawells/nestjs-shared/common';
 
 const RESULT_SUMMARY_MAX_KEYS = 3;
+const SANITIZE_MAX_DEPTH = 5;
 
 /**
  * GraphQL Logging Interceptor
@@ -107,7 +108,7 @@ export class GraphQLLoggingInterceptor implements NestInterceptor, ILazyModuleRe
 	 * @param args - The operation arguments
 	 * @returns unknown - Sanitized arguments
 	 */
-	private SanitizeArgs(args: unknown, depth = 0, maxDepth = 5): unknown {
+	private SanitizeArgs(args: unknown, depth = 0, maxDepth = SANITIZE_MAX_DEPTH): unknown {
 		// Prevent stack overflow on circular or deeply nested structures
 		if (depth > maxDepth || !args || typeof args !== 'object') {
 			return args;

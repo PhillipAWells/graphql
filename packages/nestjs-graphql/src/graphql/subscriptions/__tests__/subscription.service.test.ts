@@ -365,7 +365,7 @@ describe('SubscriptionService', () => {
 
 		it('should return iterator as-is if Symbol.asyncIterator already present', () => {
 			const mockIterator = {
-				[Symbol.asyncIterator]: function* () {
+				*[Symbol.asyncIterator]() {
 					yield {};
 				},
 				next: async () => ({ done: false, value: {} }),

@@ -15,6 +15,8 @@ const SECONDS_PER_MINUTE = 60;
 const DEFAULT_RATE_LIMIT_WINDOW_MINUTES = 15;
 const DEFAULT_RATE_LIMIT_MAX_REQUESTS = 100;
 const CLEANUP_INTERVAL_MS = 60_000;
+const IP_PREFIX_LENGTH = 3; // Length of 'ip:' prefix
+const IP_OCTET_COUNT = 4;
 
 /**
  * Rate limit result interface
@@ -216,9 +218,9 @@ export class RateLimitService implements OnModuleInit, OnModuleDestroy, ILazyMod
 			return 'user:[REDACTED]';
 		}
 		if (clientId.startsWith('ip:')) {
-			const IP = clientId.substring(3);
+			const IP = clientId.substring(IP_PREFIX_LENGTH);
 			const Parts = IP.split('.');
-			if (Parts.length === 4) {
+			if (Parts.length === IP_OCTET_COUNT) {
 				return `ip:${Parts[0]}.${Parts[1]}.[REDACTED]`;
 			}
 		}
