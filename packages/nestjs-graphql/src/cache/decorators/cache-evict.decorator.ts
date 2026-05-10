@@ -72,7 +72,7 @@ export function CacheEvict(options: ICacheEvictOptions) {
 						const Keys = await store.keys(options.pattern);
 						if (Keys && Keys.length > 0) {
 							// Parallelize deletions using Promise.all instead of sequential loop
-							await Promise.all(Keys.map((Key) => CacheManager.del(Key)));
+							await Promise.all(Keys.map((key) => CacheManager.del(key)));
 							Logger.debug(`Evicted ${Keys.length} cache keys matching pattern: ${options.pattern}`);
 						} else {
 							Logger.debug(`No cache keys found matching pattern: ${options.pattern}`);

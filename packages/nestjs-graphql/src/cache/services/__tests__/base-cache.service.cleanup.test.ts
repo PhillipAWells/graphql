@@ -1,16 +1,27 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { BaseCacheService } from '../base-cache.service.js';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { AppLogger } from '@pawells/nestjs-shared/common';
+
+/**
+ * Concrete test implementation of abstract BaseCacheService
+ */
+class TestCacheService extends BaseCacheService {
+	protected GenerateCacheKey(args: unknown): string {
+		return String(args);
+	}
+}
 
 /**
  * Tests targeting base-cache.service.ts cleanup logic
  * Lines 790-797, 807 - Redis dbsize() call and error handling
  */
 describe('BaseCacheService - Cleanup and Error Handling', () => {
-	let Service: BaseCacheService;
+	let Service: TestCacheService;
 	let MockCacheManager: any;
 	let MockLogger: any;
 	let MockContextualLogger: any;
+	let MockModuleRef: any;
 
 	beforeEach(() => {
 		MockContextualLogger = {
@@ -37,7 +48,20 @@ describe('BaseCacheService - Cleanup and Error Handling', () => {
 			},
 		};
 
-		Service = new BaseCacheService(MockCacheManager, MockLogger);
+		// Mock ModuleRef
+		MockModuleRef = {
+			get: vi.fn((token: any, _options?: any) => {
+				if (token === CACHE_MANAGER) {
+					return MockCacheManager;
+				}
+				if (token === AppLogger) {
+					return MockLogger;
+				}
+				return undefined;
+			}),
+		} as any;
+
+		Service = new TestCacheService(MockModuleRef);
 	});
 
 	describe('OnModuleDestroy - Cache Size Information (line 790-795)', () => {
@@ -143,8 +167,10 @@ describe('BaseCacheService - Cleanup and Error Handling', () => {
 
 		it('should handle when CacheManager is completely undefined', async () => {
 			// Create service with minimal cache manager
-			const MinimalCache = {};
-			const ServiceMinimal = new BaseCacheService(MinimalCache, MockLogger);
+			const MinimalModuleRef = {
+				get: vi.fn().mockReturnValue(undefined),
+			} as any;
+			const ServiceMinimal = new TestCacheService(MinimalModuleRef);
 
 			await expect(ServiceMinimal.onModuleDestroy()).resolves.toBeUndefined();
 		});
@@ -153,7 +179,7 @@ describe('BaseCacheService - Cleanup and Error Handling', () => {
 	describe('OnModuleDestroy - Final Cleanup (line 802-810)', () => {
 		it('should clear OperationTimings on destroy (line 803)', async () => {
 			// Add some timing data
-			Service['OperationTimings'].set('test-key', 100);
+			Service['OperationTimings'].set('test-key', [100]);
 
 			await Service.onModuleDestroy();
 
@@ -162,7 +188,7 @@ describe('BaseCacheService - Cleanup and Error Handling', () => {
 
 		it('should clear MemorySnapshots on destroy (line 804)', async () => {
 			// Add some snapshot data
-			Service['MemorySnapshots'] = [{ timestamp: Date.now(), heapUsed: 1000 }];
+			Service['MemorySnapshots'] = [{ timestamp: new Date(), usage: 1000 }];
 
 			await Service.onModuleDestroy();
 
@@ -179,8 +205,8 @@ describe('BaseCacheService - Cleanup and Error Handling', () => {
 		});
 
 		it('should clear all memory structures together', async () => {
-			Service['OperationTimings'].set('op1', 10);
-			Service['MemorySnapshots'] = [{ timestamp: Date.now(), heapUsed: 2000 }];
+			Service['OperationTimings'].set('op1', [10]);
+			Service['MemorySnapshots'] = [{ timestamp: new Date(), usage: 2000 }];
 			Service['KeyDistribution'].set('key', 3);
 
 			await Service.onModuleDestroy();

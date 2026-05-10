@@ -85,7 +85,7 @@ describe('Cache Service - Advanced Branch Coverage', () => {
 			mockCacheManager.del.mockResolvedValue(undefined);
 
 			await service.InvalidatePattern('user:*');
-			const stats1 = service.GetStats();
+			const _stats1 = service.GetStats();
 
 			await service.InvalidatePattern('user:*');
 			const stats2 = service.GetStats();
@@ -153,9 +153,9 @@ describe('Cache Service - Advanced Branch Coverage', () => {
 		it('should track get operation timing', async () => {
 			mockCacheManager.get.mockResolvedValue({ data: 'test' });
 
-			const startTime = Date.now();
+			const _startTime = Date.now();
 			await service.Get('key1');
-			const endTime = Date.now();
+			const _endTime = Date.now();
 
 			const stats = service.GetStats();
 			expect(stats.hits).toBe(1);

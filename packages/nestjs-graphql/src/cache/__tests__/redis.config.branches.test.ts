@@ -216,7 +216,7 @@ describe('Redis Configuration - Advanced Branch Coverage', () => {
 		it('should accept RETRY_DELAY = 0', () => {
 			process.env['REDIS_RETRY_DELAY'] = '0';
 			expect(() => GetRedisConfig()).not.toThrow();
-			expect(GetRedisConfig().Module).toBeUndefined();
+			expect(GetRedisConfig().host).toBeDefined();
 		});
 
 		it('should accept large RETRY_DELAY', () => {
