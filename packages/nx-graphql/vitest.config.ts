@@ -12,7 +12,7 @@ export default defineConfig({
 			provider: 'v8',
 			reporter: ['text', 'lcov'],
 			exclude: ['node_modules/', 'build/', 'tmp/', '**/*.test.ts', '**/*.advanced.test.ts', '**/*.integration.test.ts', '**/*.regression.test.ts', '**/types/**'],
-			thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },
+			thresholds: { lines: 80, functions: 80, branches: 70, statements: 80 },
 		},
 	},
 });

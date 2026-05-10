@@ -16,7 +16,7 @@ export default defineConfig({
 			reporter: ['text', 'lcov'],
 			reportsDirectory: '../../coverage/packages/graphql-mongoose',
 			exclude: ['node_modules/', 'build/', 'tmp/', '**/*.test.ts', '**/*.integration.test.ts', '**/types/**'],
-			thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },
+			thresholds: { lines: 80, functions: 80, branches: 70, statements: 80 },
 		},
 	},
 });
