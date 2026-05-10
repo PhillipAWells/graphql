@@ -11,10 +11,12 @@ updates:
         update-types:
           - version-update:semver-minor
     groups:
+      # Build and bundling
       nx:
         patterns:
           - "@nx/*"
           - "nx"
+      # Linting and formatting
       eslint:
         patterns:
           - "@eslint/*"
@@ -22,11 +24,23 @@ updates:
           - "@typescript-eslint/*"
           - "eslint*"
           - "globals"
+      # Testing
       vitest:
         patterns:
           - "@vitest/*"
           - "vitest"
-      dev-dependencies:
+      # GraphQL and Apollo
+      graphql:
+        patterns:
+          - "graphql*"
+          - "apollo*"
+          - "@apollo/*"
+      # NestJS ecosystem
+      nestjs:
+        patterns:
+          - "@nestjs/*"
+      # Catch-all for other dev dependencies
+      other:
         dependency-type: development
 
   - package-ecosystem: github-actions

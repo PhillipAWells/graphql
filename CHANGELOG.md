@@ -144,7 +144,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - WebSocket connection management: `WebSocketServer`, `WebSocketAuthService`, `ConnectionManagerService`, `ResilienceService`
 - Auth decorator re-exports from `@pawells/nestjs-auth`
 
-[Unreleased]: https://github.com/pawells/graphql/compare/v2.1.0...HEAD
-[2.1.0]: https://github.com/pawells/graphql/compare/v2.0.1...v2.1.0
-[2.0.1]: https://github.com/pawells/graphql/compare/v2.0.0...v2.0.1
+[Unreleased]: https://github.com/PhillipAWells/graphql/compare/v2.1.2...HEAD
+[2.1.0]: https://github.com/PhillipAWells/graphql/compare/v2.0.1...v2.1.0
+[2.0.1]: https://github.com/PhillipAWells/graphql/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/PhillipAWells/graphql/releases/tag/v2.0.0

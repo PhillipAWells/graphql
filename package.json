@@ -17,6 +17,7 @@
 		"lint:fix": "nx run-many --target=lint --fix",
 		"test": "nx run-many --target=test",
 		"test:watch": "nx run-many --target=test:watch",
+		"test:coverage": "nx run-many --target=test:coverage --run",
 		"build": "nx run-many --target=build",
 		"clean": "nx run-many --target=clean",
 		"pipeline": "nx run-many -t typecheck lint test build",

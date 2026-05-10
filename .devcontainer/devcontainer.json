@@ -8,7 +8,7 @@
 		"ghcr.io/devcontainers/features/git:1": {},
 		"ghcr.io/devcontainers/features/github-cli:1": {},
 		"ghcr.io/devcontainers/features/node:1": {
-			"version": "lts"
+			"version": "22"
 		}
 	},
 	"postCreateCommand": "bash .devcontainer/scripts/postCreate.sh",
@@ -20,8 +20,7 @@
 				"vscode.npm",
 				"eamodio.gitlens",
 				"nrwl.angular-console",
-				"dbaeumer.vscode-eslint",
-				"esbenp.prettier-vscode"
+				"dbaeumer.vscode-eslint"
 			]
 		}
 	},
