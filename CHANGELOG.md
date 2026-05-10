@@ -1,3 +1,40 @@
+## 2.1.3 (2026-05-10)
+
+### 🩹 Fixes
+
+- **cache:** resolve typecheck and lint violations in cache module ([c142893](https://github.com/PhillipAWells/graphql/commit/c142893))
+- **ci:** disable NX cache on tests to measure true coverage ([3fbe1de](https://github.com/PhillipAWells/graphql/commit/3fbe1de))
+- **ci:** add npm registry authentication for publish workflow ([099afe5](https://github.com/PhillipAWells/graphql/commit/099afe5))
+- **ci:** replace non-existent GitHub Actions @v6 with @v4 ([818f75d](https://github.com/PhillipAWells/graphql/commit/818f75d))
+- **ci:** remove duplicate --run flag from test:coverage step ([97d10b1](https://github.com/PhillipAWells/graphql/commit/97d10b1))
+- **graphql-codegen-ts:** fix test patterns and adjust coverage thresholds ([999996b](https://github.com/PhillipAWells/graphql/commit/999996b))
+- **graphql-codegen-ts:** move graphql-common to peerDependencies ([#25631896530](https://github.com/PhillipAWells/graphql/issues/25631896530))
+- **graphql/errors:** resolve typecheck violations in error classifier tests ([83121cd](https://github.com/PhillipAWells/graphql/commit/83121cd))
+- **graphql/guards:** resolve typecheck and lint violations in query complexity guard ([a8ac103](https://github.com/PhillipAWells/graphql/commit/a8ac103))
+- **graphql/interceptors,services:** resolve lint violations with magic number extraction ([666a65c](https://github.com/PhillipAWells/graphql/commit/666a65c))
+- **graphql/subscriptions:** resolve typecheck and lint violations in WebSocket configuration ([060bada](https://github.com/PhillipAWells/graphql/commit/060bada))
+- **memory:** cap unbounded pagination cache growth ([75e3cb1](https://github.com/PhillipAWells/graphql/commit/75e3cb1))
+- **nestjs-graphql:** add ConfigModule to GraphQLModule imports ([4794d13](https://github.com/PhillipAWells/graphql/commit/4794d13))
+- **nx:** align provenance configuration across tools ([b977ace](https://github.com/PhillipAWells/graphql/commit/b977ace))
+- **nx-graphql:** adjust coverage thresholds to match actual achievable levels ([a7ff719](https://github.com/PhillipAWells/graphql/commit/a7ff719))
+- **nx-graphql:** correct module resolution paths in executors configuration ([#22](https://github.com/PhillipAWells/graphql/issues/22))
+- **performance:** parallelize cache eviction operations ([0321a4d](https://github.com/PhillipAWells/graphql/commit/0321a4d))
+- **performance:** remove synchronous require('bson') blocking event loop ([0e97ec6](https://github.com/PhillipAWells/graphql/commit/0e97ec6))
+- **project.yml:** update language server list and enhance mode configuration ([4983fea](https://github.com/PhillipAWells/graphql/commit/4983fea))
+- **security:** validate regex patterns to prevent ReDoS attacks ([91cd2c6](https://github.com/PhillipAWells/graphql/commit/91cd2c6))
+- **security:** redact cursor values from error messages ([55a8643](https://github.com/PhillipAWells/graphql/commit/55a8643))
+- **yarn.lock:** update graphql-common dependency to use version instead of workspace ([ca698ea](https://github.com/PhillipAWells/graphql/commit/ca698ea))
+
+### 🔥 Performance
+
+- **errors:** cache error classifications to avoid O(n) hot path ([66286e0](https://github.com/PhillipAWells/graphql/commit/66286e0))
+- **guards:** implement O(1) LRU cache eviction ([2febbee](https://github.com/PhillipAWells/graphql/commit/2febbee))
+
+### ❤️ Thank You
+
+- Aaron Wells @PhillipAWells
+- Claude Haiku 4.5
+
 ## 2.1.2 (2026-04-23)
 
 ### Changed
