@@ -78,7 +78,7 @@ jobs:
         run: yarn test --skip-nx-cache
 
       - name: Coverage
-        run: yarn test:coverage --run
+        run: yarn test:coverage
 
   build:
     name: Build
