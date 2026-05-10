@@ -16,8 +16,8 @@ import { ErrorClassifier } from '../errors/error-classifier.js';
  * @example
  * ```typescript
  * @UseInterceptors(GraphQLErrorInterceptor)
- * @Query(() => IUser, { name: 'GetUser' })
- * async getUser(): Promise<IUser> {
+ * @Query(() => User, { name: 'GetUser' })
+ * async getUser(): Promise<User> {
  *   // Errors from this resolver will be properly formatted
  * }
  * ```
