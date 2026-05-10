@@ -4,10 +4,6 @@
   "tui": {
     "enabled": false
   },
-  "workspaceLayout": {
-    "appsDir": "packages",
-    "libsDir": "packages"
-  },
   "plugins": [
     {
       "plugin": "@nx/eslint/plugin",
@@ -72,7 +68,14 @@
       }
     },
     "test": {
-      "cache": true
+      "cache": true,
+      "inputs": [
+        "{projectRoot}/src/**/*",
+        "{projectRoot}/vitest.config.ts"
+      ],
+      "outputs": [
+        "{projectRoot}/coverage"
+      ]
     },
     "lint": {
       "cache": true
@@ -98,6 +101,7 @@
       "default",
       "!{projectRoot}/**/*.spec.ts",
       "!{projectRoot}/**/*.test.ts",
+      "!{projectRoot}/**/__tests__/**",
       "!{projectRoot}/coverage/**/*"
     ],
     "sharedGlobals": [
