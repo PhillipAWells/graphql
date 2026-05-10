@@ -3745,7 +3745,6 @@ __metadata:
   dependencies:
     "@apollo/client": "npm:^4.1.9"
     "@graphql-codegen/plugin-helpers": "npm:^6.3.0"
-    "@pawells/graphql-common": "workspace:*"
     "@types/node": "npm:^25.6.0"
     "@vitest/coverage-v8": "npm:^4.1.5"
     code-block-writer: "npm:^13.0.3"
@@ -3761,12 +3760,13 @@ __metadata:
     "@graphql-codegen/typescript": ">=4.0.0"
     "@graphql-codegen/typescript-apollo-client-helpers": ">=3.0.0"
     "@graphql-codegen/typescript-operations": ">=4.0.0"
+    "@pawells/graphql-common": "*"
     graphql: ">=16.0.0"
     rxjs: ">=7.0.0"
   languageName: unknown
   linkType: soft
 
-"@pawells/graphql-common@npm:^2.1.0, @pawells/graphql-common@workspace:*, @pawells/graphql-common@workspace:packages/graphql-common":
+"@pawells/graphql-common@npm:^2.1.0, @pawells/graphql-common@workspace:packages/graphql-common":
   version: 0.0.0-use.local
   resolution: "@pawells/graphql-common@workspace:packages/graphql-common"
   dependencies:
