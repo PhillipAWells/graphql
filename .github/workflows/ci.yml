@@ -23,14 +23,14 @@ jobs:
       CI: true
       NX_DAEMON: false
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4 # 53c6a6ce9a51b2e87a81ecb51528be3c65f314a4 # v4.2.2
         with:
           fetch-depth: 0
 
       - name: Enable corepack
         run: corepack enable
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v4 # a8ce42a4a6697706293e562e07d3055dd2b21a8b # v4.1.9
         with:
           node-version: '22'
           cache: 'yarn'
@@ -57,14 +57,14 @@ jobs:
       CI: true
       NX_DAEMON: false
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4 # 53c6a6ce9a51b2e87a81ecb51528be3c65f314a4 # v4.2.2
         with:
           fetch-depth: 0
 
       - name: Enable corepack
         run: corepack enable
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v4 # a8ce42a4a6697706293e562e07d3055dd2b21a8b # v4.1.9
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'yarn'
@@ -77,6 +77,9 @@ jobs:
       - name: Test
         run: yarn test --skip-nx-cache
 
+      - name: Coverage
+        run: yarn test:coverage --run
+
   build:
     name: Build
     needs: test
@@ -85,14 +88,14 @@ jobs:
       CI: true
       NX_DAEMON: false
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4 # 53c6a6ce9a51b2e87a81ecb51528be3c65f314a4 # v4.2.2
         with:
           fetch-depth: 0
 
       - name: Enable corepack
         run: corepack enable
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v4 # a8ce42a4a6697706293e562e07d3055dd2b21a8b # v4.1.9
         with:
           node-version: '22'
           cache: 'yarn'
