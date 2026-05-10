@@ -1,8 +1,9 @@
 import { Injectable, ExecutionContext, UnauthorizedException, CanActivate } from '@nestjs/common';
-import { ModuleRef } from '@nestjs/core';
+import { ModuleRef, Reflector } from '@nestjs/core';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import type { ILazyModuleRefService, IContextualLogger } from '@pawells/nestjs-shared/common';
 import { AppLogger } from '@pawells/nestjs-shared/common';
+import { IS_PUBLIC_KEY } from '../decorators/index.js';
 
 /**
  * GraphQL Authentication Guard
@@ -51,17 +52,29 @@ export class GraphQLAuthGuard implements CanActivate, ILazyModuleRefService {
 		}
 	}
 
-	constructor(moduleRef: ModuleRef) {
+	private readonly Reflector: Reflector;
+
+	constructor(moduleRef: ModuleRef, reflector: Reflector) {
 		this.Module = moduleRef;
+		this.Reflector = reflector;
 	}
 
 	/**
 	 * Determines if the current request can proceed
 	 *
 	 * @param context - The execution context
-	 * @returns boolean - True if authenticated, throws exception otherwise
+	 * @returns boolean - True if authenticated or public, throws exception otherwise
 	 */
 	public canActivate(context: ExecutionContext): boolean {
+		// Check if resolver is marked as @Public() - skip authentication
+		const IsPublic = this.Reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+			context.getHandler(),
+			context.getClass(),
+		]);
+		if (IsPublic) {
+			return true;
+		}
+
 		// Extract GraphQL context
 		const GqlContext = GqlExecutionContext.create(context);
 		const Request = GqlContext.getContext().req;
@@ -90,6 +103,10 @@ export class GraphQLAuthGuard implements CanActivate, ILazyModuleRefService {
 	/**
 	 * Extracts JWT token from Authorization header
 	 *
+	 * SECURITY: Uses strict space-only splitting (not /\s+/) to prevent header injection
+	 * via tab, newline, or other whitespace characters. Also validates token presence
+	 * and bounds before returning.
+	 *
 	 * @param request - The HTTP request object
 	 * @returns string | null - The extracted token or null
 	 */
@@ -99,8 +116,9 @@ export class GraphQLAuthGuard implements CanActivate, ILazyModuleRefService {
 		const AuthHeader: unknown = request.headers?.authorization;
 
 		if (AuthHeader && typeof AuthHeader === 'string') {
-			const Parts = AuthHeader.split(/\s+/);
-			if (Parts[0]?.toLowerCase() === 'bearer' && Parts[1]) {
+			// SECURITY: Use strict space-only split, not /\s+/ which allows tab/newline injection
+			const Parts = AuthHeader.split(' ');
+			if (Parts.length === 2 && Parts[0]?.toLowerCase() === 'bearer' && Parts[1]) {
 				return Parts[1];
 			}
 		}
