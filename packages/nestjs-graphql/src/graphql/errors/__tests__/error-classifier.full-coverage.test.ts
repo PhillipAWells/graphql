@@ -303,8 +303,8 @@ describe('ErrorClassifier - Full Coverage', () => {
 			const Result1 = ErrorClassifier.Classify(Error1);
 			const Result2 = ErrorClassifier.Classify(Error1);
 
-			expect(Result1.type).toBe(Result2.type);
-			expect(Result1.severity).toBe(Result2.severity);
+			expect(Result1.code).toBe(Result2.code);
+			expect(Result1.statusCode).toBe(Result2.statusCode);
 		});
 
 		it('should classify equivalent errors the same way', () => {
@@ -321,7 +321,7 @@ describe('ErrorClassifier - Full Coverage', () => {
 			const Result1 = ErrorClassifier.Classify(Error1);
 			const Result2 = ErrorClassifier.Classify(Error2);
 
-			expect(Result1.type).toBe(Result2.type);
+			expect(Result1.code).toBe(Result2.code);
 		});
 	});
 });
