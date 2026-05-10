@@ -3,7 +3,6 @@ name: Publish
 on:
   push:
     tags: ['v*']
-    branches: ['development/[0-9]*.[0-9]*']
   workflow_dispatch:
     inputs:
       preid:
@@ -40,6 +39,7 @@ jobs:
       id-token: write
     env:
       CI: true
+      HUSKY: 0
       NX_DAEMON: false
     steps:
       - uses: actions/checkout@v6
@@ -69,50 +69,52 @@ jobs:
         if: startsWith(github.ref, 'refs/heads/')
         run: |
           SHA=$(git rev-parse --short HEAD)
+          BASE=$(node -p "require('./packages/graphql-common/package.json').version.replace(/-.*$/, '')")
+          export SNAP="${BASE}-dev.${SHA}"
+          echo "Snapshot version: ${SNAP}"
           node -e "
             const fs = require('fs');
-            const path = require('path');
-
-            // Read all package versions and validate they match
-            const versions = new Map();
             for (const d of fs.readdirSync('packages')) {
-              const p = path.join('packages', d, 'package.json');
+              const p = 'packages/' + d + '/package.json';
               if (!fs.existsSync(p)) continue;
-              const pkg = JSON.parse(fs.readFileSync(p, 'utf8'));
+              const pkg = JSON.parse(fs.readFileSync(p));
               if (pkg.private) continue;
-              versions.set(d, pkg.version.replace(/-.*$/, ''));
-            }
-
-            // Verify all packages have the same base version
-            const uniqueVersions = new Set(versions.values());
-            if (uniqueVersions.size !== 1) {
-              console.error('ERROR: Package versions do not match:');
-              for (const [pkg, ver] of versions) {
-                console.error(\`  \${pkg}: \${ver}\`);
-              }
-              process.exit(1);
-            }
-
-            const BASE = Array.from(uniqueVersions)[0];
-            const SNAP = BASE + '-dev.' + process.env.SHA;
-            console.log('Snapshot version: ' + SNAP);
-            process.env.SNAP = SNAP;
-
-            // Stamp all public packages with snapshot version
-            for (const d of fs.readdirSync('packages')) {
-              const p = path.join('packages', d, 'package.json');
-              if (!fs.existsSync(p)) continue;
-              const pkg = JSON.parse(fs.readFileSync(p, 'utf8'));
-              if (pkg.private) continue;
-              pkg.version = SNAP;
+              pkg.version = process.env.SNAP;
               fs.writeFileSync(p, JSON.stringify(pkg, null, 2) + '\n');
             }
           "
-          echo "SNAP=${SNAP}" >> $GITHUB_ENV
 
       - name: Bump pre-release version
         if: github.event_name == 'workflow_dispatch'
         run: npx nx release version prerelease --preid ${{ inputs.preid }} --yes --git-commit --git-tag
+
+      - name: Rewrite workspace protocols
+        run: |
+          node -e "
+            const fs = require('fs');
+            const sharedPkg = JSON.parse(fs.readFileSync('packages/graphql-common/package.json'));
+            const version = sharedPkg.version;
+            console.log('Rewriting workspace:* to ' + version);
+            for (const d of fs.readdirSync('packages')) {
+              const p = 'packages/' + d + '/package.json';
+              if (!fs.existsSync(p)) continue;
+              const pkg = JSON.parse(fs.readFileSync(p));
+              let changed = false;
+              for (const field of ['dependencies', 'devDependencies', 'peerDependencies']) {
+                if (!pkg[field]) continue;
+                for (const [dep, ver] of Object.entries(pkg[field])) {
+                  if (ver === 'workspace:*') {
+                    pkg[field][dep] = version;
+                    changed = true;
+                  }
+                }
+              }
+              if (changed) {
+                fs.writeFileSync(p, JSON.stringify(pkg, null, 2) + '\n');
+                console.log('Updated ' + d);
+              }
+            }
+          "
 
       - name: Build all packages
         run: yarn build

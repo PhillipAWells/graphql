@@ -2,10 +2,10 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, 'development/[0-9]*.[0-9]*']
     tags-ignore: ['v*']
   pull_request:
-    branches: [main]
+    branches: [main, 'development/[0-9]*.[0-9]*']
   workflow_call:
 
 concurrency:
@@ -21,6 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CI: true
+      HUSKY: 0
       NX_DAEMON: false
     steps:
       - uses: actions/checkout@v6
@@ -32,13 +33,11 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: '24'
+          node-version: '22'
           cache: 'yarn'
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
-        env:
-          HUSKY: '0'
+        run: yarn install --immutable
 
       - name: Typecheck
         run: yarn typecheck
@@ -47,14 +46,15 @@ jobs:
         run: yarn lint
 
   test:
-    name: Test
+    name: Test (Node ${{ matrix.node-version }})
     needs: validate
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [22, 24]
+        node-version: ['22', '24']
     env:
       CI: true
+      HUSKY: 0
       NX_DAEMON: false
     steps:
       - uses: actions/checkout@v6
@@ -70,22 +70,18 @@ jobs:
           cache: 'yarn'
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
-        env:
-          HUSKY: '0'
+        run: yarn install --immutable
 
       - name: Test
-        run: yarn test --skip-nx-cache
-
-      - name: Coverage
-        run: yarn test:coverage
+        run: yarn test
 
   build:
     name: Build
-    needs: test
+    needs: [validate, test]
     runs-on: ubuntu-latest
     env:
       CI: true
+      HUSKY: 0
       NX_DAEMON: false
     steps:
       - uses: actions/checkout@v6
@@ -97,13 +93,11 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: '24'
+          node-version: '22'
           cache: 'yarn'
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
-        env:
-          HUSKY: '0'
+        run: yarn install --immutable
 
       - name: Build
         run: yarn build
