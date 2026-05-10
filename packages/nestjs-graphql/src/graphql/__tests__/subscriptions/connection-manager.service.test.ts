@@ -73,14 +73,27 @@ describe('ConnectionManagerService', () => {
 		it('should set connection timeout', () => {
 			vi.useFakeTimers();
 
-			service.AddConnection(mockWs, 'user123', 'user123');
+			// Create service with fake timers active so the interval uses fake timers
+			const mockModuleRef = {
+				get: (token: any) => {
+					if (token === 'SUBSCRIPTION_CONFIG') return config;
+					throw new Error(`Unknown token: ${String(token)}`);
+				},
+			} as any;
+			const timeoutService = new ConnectionManagerService(mockModuleRef);
 
-			expect(service.GetConnectionCount()).toBe(1);
+			timeoutService.AddConnection(mockWs, 'user123', 'user123');
+
+			expect(timeoutService.GetConnectionCount()).toBe(1);
 
 			// Fast-forward past timeout
-			vi.advanceTimersByTime(config.connection.timeout + 1000);
+			// Need to advance by timeout + check interval (5000ms) for cleanup to run
+			vi.advanceTimersByTime(config.connection.timeout + 5000);
 
-			expect(service.GetConnectionCount()).toBe(0);
+			expect(timeoutService.GetConnectionCount()).toBe(0);
+
+			// Cleanup
+			timeoutService.onModuleDestroy();
 		});
 	});
 
@@ -337,7 +350,8 @@ describe('ConnectionManagerService', () => {
 
 			for (let i = 0; i < 10; i++) {
 				service.RemoveConnection({ id: `ws${i}` }, 'user123');
-				service.RemoveSubscription('user123', `sub${i}`);
+				// Note: RemoveConnection removes all subscriptions for the user,
+				// so RemoveSubscription is only needed if subscriptions were added separately
 			}
 
 			expect(service.GetConnectionCount()).toBe(0);

@@ -34,7 +34,10 @@ describe('GraphQLAuthGuard', () => {
 			getContext: () => mockGqlContextData,
 		} as any);
 
-		mockExecutionContext = {};
+		mockExecutionContext = {
+			getHandler: () => () => {},
+			getClass: () => class {},
+		};
 	});
 
 	afterEach(() => {

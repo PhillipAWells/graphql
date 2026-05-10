@@ -11,7 +11,7 @@ const buildSchema = async (_options: any) => ({
 			email: { type: 'String' },
 			name: { type: 'String' },
 			posts: { type: 'List' },
-			author: { type: 'IUser' },
+			author: { type: 'User' },
 			comments: { type: 'List' },
 			post: { type: 'Post' },
 			text: { type: 'String' },
@@ -21,7 +21,7 @@ const buildSchema = async (_options: any) => ({
 
 /**
  * Tests for GraphQL circular dependency resolution
- * Verifies that IUser, Post, and IComment types can be defined without circular references
+ * Verifies that User, Post, and Comment types can be defined without circular references
  * and that the GraphQL schema builds successfully
  *
  * TODO: Re-enable these tests once type-graphql is added as a dependency
@@ -64,24 +64,24 @@ describe.skip('GraphQL Schema Circular Dependencies', () => {
 			}
 
 			@ObjectType()
-			class IUser extends BaseUser {
+			class User extends BaseUser {
 				@Field(() => [Post], { nullable: true })
 				public Posts?: Post[];
 			}
 
 			@ObjectType()
 			class Post extends BasePost {
-				@Field(() => IUser)
-				public Author!: IUser;
+				@Field(() => User)
+				public Author!: User;
 
-				@Field(() => [IComment], { nullable: true })
-				public Comments?: IComment[];
+				@Field(() => [Comment], { nullable: true })
+				public Comments?: Comment[];
 			}
 
 			@ObjectType()
-			class IComment extends BaseComment {
-				@Field(() => IUser)
-				public Author!: IUser;
+			class Comment extends BaseComment {
+				@Field(() => User)
+				public Author!: User;
 
 				@Field(() => Post)
 				public Post!: Post;
@@ -89,16 +89,16 @@ describe.skip('GraphQL Schema Circular Dependencies', () => {
 
 			const schema = await buildSchema({
 				resolvers: [],
-				types: [BaseUser, BasePost, BaseComment, IUser, Post, IComment],
+				types: [BaseUser, BasePost, BaseComment, User, Post, Comment],
 			});
 
 			expect(schema).toBeDefined();
-			expect(schema.getType('IUser')).toBeDefined();
+			expect(schema.getType('User')).toBeDefined();
 			expect(schema.getType('Post')).toBeDefined();
-			expect(schema.getType('IComment')).toBeDefined();
+			expect(schema.getType('Comment')).toBeDefined();
 		});
 
-		it('should resolve IUser.posts without circular reference', async () => {
+		it('should resolve User.posts without circular reference', async () => {
 			@ObjectType()
 			class BaseUser {
 				@Field(() => ID)
@@ -133,24 +133,24 @@ describe.skip('GraphQL Schema Circular Dependencies', () => {
 			}
 
 			@ObjectType()
-			class IUser extends BaseUser {
+			class User extends BaseUser {
 				@Field(() => [Post], { nullable: true })
 				public Posts?: Post[];
 			}
 
 			@ObjectType()
 			class Post extends BasePost {
-				@Field(() => IUser)
-				public Author!: IUser;
+				@Field(() => User)
+				public Author!: User;
 
-				@Field(() => [IComment], { nullable: true })
-				public Comments?: IComment[];
+				@Field(() => [Comment], { nullable: true })
+				public Comments?: Comment[];
 			}
 
 			@ObjectType()
-			class IComment extends BaseComment {
-				@Field(() => IUser)
-				public Author!: IUser;
+			class Comment extends BaseComment {
+				@Field(() => User)
+				public Author!: User;
 
 				@Field(() => Post)
 				public Post!: Post;
@@ -158,10 +158,10 @@ describe.skip('GraphQL Schema Circular Dependencies', () => {
 
 			const schema = await buildSchema({
 				resolvers: [],
-				types: [BaseUser, BasePost, BaseComment, IUser, Post, IComment],
+				types: [BaseUser, BasePost, BaseComment, User, Post, Comment],
 			});
 
-			const userType = schema.getType('IUser');
+			const userType = schema.getType('User');
 			expect(userType).toBeDefined();
 
 			if (userType && 'getFields' in userType) {
@@ -207,24 +207,24 @@ describe.skip('GraphQL Schema Circular Dependencies', () => {
 			}
 
 			@ObjectType()
-			class IUser extends BaseUser {
+			class User extends BaseUser {
 				@Field(() => [Post], { nullable: true })
 				public Posts?: Post[];
 			}
 
 			@ObjectType()
 			class Post extends BasePost {
-				@Field(() => IUser)
-				public Author!: IUser;
+				@Field(() => User)
+				public Author!: User;
 
-				@Field(() => [IComment], { nullable: true })
-				public Comments?: IComment[];
+				@Field(() => [Comment], { nullable: true })
+				public Comments?: Comment[];
 			}
 
 			@ObjectType()
-			class IComment extends BaseComment {
-				@Field(() => IUser)
-				public Author!: IUser;
+			class Comment extends BaseComment {
+				@Field(() => User)
+				public Author!: User;
 
 				@Field(() => Post)
 				public Post!: Post;
@@ -232,7 +232,7 @@ describe.skip('GraphQL Schema Circular Dependencies', () => {
 
 			const schema = await buildSchema({
 				resolvers: [],
-				types: [BaseUser, BasePost, BaseComment, IUser, Post, IComment],
+				types: [BaseUser, BasePost, BaseComment, User, Post, Comment],
 			});
 
 			const postType = schema.getType('Post');
@@ -246,7 +246,7 @@ describe.skip('GraphQL Schema Circular Dependencies', () => {
 			}
 		});
 
-		it('should resolve IComment.post and IComment.author without circular reference', async () => {
+		it('should resolve Comment.post and Comment.author without circular reference', async () => {
 			@ObjectType()
 			class BaseUser {
 				@Field(() => ID)
@@ -281,24 +281,24 @@ describe.skip('GraphQL Schema Circular Dependencies', () => {
 			}
 
 			@ObjectType()
-			class IUser extends BaseUser {
+			class User extends BaseUser {
 				@Field(() => [Post], { nullable: true })
 				public Posts?: Post[];
 			}
 
 			@ObjectType()
 			class Post extends BasePost {
-				@Field(() => IUser)
-				public Author!: IUser;
+				@Field(() => User)
+				public Author!: User;
 
-				@Field(() => [IComment], { nullable: true })
-				public Comments?: IComment[];
+				@Field(() => [Comment], { nullable: true })
+				public Comments?: Comment[];
 			}
 
 			@ObjectType()
-			class IComment extends BaseComment {
-				@Field(() => IUser)
-				public Author!: IUser;
+			class Comment extends BaseComment {
+				@Field(() => User)
+				public Author!: User;
 
 				@Field(() => Post)
 				public Post!: Post;
@@ -306,10 +306,10 @@ describe.skip('GraphQL Schema Circular Dependencies', () => {
 
 			const schema = await buildSchema({
 				resolvers: [],
-				types: [BaseUser, BasePost, BaseComment, IUser, Post, IComment],
+				types: [BaseUser, BasePost, BaseComment, User, Post, Comment],
 			});
 
-			const commentType = schema.getType('IComment');
+			const commentType = schema.getType('Comment');
 			expect(commentType).toBeDefined();
 
 			if (commentType && 'getFields' in commentType) {
@@ -397,13 +397,13 @@ describe.skip('GraphQL Schema Circular Dependencies', () => {
 			}
 
 			@ObjectType()
-			class IUser extends BaseUser {
+			class User extends BaseUser {
 				@Field()
 				public Name!: string;
 			}
 
-			expect(IUser.prototype).toBeInstanceOf(Object);
-			expect(IUser).toBeDefined();
+			expect(User.prototype).toBeInstanceOf(Object);
+			expect(User).toBeDefined();
 		});
 
 		it('should allow extended types to add relationship fields', () => {
@@ -417,12 +417,12 @@ describe.skip('GraphQL Schema Circular Dependencies', () => {
 			}
 
 			@ObjectType()
-			class IUser extends BaseUser {
+			class User extends BaseUser {
 				@Field({ nullable: true })
 				public Name?: string;
 			}
 
-			expect(IUser).toBeDefined();
+			expect(User).toBeDefined();
 		});
 	});
 });
