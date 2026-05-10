@@ -34,6 +34,11 @@ import {
 	QUERY_COMPLEXITY_CACHE_IDLE_THRESHOLD_MS,
 } from '../constants/complexity.constants.js';
 
+// Hash function constants
+const QUERY_HASH_SEED = 5381; // DJB2 hash seed
+const QUERY_HASH_SHIFT = 5;
+const QUERY_HASH_RADIX = 36;
+
 /**
  * Guard that enforces query complexity limits
  * Prevents complex queries that could impact performance
@@ -126,14 +131,14 @@ export class QueryComplexityGuard implements CanActivate, OnModuleDestroy, ILazy
 
 		// Fast hash function using string length and character distribution
 		// Not collision-free but good enough for cache keying
-		let Hash = 5381;
+		let Hash = QUERY_HASH_SEED;
 		const Str = `${QueryStr}:${VarsStr}`;
 
 		for (let I = 0; I < Str.length; I++) {
-			Hash = ((Hash << 5) + Hash) ^ Str.charCodeAt(I);
+			Hash = ((Hash << QUERY_HASH_SHIFT) + Hash) ^ Str.charCodeAt(I);
 		}
 
-		return `query_${(Hash >>> 0).toString(36)}`;
+		return `query_${(Hash >>> 0).toString(QUERY_HASH_RADIX)}`;
 	}
 
 	/**
@@ -203,9 +208,7 @@ export class QueryComplexityGuard implements CanActivate, OnModuleDestroy, ILazy
 		this.LruTail = key;
 
 		// If list was empty, this is now both head and tail
-		if (!this.LruHead) {
-			this.LruHead = key;
-		}
+		this.LruHead ??= key;
 	}
 
 	/**

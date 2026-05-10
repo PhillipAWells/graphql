@@ -259,7 +259,7 @@ describe('QueryComplexityGuard - Full Coverage', () => {
 					}
 					throw new Error(`Unknown token: ${String(token)}`);
 				}),
-			};
+			} as any;
 
 			const NoLoggerGuard = new QueryComplexityGuard(NoLoggerModuleRef);
 
@@ -288,7 +288,7 @@ describe('QueryComplexityGuard - Full Coverage', () => {
 					}
 					throw new Error(`Unknown token: ${String(token)}`);
 				}),
-			};
+			} as any;
 
 			const FailingGuard = new QueryComplexityGuard(FailingLoggerModuleRef);
 
@@ -316,7 +316,7 @@ describe('QueryComplexityGuard - Full Coverage', () => {
 					// No COMPLEXITY_CONFIG provided, should use default
 					throw new Error(`Unknown token: ${String(token)}`);
 				}),
-			};
+			} as any;
 
 			const DefaultGuard = new QueryComplexityGuard(DefaultConfigModuleRef);
 
@@ -344,7 +344,7 @@ describe('QueryComplexityGuard - Full Coverage', () => {
 					}
 					throw new Error(`Unknown token: ${String(token)}`);
 				}),
-			};
+			} as any;
 
 			const CustomGuard = new QueryComplexityGuard(CustomConfigModuleRef);
 
@@ -414,10 +414,11 @@ describe('QueryComplexityGuard - Full Coverage', () => {
 
 			// Debug should have logged the calculation
 			const DebugCalls = MockContextualLogger.debug.mock.calls;
-			const FoundCalcLog = DebugCalls.some(call =>
-				call[0]?.includes('Query complexity calculated'),
+			const FoundCalcLog = DebugCalls.some((call: unknown[]) =>
+				(call[0] as string | undefined)?.includes('Query complexity calculated'),
 			);
 
+			// eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
 			expect(FoundCalcLog || DebugCalls.length > 0).toBe(true);
 		});
 
@@ -437,10 +438,12 @@ describe('QueryComplexityGuard - Full Coverage', () => {
 			await Guard.canActivate(MockExecutionContext);
 
 			const DebugCalls = MockContextualLogger.debug.mock.calls;
-			const FoundCacheLog = DebugCalls.some(call =>
-				call[0]?.includes('cache') || call[0]?.includes('Complexity'),
+			const FoundCacheLog = DebugCalls.some((call: unknown[]) =>
+				// eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+				(call[0] as string | undefined)?.includes('cache') || (call[0] as string | undefined)?.includes('Complexity'),
 			);
 
+			// eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
 			expect(FoundCacheLog || DebugCalls.length > 0).toBe(true);
 		});
 	});

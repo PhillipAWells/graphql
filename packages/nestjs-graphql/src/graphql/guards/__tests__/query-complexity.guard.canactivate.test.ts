@@ -1,10 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { GqlExecutionContext } from '@nestjs/graphql';
-import { BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { AppLogger } from '@pawells/nestjs-shared/common';
 import { QueryComplexityGuard } from '../query-complexity.guard.js';
-import { parse } from 'graphql';
-import { buildSchema } from 'graphql';
+import { parse, buildSchema } from 'graphql';
 
 /**
  * Tests for canActivate method branches and actual complexity calculation
