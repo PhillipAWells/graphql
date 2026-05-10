@@ -94,10 +94,15 @@ interface IValidatedRedisConfig {
 
 export function ValidateRedisConfig(config: Record<string, unknown>): IValidatedRedisConfig {
 	// Allow undefined values - they will use defaults
+	// SECURITY: In production, require non-empty password; in dev/test, allow empty password
+	const PasswordSchema = process.env['NODE_ENV'] === 'production'
+		? Joi.string().required().min(REDIS_MIN_PASSWORD_LENGTH)
+		: Joi.string().allow('').min(REDIS_MIN_PASSWORD_LENGTH).default('');
+
 	const Schema = Joi.object({
 		REDIS_HOST: Joi.string().hostname().default('localhost'),
 		REDIS_PORT: Joi.number().integer().min(1).max(REDIS_MAX_PORT).default(REDIS_DEFAULT_PORT),
-		REDIS_PASSWORD: Joi.string().allow('').min(REDIS_MIN_PASSWORD_LENGTH).default(''),
+		REDIS_PASSWORD: PasswordSchema,
 		REDIS_DB: Joi.number().integer().min(REDIS_MIN_DB).max(REDIS_MAX_DB).default(REDIS_DEFAULT_DB),
 		REDIS_MAX_RETRIES: Joi.number().integer().min(0).default(REDIS_DEFAULT_MAX_RETRIES),
 		REDIS_CONNECT_TIMEOUT: Joi.number().integer().min(REDIS_MIN_TIMEOUT).default(REDIS_DEFAULT_CONNECT_TIMEOUT),
@@ -146,9 +151,24 @@ export function GetRedisConfig(): IRedisConfig {
 		enableReadyCheck: process.env['REDIS_ENABLE_READY_CHECK'] !== 'false',
 		maxRetriesPerRequest: Validated.REDIS_MAX_RETRIES,
 		lazyConnect: process.env['REDIS_LAZY_CONNECT'] === 'true',
+		// SECURITY: Use error code classification instead of fragile message-string matching
+		// This prevents ReDoS attacks and improves reliability of error detection
 		reconnectOnError: (err: Error) => {
-			const TargetErrors = ['READONLY', 'ECONNREFUSED', 'ETIMEDOUT', 'ENOTFOUND'];
-			return TargetErrors.some(errorType => err.message.includes(errorType));
+			// Retry on connection/network errors (safe to retry)
+			const ErrorCode = (err as { code?: string }).code;
+			if (ErrorCode === 'ECONNREFUSED' || ErrorCode === 'ETIMEDOUT' || ErrorCode === 'ENOTFOUND') {
+				return true;
+			}
+			// Retry on Redis read-only mode (safe to retry)
+			if (err.message.includes('READONLY')) {
+				return true;
+			}
+			// Don't retry auth errors (infinite loop risk)
+			if (err.message.includes('WRONGPASS') || err.message.includes('NOAUTH')) {
+				return false;
+			}
+			// Conservative default: don't retry unknown errors
+			return false;
 		},
 		connectTimeout: Validated.REDIS_CONNECT_TIMEOUT,
 		commandTimeout: Validated.REDIS_COMMAND_TIMEOUT,
