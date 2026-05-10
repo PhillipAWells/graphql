@@ -42,7 +42,7 @@
     "@nestjs/core": "^11.1.19",
     "@nestjs/graphql": "^13.3.0",
     "@nx/devkit": "^22.6.5",
-    "graphql": "^16.13.2",
+    "graphql": "^16.14.0",
     "reflect-metadata": "^0.2.2"
   },
   "peerDependencies": {

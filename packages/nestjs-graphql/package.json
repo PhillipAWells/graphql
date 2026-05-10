@@ -105,7 +105,7 @@
     "csrf-csrf": "^4.0.3",
     "dataloader": "^2.2.3",
     "express": "^5.2.1",
-    "graphql": "^16.13.2",
+    "graphql": "^16.14.0",
     "graphql-query-complexity": "^1.1.0",
     "graphql-redis-subscriptions": "^2.7.0",
     "graphql-subscriptions": "^3.0.0",
