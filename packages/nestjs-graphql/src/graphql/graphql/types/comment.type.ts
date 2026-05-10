@@ -1,20 +1,20 @@
 import { ObjectType, Field } from '@nestjs/graphql';
 import { BaseComment } from './base-comment.type.js';
-import { IUser } from './user.type.js';
+import { User } from './user.type.js';
 import { Post } from './post.type.js';
 
 /**
- * IComment GraphQL type with relationships
- * Extends BaseComment to include author (IUser) and post (Post) relationships
+ * Comment GraphQL type with relationships
+ * Extends BaseComment to include author (User) and post (Post) relationships
  * Avoids circular dependencies by extending base type first
  */
-@ObjectType('IComment')
-export class IComment extends BaseComment {
+@ObjectType('Comment')
+export class Comment extends BaseComment {
 	/**
-	 * IUser who created this comment
+	 * User who created this comment
 	 */
-	@Field(() => IUser)
-	public Author!: IUser;
+	@Field(() => User)
+	public Author!: User;
 
 	/**
 	 * Post this comment belongs to

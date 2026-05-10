@@ -3,7 +3,7 @@ import { ObjectType, Field, ID } from '@nestjs/graphql';
 /**
  * Base Post GraphQL type without relationships
  * Contains only core post fields to avoid circular dependencies
- * Extended by Post type to include relationships with IUser and IComment
+ * Extended by Post type to include relationships with User and Comment
  */
 @ObjectType('BasePost')
 export class BasePost {

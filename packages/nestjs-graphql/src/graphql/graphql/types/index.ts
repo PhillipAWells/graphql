@@ -12,9 +12,9 @@ export { BasePost } from './base-post.type.js';
 export { BaseComment } from './base-comment.type.js';
 
 // Extended types with relationships
-export { IUser } from './user.type.js';
+export { User } from './user.type.js';
 export { Post } from './post.type.js';
-export { IComment } from './comment.type.js';
+export { Comment } from './comment.type.js';
 
 // Type registry and utilities
 export {
