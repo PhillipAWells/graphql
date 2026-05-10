@@ -119,7 +119,7 @@ describe('WebSocketAuthService - Authentication Branches', () => {
 		it('should use "Authorization" uppercase if lowercase not provided', async () => {
 			MockJwtService.verifyAsync.mockResolvedValue({ sub: 'user123' });
 
-			const result = await service.Authenticate({
+			const _result = await service.Authenticate({
 				Authorization: 'Bearer token2',
 				token: 'Bearer token3',
 				authToken: 'Bearer token4',
@@ -131,7 +131,7 @@ describe('WebSocketAuthService - Authentication Branches', () => {
 		it('should use "token" field if no authorization headers', async () => {
 			MockJwtService.verifyAsync.mockResolvedValue({ sub: 'user123' });
 
-			const result = await service.Authenticate({
+			const _result = await service.Authenticate({
 				token: 'Bearer token3',
 				authToken: 'Bearer token4',
 			});
@@ -142,7 +142,7 @@ describe('WebSocketAuthService - Authentication Branches', () => {
 		it('should use "authToken" as last resort', async () => {
 			MockJwtService.verifyAsync.mockResolvedValue({ sub: 'user123' });
 
-			const result = await service.Authenticate({
+			const _result = await service.Authenticate({
 				authToken: 'Bearer token4',
 			});
 
@@ -324,7 +324,7 @@ describe('WebSocketAuthService - Authentication Branches', () => {
 
 	describe('JwtService Availability - Fail-Closed', () => {
 		it('should return unauthenticated when JwtService is unavailable', async () => {
-			MockModuleRef.get.mockImplementation((token: any, options?: any) => {
+			MockModuleRef.get.mockImplementation((token: any, _options?: any) => {
 				if (token === AppLogger) return MockAppLogger;
 				if (token === JwtService) return undefined; // Service not available
 				throw new Error(`Unknown: ${String(token)}`);
@@ -341,7 +341,7 @@ describe('WebSocketAuthService - Authentication Branches', () => {
 		});
 
 		it('should log error when JwtService required but not available', async () => {
-			MockModuleRef.get.mockImplementation((token: any, options?: any) => {
+			MockModuleRef.get.mockImplementation((token: any, _options?: any) => {
 				if (token === AppLogger) return MockAppLogger;
 				if (token === JwtService) return undefined;
 				throw new Error(`Unknown: ${String(token)}`);

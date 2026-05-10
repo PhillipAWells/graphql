@@ -129,7 +129,7 @@ export class WebSocketAuthService implements ILazyModuleRefService {
 			}
 
 			// Validate that we have a non-empty token
-			if (!BearerToken || !BearerToken.trim()) {
+			if (!BearerToken?.trim()) {
 				this.Logger?.warn('Token validation failed: empty or invalid Bearer token format');
 				return null;
 			}

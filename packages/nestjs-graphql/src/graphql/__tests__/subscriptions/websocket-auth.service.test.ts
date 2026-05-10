@@ -337,7 +337,7 @@ describe('WebSocketAuthService', () => {
 				sub: 'user',
 				exp: Math.floor(Date.now() / 1000) + 3600,
 			})).toString('base64url');
-			const token = `header.${payload}.sig`;
+			const _token = `header.${payload}.sig`;
 
 			// Test "Bearer " with just space (should fail trim check)
 			const result = await service.Authenticate({ authorization: 'Bearer ' });
