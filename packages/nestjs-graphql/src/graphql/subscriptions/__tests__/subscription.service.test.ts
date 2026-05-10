@@ -297,4 +297,88 @@ describe('SubscriptionService', () => {
 			expect(mockPubSub.asyncIterator).toHaveBeenCalled();
 		});
 	});
+
+	describe('topic validation - branch coverage', () => {
+		it('should reject publish to invalid topic with special characters', async () => {
+			const mockPubSub = {
+				publish: vi.fn(),
+			};
+
+			deps.pubSub = mockPubSub;
+
+			// Topics with invalid characters should throw
+			await expect(service.Publish('topic@invalid', { data: 'test' })).rejects.toThrow('Invalid topic format');
+		});
+
+		it('should reject publish to topic with spaces', async () => {
+			const mockPubSub = {
+				publish: vi.fn(),
+			};
+
+			deps.pubSub = mockPubSub;
+
+			await expect(service.Publish('topic with spaces', { data: 'test' })).rejects.toThrow('Invalid topic format');
+		});
+
+		it('should accept valid topic formats', async () => {
+			const mockPubSub = {
+				publish: vi.fn().mockResolvedValue(1),
+			};
+
+			deps.pubSub = mockPubSub;
+
+			// Valid topics with dots, hyphens, underscores, word chars
+			await service.Publish('user.notifications-v1_test', { data: 'test' });
+			expect(mockPubSub.publish).toHaveBeenCalledWith('user.notifications-v1_test', { data: 'test' });
+		});
+
+		it('should throw when PubSub not configured on publish', async () => {
+			deps.pubSub = undefined;
+
+			await expect(service.Publish('valid-topic', { data: 'test' })).rejects.toThrow('PubSub instance not configured');
+		});
+
+		it('should throw when PubSub not configured on subscribe', () => {
+			deps.pubSub = undefined;
+
+			expect(() => service.Subscribe('valid-topic')).toThrow('PubSub instance not configured');
+		});
+	});
+
+	describe('subscribe iterator wrapping - branch coverage', () => {
+		it('should wrap iterator if Symbol.asyncIterator not present', () => {
+			const mockIterator = {
+				next: async () => ({ done: false, value: {} }),
+				return: async () => ({ done: true }),
+			};
+
+			const mockPubSub = {
+				asyncIterator: vi.fn().mockReturnValue(mockIterator),
+			};
+
+			deps.pubSub = mockPubSub;
+
+			const result = service.Subscribe('topic');
+			// Result should have Symbol.asyncIterator
+			expect(result[Symbol.asyncIterator]).toBeDefined();
+		});
+
+		it('should return iterator as-is if Symbol.asyncIterator already present', () => {
+			const mockIterator = {
+				[Symbol.asyncIterator]: function* () {
+					yield {};
+				},
+				next: async () => ({ done: false, value: {} }),
+			};
+
+			const mockPubSub = {
+				asyncIterator: vi.fn().mockReturnValue(mockIterator),
+			};
+
+			deps.pubSub = mockPubSub;
+
+			const result = service.Subscribe('topic');
+			expect(result[Symbol.asyncIterator]).toBe(mockIterator[Symbol.asyncIterator]);
+		});
+	});
 });
