@@ -1,5 +1,8 @@
 /**
- * Cache statistics interface
+ * Cache statistics interface with enhanced metrics
+ *
+ * Provides comprehensive cache statistics including hit/miss rates, operation counts,
+ * and performance metrics for monitoring and optimization.
  */
 export interface ICacheStats {
 	hits: number;
@@ -9,6 +12,18 @@ export interface ICacheStats {
 	clears: number;
 	errors: number;
 	hitRate: number;
+	// Enhanced metrics for detailed analytics
+	totalKeys?: number;
+	memoryUsage?: number; // in bytes
+	evictions: number;
+	evictionReasons: { [reason: string]: number };
+	invalidationPatterns: { [pattern: string]: number };
+	operationTimings: {
+		get: number[];
+		set: number[];
+		del: number[];
+	};
+	lastSnapshot?: Date;
 }
 
 /**

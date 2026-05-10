@@ -60,8 +60,8 @@ export interface ICacheInvalidateOptions extends IBaseCacheInvalidateOptions {
  *   patterns: ['graphql:user|id:*'], // Invalidate all user queries by ID
  *   when: 'after' // Invalidate after successful execution
  * })
- * @Mutation(() => IUser, { name: 'UpdateUser' })
- * async updateUser(@Args('input') input: UpdateUserInput): Promise<IUser> {
+ * @Mutation(() => User, { name: 'UpdateUser' })
+ * async updateUser(@Args('input') input: UpdateUserInput): Promise<User> {
  *   return this.userService.update(input.id, input);
  * }
  *

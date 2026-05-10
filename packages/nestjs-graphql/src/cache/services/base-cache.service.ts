@@ -13,6 +13,7 @@ import type { ILazyModuleRefService, IContextualLogger } from '@pawells/nestjs-s
 import { AppLogger, getErrorMessage } from '@pawells/nestjs-shared/common';
 import { Traced } from '@pawells/nestjs-open-telemetry';
 import { PyroscopeService, ProfileMethod } from '@pawells/nestjs-pyroscope';
+import { ICacheStats } from '../cache.types.js';
 import {
 	CACHE_MAX_OPERATION_TIMINGS,
 	CACHE_OPERATION_TIMING_MAX_AGE_MS,
@@ -32,31 +33,6 @@ import {
 	CACHE_MAX_TIMINGS_PER_OPERATION,
 	CACHE_TIMING_CLEANUP_TRIGGER_SIZE,
 } from '../constants/cache-config.constants.js';
-
-/**
- * Cache statistics interface
- */
-export interface ICacheStats {
-	hits: number;
-	misses: number;
-	sets: number;
-	deletes: number;
-	clears: number;
-	errors: number;
-	hitRate: number;
-	// Enhanced metrics for Phase 3
-	totalKeys?: number;
-	memoryUsage?: number; // in bytes
-	evictions: number;
-	evictionReasons: { [reason: string]: number };
-	invalidationPatterns: { [pattern: string]: number };
-	operationTimings: {
-		get: number[];
-		set: number[];
-		del: number[];
-	};
-	lastSnapshot?: Date;
-}
 
 /**
  * Abstract base cache service providing shared caching functionality
@@ -87,6 +63,12 @@ export abstract class BaseCacheService implements ILazyModuleRefService, OnModul
 
 	// Enhanced tracking for Phase 3
 	protected OperationTimings: Map<string, number[]> = new Map();
+
+	/**
+	 * Track minimum timing value incrementally to avoid O(n) Math.min() in comparator
+	 * Maintained during recording, used during cleanup without recomputation
+	 */
+	protected MinTimingPerOperation: Map<string, number> = new Map();
 
 	protected MemorySnapshots: Array<{ timestamp: Date; usage: number }> = [];
 
@@ -153,37 +135,44 @@ export abstract class BaseCacheService implements ILazyModuleRefService, OnModul
 
 	/**
 	 * Clean up old timing entries to prevent unbounded map growth
+	 * O(n) cleanup instead of O(n log n) with expensive Math.min() in comparator
 	 */
 	private CleanupTimings(): void {
 		if (this.OperationTimings.size > BaseCacheService.MAX_OPERATION_TIMINGS) {
 			const Now = Date.now();
 			let RemovedCount = 0;
 
-			// First, try to remove expired entries (older than 1 hour)
-			for (const [Key, Timings] of this.OperationTimings.entries()) {
-				const OldestTiming = Math.min(...Timings);
+			// First pass: remove expired entries using pre-tracked minimums O(n)
+			for (const [Key, _Timings] of this.OperationTimings.entries()) {
+				// Use pre-computed minimum instead of calling Math.min(...) which is O(m)
+				const OldestTiming = this.MinTimingPerOperation.get(Key) ?? 0;
 				if (Now - OldestTiming > BaseCacheService.OPERATION_TIMING_MAX_AGE_MS) {
 					this.OperationTimings.delete(Key);
+					this.MinTimingPerOperation.delete(Key);
 					RemovedCount++;
 				}
 			}
 
-			// If still too large, remove oldest entries using FIFO strategy
+			// If still too large, remove oldest entries using FIFO strategy O(n log n)
 			if (this.OperationTimings.size > BaseCacheService.MAX_OPERATION_TIMINGS) {
 				const ToRemove = this.OperationTimings.size - BaseCacheService.MAX_OPERATION_TIMINGS;
 				const Entries = Array.from(this.OperationTimings.entries());
 
-				// Sort by oldest first timing
+				// Sort by oldest first timing using pre-tracked minimums (no Math.min() in comparator)
 				Entries.sort((a, b) => {
-					const MinA = Math.min(...a[1]);
-					const MinB = Math.min(...b[1]);
+					const MinA = this.MinTimingPerOperation.get(a[0]) ?? 0;
+					const MinB = this.MinTimingPerOperation.get(b[0]) ?? 0;
 					return MinA - MinB;
 				});
 
 				// Remove oldest entries
 				for (let I = 0; I < ToRemove && I < Entries.length; I++) {
-					this.OperationTimings.delete(Entries[I]?.[0] ?? '');
-					RemovedCount++;
+					const Key = Entries[I]?.[0];
+					if (Key) {
+						this.OperationTimings.delete(Key);
+						this.MinTimingPerOperation.delete(Key);
+						RemovedCount++;
+					}
 				}
 			}
 
@@ -548,19 +537,32 @@ export abstract class BaseCacheService implements ILazyModuleRefService, OnModul
 
 	/**
 	 * Track operation timing for percentiles calculation
+	 * Maintains minimum value incrementally to avoid O(n) Math.min() during cleanup
 	 */
 	private TrackOperationTiming(operation: string, duration: number): void {
 		if (!this.OperationTimings.has(operation)) {
 			this.OperationTimings.set(operation, []);
+			this.MinTimingPerOperation.set(operation, duration);
 		}
 
 		const Timings = this.OperationTimings.get(operation);
 		if (!Timings) return;
 		Timings.push(duration);
 
+		// Update minimum incrementally (O(1) instead of O(n) on cleanup)
+		const CurrentMin = this.MinTimingPerOperation.get(operation) ?? Infinity;
+		if (duration < CurrentMin) {
+			this.MinTimingPerOperation.set(operation, duration);
+		}
+
 		// Keep only last CACHE_MAX_TIMINGS_PER_OPERATION timings to prevent memory growth per operation type
 		if (Timings.length > CACHE_MAX_TIMINGS_PER_OPERATION) {
-			Timings.shift();
+			const Removed = Timings.shift();
+			// Recompute minimum if we removed the old minimum (rare case)
+			if (Removed === CurrentMin) {
+				const NewMin = Math.min(...Timings);
+				this.MinTimingPerOperation.set(operation, NewMin);
+			}
 		}
 
 		// Update stats operation timings
