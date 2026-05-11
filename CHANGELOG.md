@@ -1,3 +1,7 @@
+## 2.1.4 (2026-05-11)
+
+This was a version bump only, there were no code changes.
+
 ## 2.1.3 (2026-05-10)
 
 ### 🩹 Fixes
@@ -181,7 +185,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - WebSocket connection management: `WebSocketServer`, `WebSocketAuthService`, `ConnectionManagerService`, `ResilienceService`
 - Auth decorator re-exports from `@pawells/nestjs-auth`
 
-[Unreleased]: https://github.com/PhillipAWells/graphql/compare/v2.1.2...HEAD
+[Unreleased]: https://github.com/PhillipAWells/graphql/compare/v2.1.4...HEAD
+[2.1.4]: https://github.com/PhillipAWells/graphql/compare/v2.1.3...v2.1.4
+[2.1.3]: https://github.com/PhillipAWells/graphql/compare/v2.1.2...v2.1.3
+[2.1.2]: https://github.com/PhillipAWells/graphql/compare/v2.1.1...v2.1.2
+[2.1.1]: https://github.com/PhillipAWells/graphql/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/PhillipAWells/graphql/compare/v2.0.1...v2.1.0
 [2.0.1]: https://github.com/PhillipAWells/graphql/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/PhillipAWells/graphql/releases/tag/v2.0.0
