@@ -1,3 +1,14 @@
+## 2.1.5 (2026-05-11)
+
+### 🩹 Fixes
+
+- **nx-graphql:** add package.json export for NX plugin compatibility ([7e3f1c7](https://github.com/PhillipAWells/graphql/commit/7e3f1c7))
+
+### ❤️ Thank You
+
+- Aaron Wells @PhillipAWells
+- Claude Haiku 4.5
+
 ## 2.1.4 (2026-05-11)
 
 This was a version bump only, there were no code changes.
