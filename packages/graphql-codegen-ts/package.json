@@ -36,7 +36,7 @@
     "pipeline": "yarn typecheck && yarn lint && yarn test && yarn build"
   },
   "dependencies": {
-    "@graphql-codegen/plugin-helpers": "^6.3.0",
+    "@graphql-codegen/plugin-helpers": "^7.0.1",
     "code-block-writer": "^13.0.3",
     "graphql-ws": "^6.0.8",
     "strongly-typed-events": "^3.0.11"
