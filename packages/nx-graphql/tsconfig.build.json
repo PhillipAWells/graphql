@@ -1,6 +1,6 @@
 {
   "extends": "./tsconfig.json",
-  "compilerOptions": { "rootDir": "./src", "noEmit": false, "types": ["node"] },
+  "compilerOptions": { "rootDir": "./src", "noEmit": false, "types": ["node"], "module": "CommonJS", "moduleResolution": "node10" },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "build", "src/**/*.test.ts", "src/**/__tests__/**"]
 }
