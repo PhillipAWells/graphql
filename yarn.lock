@@ -2198,7 +2198,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-tools/merge@npm:9.1.8, @graphql-tools/merge@npm:^9.0.0, @graphql-tools/merge@npm:^9.0.6, @graphql-tools/merge@npm:^9.1.8":
+"@graphql-tools/merge@npm:9.1.9, @graphql-tools/merge@npm:^9.1.9":
+  version: 9.1.9
+  resolution: "@graphql-tools/merge@npm:9.1.9"
+  dependencies:
+    "@graphql-tools/utils": "npm:^11.1.0"
+    tslib: "npm:^2.4.0"
+  peerDependencies:
+    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+  checksum: 10c0/de16a915b09d1d3a3e0105d0b6cbdfd75feaa5ef7cbf4eec489c817d390b6aacd169b8e68e6efcefe82c92c4e88d36723b5e24a7035494100ead7efcef446359
+  languageName: node
+  linkType: hard
+
+"@graphql-tools/merge@npm:^9.0.0, @graphql-tools/merge@npm:^9.0.6, @graphql-tools/merge@npm:^9.1.8":
   version: 9.1.8
   resolution: "@graphql-tools/merge@npm:9.1.8"
   dependencies:
@@ -2234,7 +2246,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-tools/schema@npm:10.0.32, @graphql-tools/schema@npm:^10.0.0, @graphql-tools/schema@npm:^10.0.29, @graphql-tools/schema@npm:^10.0.32":
+"@graphql-tools/schema@npm:10.0.33":
+  version: 10.0.33
+  resolution: "@graphql-tools/schema@npm:10.0.33"
+  dependencies:
+    "@graphql-tools/merge": "npm:^9.1.9"
+    "@graphql-tools/utils": "npm:^11.1.0"
+    tslib: "npm:^2.4.0"
+  peerDependencies:
+    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+  checksum: 10c0/6c32d175b4832d063017d86cfe392502bd69dddb58d9ec47939818a103a6c23201402bbd13756f4bfd5ad14677e8b54af46adce4a4e63aa5d7fe8853351d3dce
+  languageName: node
+  linkType: hard
+
+"@graphql-tools/schema@npm:^10.0.0, @graphql-tools/schema@npm:^10.0.29, @graphql-tools/schema@npm:^10.0.32":
   version: 10.0.32
   resolution: "@graphql-tools/schema@npm:10.0.32"
   dependencies:
@@ -2269,7 +2294,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-tools/utils@npm:11.0.1, @graphql-tools/utils@npm:^11.0.0, @graphql-tools/utils@npm:^11.0.1":
+"@graphql-tools/utils@npm:11.1.0, @graphql-tools/utils@npm:^11.1.0":
+  version: 11.1.0
+  resolution: "@graphql-tools/utils@npm:11.1.0"
+  dependencies:
+    "@graphql-typed-document-node/core": "npm:^3.1.1"
+    "@whatwg-node/promise-helpers": "npm:^1.0.0"
+    cross-inspect: "npm:1.0.1"
+    tslib: "npm:^2.4.0"
+  peerDependencies:
+    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+  checksum: 10c0/4858ee4a1df0f858c65a5459d991bedcfde488054484c8707c97e2ce9db9a8f74aaaa0d7c20f38ff872507db9a73fc1182d4d1860dd72099509552538dfd477a
+  languageName: node
+  linkType: hard
+
+"@graphql-tools/utils@npm:^11.0.0, @graphql-tools/utils@npm:^11.0.1":
   version: 11.0.1
   resolution: "@graphql-tools/utils@npm:11.0.1"
   dependencies:
@@ -2961,13 +3000,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nestjs/graphql@npm:^13.3.0":
-  version: 13.3.0
-  resolution: "@nestjs/graphql@npm:13.3.0"
+"@nestjs/graphql@npm:^13.4.0":
+  version: 13.4.0
+  resolution: "@nestjs/graphql@npm:13.4.0"
   dependencies:
-    "@graphql-tools/merge": "npm:9.1.8"
-    "@graphql-tools/schema": "npm:10.0.32"
-    "@graphql-tools/utils": "npm:11.0.1"
+    "@graphql-tools/merge": "npm:9.1.9"
+    "@graphql-tools/schema": "npm:10.0.33"
+    "@graphql-tools/utils": "npm:11.1.0"
     "@nestjs/mapped-types": "npm:2.1.1"
     chokidar: "npm:4.0.3"
     fast-glob: "npm:3.3.3"
@@ -2996,7 +3035,7 @@ __metadata:
       optional: true
     ts-morph:
       optional: true
-  checksum: 10c0/6d7d497870cb09d43b7c75f01fed5e23559bcbce5fe7092a01c3544bdbf7b15dd4ade8d87f3f7df4d72e98f352f381fa2eb275edc1c7e71a5ed1e7faad14fec8
+  checksum: 10c0/f32774b02d4a48ce4657de4ca9a819a50f780009f927ecfe26e03ae3a4ed85bf531999a27323eea78b1916da0575fccc34a547e5aa847c58ecd4d636ac57b2a9
   languageName: node
   linkType: hard
 
@@ -3817,7 +3856,7 @@ __metadata:
     "@nestjs/common": "npm:^11.1.19"
     "@nestjs/config": "npm:^4.0.4"
     "@nestjs/core": "npm:^11.1.19"
-    "@nestjs/graphql": "npm:^13.3.0"
+    "@nestjs/graphql": "npm:^13.4.0"
     "@nestjs/jwt": "npm:^11.0.2"
     "@nestjs/platform-express": "npm:^11.1.19"
     "@nestjs/terminus": "npm:^11.1.1"
@@ -3940,7 +3979,7 @@ __metadata:
     "@nestjs/common": "npm:^11.1.19"
     "@nestjs/config": "npm:^4.0.4"
     "@nestjs/core": "npm:^11.1.19"
-    "@nestjs/graphql": "npm:^13.3.0"
+    "@nestjs/graphql": "npm:^13.4.0"
     "@nestjs/terminus": "npm:^11.1.1"
     "@nestjs/throttler": "npm:^6.5.0"
     "@opentelemetry/api": "npm:^1.9.1"
@@ -4098,7 +4137,7 @@ __metadata:
     "@graphql-codegen/cli": "npm:^7.0.0"
     "@nestjs/common": "npm:^11.1.19"
     "@nestjs/core": "npm:^11.1.19"
-    "@nestjs/graphql": "npm:^13.3.0"
+    "@nestjs/graphql": "npm:^13.4.0"
     "@nx/devkit": "npm:^22.6.5"
     "@types/node": "npm:^25.6.0"
     "@vitest/coverage-v8": "npm:^4.1.5"
