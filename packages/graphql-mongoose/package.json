@@ -1,7 +1,7 @@
 {
   "name": "@pawells/graphql-mongoose",
   "displayName": "@pawells/graphql-mongoose",
-  "version": "2.1.4",
+  "version": "2.1.5",
   "description": "GraphQL-to-Mongoose filter builder — translates GraphQL filter inputs to Mongoose FilterQuery",
   "keywords": [
     "graphql",
