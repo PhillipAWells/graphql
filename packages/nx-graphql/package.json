@@ -15,13 +15,12 @@
     "plugin",
     "code-generation"
   ],
-  "type": "module",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
   "exports": {
     ".": {
       "types": "./build/index.d.ts",
-      "import": "./build/index.js"
+      "require": "./build/index.js"
     }
   },
   "executors": "./build/executors.json",
