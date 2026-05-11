@@ -21,7 +21,8 @@
     ".": {
       "types": "./build/index.d.ts",
       "require": "./build/index.js"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "executors": "./build/executors.json",
   "scripts": {
