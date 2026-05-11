@@ -37,7 +37,7 @@
     "pipeline": "yarn typecheck && yarn lint && yarn test && yarn build"
   },
   "dependencies": {
-    "@graphql-codegen/plugin-helpers": "^6.3.0",
+    "@graphql-codegen/plugin-helpers": "^7.0.1",
     "code-block-writer": "^13.0.3"
   },
   "peerDependencies": {
@@ -50,7 +50,7 @@
   },
   "devDependencies": {
     "@types/node": "^25.6.0",
-    "graphql": "^16.13.2",
+    "graphql": "^16.14.0",
     "react": "^19.2.5"
   },
   "engines": {
